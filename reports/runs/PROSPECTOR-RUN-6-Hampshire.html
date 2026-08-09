@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #6</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #6 &mdash; 9 August 2026</div>
+    </header>
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top prospects &mdash; Hampshire</h1>
+        <p class="sub">31 qualified businesses across HVAC engineers. Showing top 25 sorted by priority tier, then score.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Priority A</span>
+            <div class="stat-num">2</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Priority B</span>
+            <div class="stat-num">29</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Priority C</span>
+            <div class="stat-num">0</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Total qualified</span>
+            <div class="stat-num">31</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked prospect list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Diamond Green Energy &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 85</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (100 reviews)</span><span>01329 234111</span><span>https://www.diamondgreen.energy/</span><span>Director: SIMM, Ian John</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY A</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (21 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 4, Apex Centre, Speedfields, Portsmouth, Fareham PO14 1TP</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;We went with diamond green energy over a couple of other companies because of their attitude towards customer care, their promotional blurb states this as being the reason they started the company in the first place. To provide a service to the customer that was seen to be sadly ...&rdquo;</div>
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Aqua Cooling Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 82</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (43 reviews)</span><span>0333 004 4433</span><span>https://www.aquacooling.co.uk/</span><span>Director: DAVIES, Ben Duncan</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY A</span>
+                <span class="tag on">Meta ads active (6 creatives)</span>
+<span class="tag on">Google ads active (98 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Industrial Estate, Unit 6 Brickfield Ln, Chandler&#x27;s Ford, Eastleigh SO53 4DP</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;BE WARNED ❌⛔️ - awful company will not deliver within the given time frame. Do not I repeat DO NOT trust and sign anything with them until you have your delivery. They will not deliver for months and then take you to court as you have signed the contract. Ruthless company out to ...&rdquo;</div>
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Neater Heat &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (540 reviews)</span><span>01252 338078</span><span>https://www.neaterheat.co.uk/</span><span>Director: TILBURY, Lee</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (5 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">6, Beechnut Industrial Estate, Beechnut Rd, Aldershot GU12 4JA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Roost Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (254 reviews)</span><span>01962 217917</span><span>https://www.roostheating.co.uk/</span><span>Director: VIJAYAKUMAR, Ajithkumar</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (19 creatives)</span>
+<span class="tag on">Google ads active (1 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 8, Suite 3, Four Dells Farm, Poles Ln, Winchester SO21 2DY</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">ProtoCool Ltd - Cooling and Heating Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 62</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (140 reviews)</span><span>0118 449 2007</span><span>http://www.protocool.co.uk/</span><span>Director: PALMER, Phillip John</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (33 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 1, Comet House, Calleva Park, Reading, RG7 8JA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">CLIMATE CHANGE SERVICES LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 60</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (118 reviews)</span><span>01489 422200</span><span>http://www.climatechangeservices.co.uk/</span><span>Director: MALONE, Christopher Martin</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (51 creatives)</span>
+<span class="tag on">Google ads active (2 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">11 Linden Cl, Waltham Chase, Southampton, SO32 2TZ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Just The Right Temperature (Boilers2AC) &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 60</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (113 reviews)</span><span>0800 246 1154</span><span>http://www.boilers2ac.co.uk/</span><span>Director: MARSH, Darren Nigel</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (12 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">ClimateWorks - Residential &amp; Commercial Air Conditioning, Refrigeration &amp; Ventilation Systems &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 57</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (41 reviews)</span><span>01256 442571</span><span>https://climateworks.co.uk/</span><span>Director: HOARE, Anthony Scott</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (22 creatives)</span>
+<span class="tag on">Google ads active (46 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">11, Vickers House, Priestley Rd, Basingstoke RG24 9NP</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Celsius Hire Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 57</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (48 reviews)</span><span>0800 702 2161</span><span>https://www.celsiushire.com/?utm_source=Google+Business+&amp;utm_medium=Organic+Search+&amp;utm_campaign=GB+Organic+</span><span>Director: CHARD, Lee</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (9 creatives)</span>
+<span class="tag on">Google ads active (100 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Woodside Rd, Eastleigh, SO50 4ET</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Appian Heat Pumps &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 57</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (53 reviews)</span><span>07481 552059</span><span>https://www.appianheatpumps.com/</span><span>Director: DUNCAN, Emma</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (11 creatives)</span>
+<span class="tag on">Google ads active (10 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">12 Appian Wy, Chineham, Basingstoke, RG24 8BH</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heatcomp &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 55</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (14 reviews)</span><span>023 8184 9711</span><span>http://www.heatcomp.co.uk/</span><span>Director: DAVIES, Daryl</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (2 creatives)</span>
+<span class="tag on">Google ads active (5 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 16, Freemantle Business Centre, 152 Millbrook Rd E, Freemantle, Southampton SO15 1JR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Hampshire Heating Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 45</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (324 reviews)</span><span>07446 978574</span><span>http://www.hampshireheatingservices.com/</span><span>Director: DEMETRIOUS-WILDE, Dylan William</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (10 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">70 St Nicholas Ave, Gosport, PO13 9RW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Spartan Mechanical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 45</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (246 reviews)</span><span>01252 511747</span><span>http://www.spartanph.co.uk/</span><span>Director: HOYLE, Ross George</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 3, winkworth business park, London Rd, Hook RG27 8WP</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">GEO M&amp;E Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 40</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (101 reviews)</span><span>023 9238 8799</span><span>http://www.geo-me.co.uk/</span><span>Director: ACTON, Edward Stephen James</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">16a Hamilton Rd, Portsmouth, PO6 4QE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">J Hillier Air Conditioning Ltd. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 39</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (91 reviews)</span><span>01962 453204</span><span>https://jhillierac.co.uk/</span><span>Director: PARRISH, Andrew James</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">27 Peverells Rd, Chandler&#x27;s Ford, Eastleigh, SO53 2AR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heat Hampshire &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 38</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (61 reviews)</span><span>07557 818428</span><span>http://www.heathampshire.co.uk/</span><span>Director: CASTELLON, Alberto</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Andover Gas Engineers Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 38</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (77 reviews)</span><span>07808 318983</span><span>https://www.andovergasengineers.co.uk/</span><span>Director: LEWIS, Andrew</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">13 Millway Cl, Andover, SP10 3AX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Fair Oak Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 37</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (41 reviews)</span><span>023 8225 6727</span><span>http://www.foac.co.uk/</span><span>Director: BRISTOW, Adam James</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (6 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">3 Elland Cl, Fair Oak, Eastleigh, SO50 7JY</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Techno Cool Engineering Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 37</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (43 reviews)</span><span>0333 567 2125</span><span>https://www.technocool.co.uk/</span><span>Director: MINDA ROMERO, Diego Javier</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Install Aircon Limited✅️✅️✅️✅️✅️ &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 37</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (49 reviews)</span><span>07403 415267</span><span>http://installaircon.co.uk/</span><span>Director: COX, Darren Michael</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Ridgefield, Station Rd, Petersfield, GU32 3DE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Air Control Southern Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 37</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (41 reviews)</span><span>023 8042 1515</span><span>https://www.air-control.co.uk/</span><span>Director: MUSGRAVE, Stephen Paul</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (2 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">3, Barley House, Barley Business Park, Duncan Rd, Park Gate, Southampton SO31 1ZT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">The GHS Group Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 37</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (47 reviews)</span><span>01329 285993</span><span>http://ghs.me.uk/</span><span>Director: SMITH, Kerris Jacqueline</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">4 Croftlands Ave, Fareham, PO14 2JR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Woodhouse Environmental Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 36</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (25 reviews)</span><span>01489 797800</span><span>https://woodhouseservices.co.uk/</span><span>Director: FOX, Chris David</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">1-2 Lower Vicarage Rd, Woolston, Southampton, SO19 7RJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Topaz Refrigeration &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 36</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (26 reviews)</span><span>07710 162546</span><span>http://topaz-refrigeration.co.uk/</span><span>Director: HATCH, Stephen</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">33 Butts Ash Gardens, Hythe, Southampton, SO45 3BL</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Mr HVAC &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 36</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (23 reviews)</span><span>07570 330947</span><span>https://www.mrhvac.co.uk/</span><span>Director: ORG, Norman</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">2 Poplar Cl, Liphook, GU30 7WT</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #6 &mdash; 9 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>
