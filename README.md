@@ -1,27 +1,40 @@
 # prospector
 
 Local business prospecting pipeline for **Antek Automation**. Runs an
-interactive wizard, pulls data from SerpAPI (Google Maps discovery +
-reviews), Companies House (ownership/PSC check), and Apify (Meta + Google ad
-spend signals), scores each business, and stores everything in SQLite with
-CSV export.
+interactive wizard, pulls data from Google Places (primary business
+discovery) with SerpAPI as an automatic fallback (also used for reviews),
+Companies House (ownership/PSC check), and Apify (Meta + Google ad spend
+signals), scores each business, and stores everything in SQLite with CSV
+export.
 
 This is a standalone tool that lives alongside Andy's existing
-`geo-prospecting` project and **reuses its API keys** (SerpAPI, Companies
-House, Apify) rather than requiring new ones — see "Credentials" below. It
-does not modify or depend on `geo-prospecting`'s code.
+`geo-prospecting` project and **reuses its API keys** (Google Places,
+SerpAPI, Companies House, Apify) rather than requiring new ones — see
+"Credentials" below. It does not modify or depend on `geo-prospecting`'s
+code, though `places_client.py` follows the same Google Places API (New)
+conventions already established there (see
+`geo-prospecting/src/ingest/places.py`).
 
 ## What it does
 
 1. **Wizard** (`prospector run`) asks for area, radius, trade sector(s),
    minimum review count/rating, max businesses per sector, an ownership
    filter, an ad-qualification rule, and whether to dry-run.
-2. **Discover** — SerpAPI Google Maps search per sector/area.
+2. **Discover** — Google Places API (New) Text Search per sector/area is
+   tried first (`places_client.py`); if it raises (missing/invalid key, HTTP
+   error, etc.) or returns 0 results, prospector logs a warning and falls
+   back to SerpAPI's Google Maps search (`serpapi_client.py`) automatically.
+   Both sources return the identical business dict shape, so this is
+   transparent to every step downstream — filtering, scoring, and storage
+   don't know or care which source found a given business. See "Discovery
+   source & fallback" below for the full rationale.
 3. **Filter** — drop businesses below the rating/review thresholds or with
    no website.
 4. **Reviews** — pull the latest ~20 Google reviews per surviving business
    and flag any that match a "pain" keyword list (missed calls, no
    response, etc.) — a strong signal that automation would help them.
+   Reviews always come from SerpAPI regardless of which source discovered
+   the business — see "Discovery source & fallback" below for why.
 5. **Ownership** — Companies House PSC/officer lookup, to filter out
    group/corporate-owned businesses (optional, on by default).
 6. **Ad spend** — Meta (Facebook Ads Library) and Google (Ads Transparency
@@ -53,11 +66,12 @@ prospector/
   pyproject.toml          # deps + `prospector` console script
   requirements.txt        # same deps, plain pip form
   .env -> ../geo-prospecting/.env   # symlink, shares Andy's existing keys
-  .env.example             # documents the 3 keys this tool needs
+  .env.example             # documents the 4 keys this tool needs
   prospector/
     __init__.py
     wizard.py                    # the interactive "series of asks"
-    serpapi_client.py             # Google Maps discovery + reviews
+    places_client.py              # Google Places API (New) discovery — PRIMARY
+    serpapi_client.py             # Google Maps discovery (FALLBACK) + reviews (always)
     companies_house_client.py      # PSC/officer ownership lookup
     apify_client.py                 # Meta + Google ad spend actors — sync/async
                                       # polling + NULL-vs-0 policy (see below)
@@ -106,13 +120,55 @@ prospector --help
 
 `prospector/.env` is a **symlink** to
 `/data/workspaces/worker/geo-prospecting/.env`, so it automatically picks up
-the same `SERPAPI_KEY`, `COMPANIES_HOUSE_API_KEY`, and `APIFY_TOKEN` that
-geo-prospecting already uses — nothing to configure out of the box.
+the same `GOOGLE_PLACES_API_KEY`, `SERPAPI_KEY`, `COMPANIES_HOUSE_API_KEY`,
+and `APIFY_TOKEN` that geo-prospecting already uses — nothing to configure
+out of the box.
+
+`GOOGLE_PLACES_API_KEY` is required for the primary (Places) discovery
+path — Andy already pays for it, so it's the default. It's not *strictly*
+required for the tool to run at all, since discovery automatically falls
+back to SerpAPI if it's missing (see "Discovery source & fallback" below),
+but without it every run pays for SerpAPI instead of the already-paid-for
+Places API. `SERPAPI_KEY` remains required regardless, since it's both the
+fallback discovery source and the only reviews source.
 
 If you ever want prospector to use its own separate keys, delete the
 symlink and create a real `prospector/.env` file (see `.env.example` for
-the three variables it reads). Keys are always read from `.env` at runtime;
+the four variables it reads). Keys are always read from `.env` at runtime;
 none are hardcoded anywhere in the codebase.
+
+## Discovery source & fallback
+
+Google Places API (New) (`places_client.py`, Text Search endpoint,
+`places.googleapis.com/v1/places:searchText`) is the **default** discovery
+source — Andy already pays for `GOOGLE_PLACES_API_KEY`, so this is now
+wired in as primary rather than 100% SerpAPI. It follows the same
+conventions as the existing Google Places integration in the sibling
+`geo-prospecting` project (`src/ingest/places.py`): the newer v1 API (not
+the legacy `maps.googleapis.com/maps/api/place` one), `X-Goog-Api-Key` +
+`X-Goog-FieldMask` headers, and `nextPageToken` pagination.
+
+**Fallback:** if Google Places raises an error (missing/invalid key, HTTP
+failure, etc.) or returns 0 results for a sector/area, `pipeline.py` logs a
+warning and automatically retries the same query against SerpAPI's
+`google_maps` engine (the tool's original 100%-SerpAPI behaviour). Both
+clients' `discover_businesses()` return the identical dict shape (`name`,
+`address`, `phone`, `website`, `domain`, `rating`, `review_count`,
+`google_place_id`), so nothing downstream — filtering, ad checks, scoring,
+storage — needs to change based on which source actually ran.
+
+**Reviews stay on SerpAPI, always** — regardless of which source
+discovered a business. This is a deliberate choice, not an oversight:
+Google's own Places Details endpoint caps reviews at 5 per place, while
+SerpAPI's `google_maps_reviews` engine returns up to ~20. Since
+`pipeline.py`'s pain-flag detection (`pain.has_pain_signal`) scans review
+text for signals like missed calls/no response, and that detection is only
+as good as the review sample it sees, thinning the sample from ~20 to ~5
+would materially weaken pain-flag accuracy — a worse trade than the cost of
+keeping SerpAPI in the loop just for this step. `google_place_id` is a
+standard Google place identifier valid across both APIs, so this works
+regardless of which API discovered the business. See
+`places_client.fetch_reviews`'s docstring for the same reasoning in code.
 
 ## Usage
 

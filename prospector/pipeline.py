@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from rich.console import Console
 from rich.table import Table
 
-from prospector import apify_client, companies_house_client, serpapi_client
+from prospector import apify_client, companies_house_client, places_client, serpapi_client
 from prospector.db import (
     add_pending_apify_run,
     create_run,
@@ -40,6 +40,28 @@ class RunResult:
     total_after_filters: int = 0
     priority_counts: dict = field(default_factory=lambda: {"A": 0, "B": 0, "C": 0})
     apify_spend_estimate: float = 0.0
+
+
+def _discover_businesses(vertical: str, search_term: str, cfg: RunConfig) -> list[dict]:
+    """Discover businesses for one sector/area, Google Places first.
+
+    Google Places API is the default discovery source (Andy already pays
+    for GOOGLE_PLACES_API_KEY). SerpAPI is kept as an automatic fallback —
+    used transparently if Places raises (missing/invalid key, HTTP error,
+    etc.) or comes back with 0 results — so discovery never silently stops
+    working just because one of the two sources is having a bad day. Either
+    source returns the identical dict shape, so nothing downstream of this
+    function needs to know which one ran.
+    """
+    try:
+        discovered = places_client.discover_businesses(search_term, cfg.area, cfg.radius, cfg.max_per_sector)
+        if discovered:
+            return discovered
+        console.print(f"[yellow]Google Places returned 0 results for {vertical} — falling back to SerpAPI.[/yellow]")
+    except ApiError as exc:
+        console.print(f"[yellow]Google Places discovery failed for {vertical}: {exc} — falling back to SerpAPI.[/yellow]")
+
+    return serpapi_client.discover_businesses(search_term, cfg.area, cfg.radius, cfg.max_per_sector)
 
 
 def _passes_filters(biz: dict, cfg: RunConfig) -> bool:
@@ -91,9 +113,9 @@ def run_pipeline(conn: sqlite3.Connection, cfg: RunConfig) -> RunResult:
     for vertical, search_term in sector_terms:
         console.print(f"[bold cyan]Discovering[/bold cyan] {vertical} near {cfg.area} ({cfg.radius})...")
         try:
-            discovered = serpapi_client.discover_businesses(search_term, cfg.area, cfg.radius, cfg.max_per_sector)
+            discovered = _discover_businesses(vertical, search_term, cfg)
         except ApiError as exc:
-            console.print(f"[red]SerpAPI discovery failed for {vertical}: {exc}[/red]")
+            console.print(f"[red]Discovery failed for {vertical} (Places and SerpAPI both failed): {exc}[/red]")
             continue
 
         result.total_discovered += len(discovered)

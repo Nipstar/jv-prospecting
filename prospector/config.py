@@ -25,11 +25,20 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
 COMPANIES_HOUSE_API_KEY = os.getenv("COMPANIES_HOUSE_API_KEY", "")
 APIFY_TOKEN = os.getenv("APIFY_TOKEN", "")
+# Google Places API (New) — primary business-discovery source. SerpAPI is
+# kept as an automatic fallback (see pipeline.py) so discovery still works
+# if this key is unset/invalid or Places errors/returns 0 results. Shared
+# with geo-prospecting via the symlinked .env — see src/config.py there for
+# the sibling usage this mirrors.
+GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
 
 # --- API endpoints -----------------------------------------------------------
 SERPAPI_BASE_URL = "https://serpapi.com/search"
 COMPANIES_HOUSE_BASE_URL = "https://api.company-information.service.gov.uk"
 APIFY_BASE_URL = "https://api.apify.com/v2"
+# Official Places API (New) — Text Search endpoint (not the legacy
+# maps.googleapis.com/maps/api/place API).
+GOOGLE_PLACES_BASE_URL = "https://places.googleapis.com/v1/places:searchText"
 
 APIFY_ACTOR_FB_ADS = "curious_coder/facebook-ads-library-scraper"
 APIFY_ACTOR_GOOGLE_ADS = "scrapesage/google-ads-transparency-scraper"
