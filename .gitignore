@@ -8,3 +8,9 @@ reports/*.html
 reports/*.pdf
 *.egg-info/
 .DS_Store
+
+# Explicit exceptions: specific run outputs Andy asked to commit
+!reports/runs/
+!reports/runs/*
+!exports/runs/
+!exports/runs/*
