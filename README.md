@@ -66,13 +66,15 @@ prospector/
     pipeline.py                        # orchestrates: discover -> filter ->
                                          # reviews -> ownership -> ads -> score -> store
     trade_sectors.py                    # TRADE_SECTORS constant
-    cli.py                                # `prospector run` / `export` / `collect` / `list-runs`
+    cli.py                                # `prospector run` / `export` / `collect` / `list-runs` / `report`
     # --- internal support modules, not part of Andy's named list ---
     http.py                               # shared retry/backoff wrapper
     config.py                              # env vars, paths, pricing constants
     pain.py                                 # pain keyword list + matcher
     export.py                                # CSV export
+    report.py                                 # branded PDF report (ported from geo-slab)
 exports/                    # CSV exports land here
+reports/                     # HTML + PDF reports land here
 prospector.db                # created on first run
 ```
 
@@ -129,6 +131,10 @@ prospector export --run-id 1 --format csv
 # Collect any Apify runs that were still going after the 60s sync-poll
 # window during `prospector run` (see "Apify sync/async" below)
 prospector collect --run-id 1
+
+# Generate a branded PDF report (see "PDF reports" below)
+prospector report --run-id 1
+prospector report --business-id 7
 ```
 
 ### Wizard flow
@@ -217,6 +223,44 @@ Priority bands:
 - **A** — ads on both channels AND a pain-flagged review AND independent
 - **B** — ads on one channel AND (pain-flagged review OR independent)
 - **C** — everything else that survived the filters
+
+## PDF reports
+
+`prospector report` generates a branded, client/rep-ready PDF from a run's
+data (or a single business). It reuses the rendering pipeline built for
+[geo-slab](https://github.com/Nipstar) — the neo-brutalist, Outfit / DM
+Sans / JetBrains Mono, coral-on-cream-and-charcoal brand system Andy already
+uses for GEO scan reports and his podcast cover branding — rather than
+inventing a new rendering approach. See `prospector/report.py` for the
+full port; the mechanism (self-contained HTML/CSS template, printed to PDF
+via Playwright headless Chromium) is copied close to verbatim from
+`geo-slab/scripts/generate_prospect_report.py`, with a new prospector-shaped
+layout since geo-slab's template is built around 0-100 GEO audit scores that
+don't apply here.
+
+```bash
+# One PDF per run: priority-tier counts, then a card per qualified
+# business (name, address, priority tier + score, ad signals, ownership,
+# top pain-flagged review quote, contact info) — sorted priority A->C then
+# score, same order as the CSV export.
+prospector report --run-id 1
+# optional: --limit N (default 25) caps how many businesses are shown
+
+# One-page sales-readiness snapshot for a single business.
+prospector report --business-id 7
+```
+
+Both write an `.html` and a `.pdf` to `./reports/` (created automatically),
+named `PROSPECTOR-RUN-<id>-<area>.pdf` / `PROSPECTOR-BIZ-<id>-<name>.pdf`.
+The HTML is kept alongside the PDF for a quick eyeball in a browser without
+regenerating.
+
+**Setup**: `prospector report` needs Playwright's Chromium browser, which
+is a separate download from the `playwright` pip package:
+
+```bash
+playwright install chromium
+```
 
 ## Database
 

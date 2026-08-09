@@ -18,6 +18,8 @@ DATA_DIR = ROOT
 DB_PATH = DATA_DIR / "prospector.db"
 EXPORTS_DIR = ROOT / "exports"
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR = ROOT / "reports"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- Secrets (read from .env, never hardcoded) ------------------------------
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")

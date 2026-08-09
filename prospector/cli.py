@@ -7,6 +7,7 @@ from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.export import export_run_csv
 from prospector.pipeline import collect_pending_apify_runs, print_summary, run_pipeline
+from prospector.report import generate_business_report, generate_run_report
 from prospector.wizard import confirm_to_proceed, print_cost_estimate, run_wizard
 
 
@@ -67,6 +68,28 @@ def collect(run_id: int) -> None:
         return
     click.echo(f"Resolved {resolved} pending Apify run entr{'y' if resolved == 1 else 'ies'}; "
                f"{still_pending} still running (re-run `prospector collect --run-id {run_id}` later).")
+
+
+@cli.command()
+@click.option("--run-id", "run_id", type=int, default=None, help="Run id to report on (whole-run snapshot).")
+@click.option("--business-id", "business_id", type=int, default=None, help="Single business id (one-page sales snapshot).")
+@click.option("--limit", "limit", type=int, default=25, help="Max businesses to include in a run report (default 25, sorted priority then score). Ignored for --business-id.")
+def report(run_id: int | None, business_id: int | None, limit: int) -> None:
+    """Generate a branded PDF report — either a run-wide top-prospects
+    snapshot (--run-id) or a single-business sales-readiness one-pager
+    (--business-id). Requires `playwright install chromium` once."""
+    if bool(run_id) == bool(business_id):
+        raise click.UsageError("Pass exactly one of --run-id or --business-id.")
+
+    with get_conn() as conn:
+        if run_id:
+            html_path, pdf_path = generate_run_report(conn, run_id, limit=limit)
+        else:
+            html_path, pdf_path = generate_business_report(conn, business_id)
+
+    size_kb = round(pdf_path.stat().st_size / 1024)
+    click.echo(f"Report written to: {html_path}")
+    click.echo(f"PDF written to: {pdf_path} ({size_kb} KB)")
 
 
 @cli.command(name="list-runs")
