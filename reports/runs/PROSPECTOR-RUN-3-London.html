@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #3 &mdash; 9 August 2026</div>
+    </header>
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top prospects &mdash; London</h1>
+        <p class="sub">48 qualified businesses across HVAC engineers. Showing top 25 sorted by priority tier, then score.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Priority A</span>
+            <div class="stat-num">1</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Priority B</span>
+            <div class="stat-num">47</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Priority C</span>
+            <div class="stat-num">0</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Total qualified</span>
+            <div class="stat-num">48</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked prospect list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Thermacool Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 82</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (46 reviews)</span><span>020 7738 8666</span><span>http://www.thermacoolservices.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY A</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (58 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">60 Buckingham Gate, London, SW1E 6AJ</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;These guys were recommended by a friend but I won’t be using them due to extremely poor communication. I had a brief conversation with James, who said just let me know a week before first fix and we’ll sort out a quote. I emailed 2 weeks before, and chased a week later, no reply....&rdquo;</div>
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">The Air Conditioning Company &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.6★ (219 reviews)</span><span>020 8346 6000</span><span>https://www.airconco.com/</span><span>Director: SMITH, Sydney Thomas</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (9 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Unit 2, Bittacy Business Centre, Bittacy Hill, Mill Hill East, London NW7 1BA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heat-Plex &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (275 reviews)</span><span>020 3621 8586</span><span>http://www.heatplex.com/</span><span>Director: JENNINGS, Joseph</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (13 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">9 Webb&#x27;s Rd, London, SW11 1XJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">London Heating Solutions Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (116 reviews)</span><span>020 7607 7171</span><span>http://www.londonheatingsolutions.co.uk/</span><span>Director: SULLIVAN, Paul Gabriel</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">348 Caledonian Rd, London, N1 1DU</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;Following a service I noticed a leak from where a pipe is connected. I received a reply saying it was nothing to do with the recent service. I followed up with some clarifications and questions, to which I had no reply. I resent asking for a response, still no reply.&rdquo;</div>
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Xpress Refrigeration &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (281 reviews)</span><span>07776 395335</span><span>https://xpressrefrigeration.com/</span><span>Director: ISMAIL, Yusuf</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (26 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">124 City Rd, London, EC1V 2NX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Mayfair Plumbers &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (363 reviews)</span><span>020 3633 1526</span><span>https://www.mayfairplumbers.london/</span><span>Director: MILLAR, Kristopher Marc</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (19 creatives)</span>
+<span class="tag on">Google ads active (31 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Quantum Electricians &amp; Plumbers &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (276 reviews)</span><span>020 8015 2495</span><span>https://www.quantum-electrical.co.uk/</span><span>Director: REKA, Jim</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (19 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Niddry Lodge, 51 Holland St, London, W8 7JB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">WPJ Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.6★ (389 reviews)</span><span>020 7350 2511</span><span>https://wpjheating.co.uk/?utm_source=google&amp;utm_medium=organic&amp;utm_campaign=gbp</span><span>Director: HAWKSLEY, William Patric James</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (6 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Fieldhouse, 284b Battersea Park Rd, London, SW11 3BT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Alpha Building Services Engineering &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (592 reviews)</span><span>020 8221 0321</span><span>http://www.alphabse.co.uk/</span><span>Director: BUDU AGGREY, John Bossman</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (29 creatives)</span>
+<span class="tag on">Google ads active (19 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Abbey Rd, Canning Rd, London, E15 2QT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">ECO Energy Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.4★ (280 reviews)</span><span>020 4525 9721</span><span>https://ecoenergyservices.co.uk/</span><span>Director: OAKLEY, Christopher</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (12 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">124 City Rd, London, EC1V 2NX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Eral Metal Fabrication Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 65</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (227 reviews)</span><span>020 8556 4863</span><span>http://www.eralmetal.co.uk/</span><span>Director: ALBAYRAKOGLU, Jeren</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (21 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">157-158, 159 Midland Rd, London, E10 6JT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Future Engineering Recruitment Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 64</div>
+            </div>
+            <div class="biz-meta"><span>4.4★ (98 reviews)</span><span>020 3411 4199</span><span>http://www.futureengineer.co.uk/</span><span>Director: COURTNEY, Ben Peter</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (8 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">10 Lower Thames St, London, EC3R 6EN</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;I contacted Billy (as per the request in the job posting), went through the details from my side, before he was able to go through the role in any depth he had to take a call with another client - he asked that I email him my CV and he&#x27;d call me the next day (Friday).
+
+I called h...&rdquo;</div>
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Be Cool Refrigeration &amp; Air-conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 63</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (169 reviews)</span><span>020 3488 1889</span><span>https://becoolrefrigeration.co.uk/</span><span>Director: YOUNG, Christopher John</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (41 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">35-37 Ludgate Hill, London, EC4M 7JN</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">SmartHeat London - Commercial Boiler Installation, Repair, Service &amp; Replacement Specialist &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 60</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (101 reviews)</span><span>020 8432 2271</span><span>http://smartheatlondon.co.uk/</span><span>Director: NASH, Caroline</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (1 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">142 Powys Ln, Arnos Grove, London, N13 4HN</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">London Engineers Company &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 59</div>
+            </div>
+            <div class="biz-meta"><span>3.9★ (83 reviews)</span><span>020 3603 7172</span><span>http://www.lecompany.co.uk/</span><span>Director: KHYMCHENKO, Oleh</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (1 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Station ​London, 12 Melcombe Pl, London, NW1 6JJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Breezwell LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 58</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (69 reviews)</span><span>020 3740 0811</span><span>http://breezwelluk.com/</span><span>Director: FERREIRA, Manuel Costa Figueiredo</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (2 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">86-90 Paul St, London, EC2A 4NE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Fan Services LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 58</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (61 reviews)</span><span>020 3539 1475</span><span>https://www.fanservices.co.uk/</span><span>Director: ZEN ALABDEEN, Ghaith</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (29 creatives)</span>
+<span class="tag on">Google ads active (26 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">Ste 44, 2-3 Coleridge Gardens, London, NW6 3QH</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Airvana &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 58</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (65 reviews)</span><span>020 3370 6773</span><span>https://airvana.co.uk/</span><span>Director: AL-BAGHDADI, Karar Mohamed</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (37 creatives)</span>
+<span class="tag on">Google ads active (4 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">118 Baker St, London, W1U 6TT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">UK Gas Plumbers - Commercial Gas Engineer &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 57</div>
+            </div>
+            <div class="biz-meta"><span>4.5★ (55 reviews)</span><span>020 8935 5572</span><span>https://ukgasplumbers.com/</span><span>Director: NORMAN, Christopher</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (11 creatives)</span>
+<span class="tag on">Google ads active (34 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">2JR, 7 Bell Yard, London, WC2A 2JR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Quantech Environmental Ltd - Air Con and HVAC Installation Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 56</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (27 reviews)</span><span>020 7739 2462</span><span>https://www.quantechenv.co.uk/?utm_source=GBP&amp;utm_medium=organic&amp;utm_campaign=search</span><span>Director: TEMPEST, Glen</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (2 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">124 City Rd, London, EC1V 2NX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">AA FROST &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 56</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (37 reviews)</span><span>http://www.aafrost.co.uk/</span><span>Director: AL-SALEH, Bassel</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (50 creatives)</span>
+<span class="tag on">Google ads active (8 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">55 Wilton Rd, Pimlico, London, SW1V 1DE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Flair Facilities Ltd. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 55</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (11 reviews)</span><span>020 7998 9005</span><span>https://flairfacilities.co.uk/</span><span>Director: FARIS, William John</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag on">Google ads active (5 creatives)</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">160 City Rd, London, EC1V 2NX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heat Knights Boiler Repair London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 45</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (210 reviews)</span><span>020 3002 4997</span><span>https://hkboilerrepairlondon.co.uk/</span><span>Director: GATT, Simon</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (1 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">3, Omega Works, Harringay Warehouse District, London, N4 1LZ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Switched On London Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 45</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (529 reviews)</span><span>020 8715 4058</span><span>https://www.switchedon.london/</span><span>Director: LYONS, James</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (30 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">625 Garratt Ln, London, SW18 4SX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Boiler Repairs R Us Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">HVAC engineers</span></div>
+                <div class="biz-score">SCORE 45</div>
+            </div>
+            <div class="biz-meta"><span>3.9★ (200 reviews)</span><span>020 3695 3137</span><span>https://www.boilerrepairsrus.co.uk/</span><span>Director: MORRIS, Steven Anthony</span></div>
+            <div class="tag-row">
+                <span class="tag priority">PRIORITY B</span>
+                <span class="tag on">Meta ads active (9 creatives)</span>
+<span class="tag">Google ads: none</span>
+<span class="tag on">Independent</span>
+            </div>
+            <div class="biz-meta" style="margin-top:2px">5th Floor, 167-169 Great Portland St, London, W1W 5PF</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #3 &mdash; 9 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>
