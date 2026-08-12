@@ -37,6 +37,21 @@ def search_company(name: str) -> dict[str, Any] | None:
     return items[0] if items else None
 
 
+def get_company_profile(company_number: str) -> dict[str, Any] | None:
+    """Full company profile — used by discovery/places.py (Phase 2) for
+    incorporation date + company status, distinct from check_ownership()
+    below (which only cares about PSC/officer ownership structure)."""
+    resp = get(
+        f"{COMPANIES_HOUSE_BASE_URL}/company/{company_number}",
+        auth=_auth(),
+    )
+    if resp.status_code == 404:
+        return None
+    if resp.status_code != 200:
+        raise ApiError(f"Companies House profile lookup failed: HTTP {resp.status_code}: {resp.text[:300]}")
+    return resp.json()
+
+
 def get_psc(company_number: str) -> list[dict[str, Any]]:
     """Persons/entities with significant control for a company number."""
     resp = get(

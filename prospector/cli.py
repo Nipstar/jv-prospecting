@@ -1,10 +1,15 @@
-"""CLI entrypoint — `prospector run` (wizard + pipeline), `prospector export`."""
+"""CLI entrypoint — `prospector run` (wizard + pipeline), `prospector export`,
+plus the Prospector v2 command groups added in Phases 2-5: `discover`,
+`reviews`, `site`, `targets`."""
 from __future__ import annotations
+
+from pathlib import Path
 
 import click
 
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
+from prospector.discovery.places import discover_run, import_csv
 from prospector.export import export_run_csv
 from prospector.pipeline import print_summary, run_pipeline
 from prospector.report import generate_business_report, generate_run_report
@@ -94,6 +99,47 @@ def list_runs() -> None:
             ).fetchone()[0]
         click.echo(f"#{row['id']}  {row['created_at']}  area={row['area']!r}  "
                     f"sectors={row['trade_sectors']}  businesses={biz_count}")
+
+
+@cli.group()
+def discover() -> None:
+    """Prospector v2 discovery module (Phase 2) — vertical x location Google
+    Places search, Companies House enrichment, dedupe against the DB."""
+
+
+@discover.command(name="run")
+@click.option("--vertical", "vertical", required=True, help="A prospector.verticals slug/name, or freeform text.")
+@click.option("--location", "location", required=True, help="UK town/city (freeform, or one of prospector.locations.LOCATIONS).")
+@click.option("--max-results", "max_results", type=int, default=20, help="Max businesses to discover (default 20).")
+@click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment (faster, no CH API calls).")
+def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool) -> None:
+    """Discover businesses for one vertical/location pair."""
+    missing = missing_keys()
+    if missing:
+        click.echo(f"Warning: missing .env keys: {', '.join(missing)}.", err=True)
+
+    with get_conn() as conn:
+        result = discover_run(conn, vertical, location, max_results=max_results, do_ch=not no_ch)
+
+    click.echo(f"Run #{result.run_id}: {result.vertical} in {result.location}")
+    click.echo(f"  found={result.found}  deduped_skipped={result.deduped_skipped}  inserted={result.inserted}")
+
+
+@discover.command(name="import")
+@click.argument("csv_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--max-results", "max_results", type=int, default=20, help="Default max businesses per row (default 20; overridable per-row via a max_results CSV column).")
+@click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment for all rows.")
+def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool) -> None:
+    """Bulk-discover from a CSV of vertical,location pairs (optional max_results column)."""
+    with get_conn() as conn:
+        results = import_csv(conn, csv_path, max_results=max_results, do_ch=not no_ch)
+
+    total_found = sum(r.found for r in results)
+    total_inserted = sum(r.inserted for r in results)
+    total_deduped = sum(r.deduped_skipped for r in results)
+    for r in results:
+        click.echo(f"Run #{r.run_id}: {r.vertical} in {r.location} — found={r.found} deduped={r.deduped_skipped} inserted={r.inserted}")
+    click.echo(f"\nTotal: {len(results)} rows, found={total_found}, deduped_skipped={total_deduped}, inserted={total_inserted}")
 
 
 if __name__ == "__main__":

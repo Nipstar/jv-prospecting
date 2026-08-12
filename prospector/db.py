@@ -99,9 +99,82 @@ def _migration_v2_drop_ad_columns(conn: sqlite3.Connection) -> None:
         conn.execute("ALTER TABLE runs DROP COLUMN pending_apify_runs")
 
 
+# v3 — Phase 2 of the Prospector v2 rebuild ("Discovery module"): adds
+# Companies House incorporation/status enrichment columns and a scraped
+# email column to `businesses`, all additive (nullable, default NULL/0) so
+# the 8 pre-existing runs / 291 businesses are untouched. Backed up to
+# prospector.db.bak-<timestamp>-phase2 before this migration ran.
+_V3_ADD_BUSINESS_COLUMNS = [
+    ("incorporation_date", "TEXT"),
+    ("company_status", "TEXT"),
+    ("established_flag", "INTEGER DEFAULT 0"),  # 1 if company is 3+ years old
+    ("email", "TEXT"),
+]
+
+# v4 — Phase 3 ("Review profile module"): review-target scoring columns on
+# `businesses`, plus a keyword-match column on `reviews` for missed-call
+# evidence provenance. Additive/nullable.
+_V4_ADD_BUSINESS_COLUMNS = [
+    ("worst_recent_rating", "INTEGER"),
+    ("has_negative_recent", "INTEGER DEFAULT 0"),
+    ("review_target_score", "INTEGER"),
+    ("weak_gbp", "INTEGER DEFAULT 0"),
+    ("missed_call_evidence", "INTEGER DEFAULT 0"),
+    ("reviews_fetched_at", "TEXT"),
+]
+_V4_ADD_REVIEW_COLUMNS = [
+    ("review_keyword_match", "INTEGER DEFAULT 0"),
+]
+
+# v5 — Phase 4 ("Website signal module"): opportunity-score flags from the
+# lightweight homepage/contact-page fetch. Additive/nullable.
+_V5_ADD_BUSINESS_COLUMNS = [
+    ("no_booking", "INTEGER DEFAULT 0"),
+    ("no_chat", "INTEGER DEFAULT 0"),
+    ("phone_dependent", "INTEGER DEFAULT 0"),
+    ("opportunity_score", "INTEGER DEFAULT 0"),
+    ("site_checked_at", "TEXT"),
+]
+
+# v6 — Phase 5 ("Combined targeting and export"): PECR/TPS compliance
+# placeholder column. Defaults to 0 (false) — no TPS-checking API
+# integration, just a column + README note per Andy's spec.
+_V6_ADD_BUSINESS_COLUMNS = [
+    ("tps_checked", "INTEGER DEFAULT 0"),
+]
+
+
+def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
+    existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+    for name, coltype in columns:
+        if name not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {coltype}")
+
+
+def _migration_v3_ch_and_email(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V3_ADD_BUSINESS_COLUMNS)
+
+
+def _migration_v4_review_scoring(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V4_ADD_BUSINESS_COLUMNS)
+    _add_columns_if_missing(conn, "reviews", _V4_ADD_REVIEW_COLUMNS)
+
+
+def _migration_v5_site_signals(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V5_ADD_BUSINESS_COLUMNS)
+
+
+def _migration_v6_tps_placeholder(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V6_ADD_BUSINESS_COLUMNS)
+
+
 MIGRATIONS: list[tuple[int, "str | object"]] = [
     (1, "ALTER TABLE runs ADD COLUMN pending_apify_runs TEXT DEFAULT '[]';"),
     (2, _migration_v2_drop_ad_columns),
+    (3, _migration_v3_ch_and_email),
+    (4, _migration_v4_review_scoring),
+    (5, _migration_v5_site_signals),
+    (6, _migration_v6_tps_placeholder),
 ]
 
 
@@ -167,6 +240,64 @@ def insert_business(conn: sqlite3.Connection, run_id: int, biz: dict) -> int:
         "domain", "phone", "google_place_id", "rating", "review_count",
         "director_name", "companies_house_number", "is_group_owned",
         "priority", "priority_score", "created_at",
+    ]
+    values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
+    placeholders = ", ".join(["?"] * len(cols))
+    cur = conn.execute(
+        f"INSERT INTO businesses ({', '.join(cols)}) VALUES ({placeholders})",
+        values,
+    )
+    return int(cur.lastrowid)
+
+
+def normalize_phone(phone: str | None) -> str | None:
+    """Strip everything but digits, for phone dedupe matching. '+44' and
+    '0' UK prefixes are left as-is (digits only) — good enough for exact
+    fallback-dedupe purposes; not a full E.164 normalizer."""
+    if not phone:
+        return None
+    digits = "".join(ch for ch in phone if ch.isdigit())
+    return digits or None
+
+
+def find_business_by_place_id(conn: sqlite3.Connection, place_id: str) -> sqlite3.Row | None:
+    return conn.execute(
+        "SELECT * FROM businesses WHERE google_place_id = ? LIMIT 1", (place_id,)
+    ).fetchone()
+
+
+def find_business_by_phone_or_domain(conn: sqlite3.Connection, phone: str | None, domain: str | None) -> sqlite3.Row | None:
+    """Fallback dedupe when place_id isn't a match (e.g. re-discovered via a
+    different search). Matches on normalised phone digits or lower-cased
+    domain, whichever is available."""
+    norm_phone = normalize_phone(phone)
+    if norm_phone:
+        rows = conn.execute("SELECT * FROM businesses WHERE phone IS NOT NULL").fetchall()
+        for row in rows:
+            if normalize_phone(row["phone"]) == norm_phone:
+                return row
+    if domain:
+        row = conn.execute(
+            "SELECT * FROM businesses WHERE domain = ? LIMIT 1", (domain.lower(),)
+        ).fetchone()
+        if row:
+            return row
+    return None
+
+
+def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict) -> int:
+    """Insert a business discovered via the Phase 2 discovery module
+    (prospector/discovery/places.py). Distinct from insert_business (used by
+    the legacy ad-hoc-scoring `prospector run` pipeline) only in that it also
+    writes the Companies House enrichment columns added in migration v3 and
+    doesn't require priority/priority_score (v2 businesses are scored later,
+    in Phase 3/5)."""
+    cols = [
+        "run_id", "name", "vertical", "town", "postcode", "address", "website",
+        "domain", "phone", "google_place_id", "rating", "review_count",
+        "director_name", "companies_house_number", "is_group_owned",
+        "incorporation_date", "company_status", "established_flag",
+        "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
     placeholders = ", ".join(["?"] * len(cols))
