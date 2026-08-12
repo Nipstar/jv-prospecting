@@ -9,10 +9,16 @@ everything in SQLite with CSV export.
 **Prospector v2 note:** the original ad-spend targeting model (score
 businesses by whether they run Meta/Google ads, via two Apify actors) was
 removed in Phase 1 of the "Prospector v2: UK High-Ticket Firms,
-Review-Based Targeting" rebuild. The new targeting model — UK high-ticket
-firms with weak review profiles — is being built out in later phases; this
-README reflects the current (Phase 1) state: ad-spend module gone,
-everything else intact.
+Review-Based Targeting" rebuild. Phases 2-5 then built the replacement:
+**discovery** (`prospector discover`, vertical x location Google Places
+search + Companies House enrichment), **review profile** (`prospector
+reviews`, Google Places review-snippet scoring), **website signal**
+(`prospector site`, booking/chat-widget + phone-dependency heuristics),
+and **combined targeting/export** (`prospector targets`). All four are new
+command groups that sit alongside the original `prospector run` /
+`export` / `report` commands (kept as-is — the 8 existing runs used that
+pipeline and it still works). See "Prospector v2: discovery, reviews,
+site signals, targets" below for the new workflow.
 
 This is a standalone tool that lives alongside Andy's existing
 `geo-prospecting` project and **reuses its API keys** (Google Places,
@@ -86,10 +92,32 @@ prospector/
     pain.py                                 # pain keyword list + matcher
     export.py                                # CSV export
     report.py                                 # branded PDF report (ported from geo-slab)
+    # --- Prospector v2 (Phases 2-5): discovery, review/site scoring, targeting ---
+    verticals.py                                # VERTICALS — Andy's 9 v2 target verticals
+    locations.py                                 # starter UK town/city list
+    scoring_config.py                             # centralised thresholds/keywords for
+                                                    # review_target_score + opportunity_score
+    targets.py                                     # combined sort/list/export (Phase 5)
+    discovery/
+      __init__.py
+      places.py                                     # vertical x location discovery (Phase 2)
+    enrichers/
+      __init__.py
+      reviews.py                                     # review profile + review_target_score (Phase 3)
+      site.py                                         # booking/chat/phone signals + opportunity_score (Phase 4)
 exports/                    # CSV exports land here
 reports/                     # HTML + PDF reports land here
 prospector.db                # created on first run
 ```
+
+**Why a `discovery/`/`enrichers/` subpackage split instead of flat
+modules:** Andy's Phase 2-4 spec named the files `discovery/places.py`,
+`enrichers/reviews.py`, `enrichers/site.py` explicitly (vs. the flat
+`prospector/` layout Phase 1 and earlier used) — these are genuinely new
+subsystems layered on top of the existing flat client modules
+(`places_client.py`, `companies_house_client.py`, kept as-is and
+reused/extended rather than duplicated), so the subpackage split doesn't
+fight the existing layout, it sits on top of it.
 
 **Note:** `apify_client.py` (Meta + Google ad spend actors) was removed in
 Phase 1 of the Prospector v2 rebuild, along with the `collect` CLI command
@@ -277,6 +305,124 @@ is a separate download from the `playwright` pip package:
 playwright install chromium
 ```
 
+## Prospector v2: discovery, reviews, site signals, targets
+
+This is the new workflow built in Phases 2-5 of the "Prospector v2: UK
+High-Ticket Firms, Review-Based Targeting" rebuild. It writes to the same
+`businesses`/`runs`/`reviews` tables as the legacy `prospector run`
+pipeline above (dedupe is shared across both), but is driven by four new
+command groups rather than the interactive wizard, and doesn't do
+ad-spend or pain-keyword scoring — it targets **weak Google review
+profiles** instead.
+
+```bash
+# 1. Discover — vertical x location Google Places search + Companies
+#    House enrichment (company number, incorporation date, status,
+#    established_flag for 3+ year old firms). Dedupes on google_place_id,
+#    then normalised phone/domain fallback, against everything already in
+#    the DB (including legacy-pipeline businesses).
+prospector discover run --vertical vets --location Winchester --max-results 20
+prospector discover run --vertical "solicitors and conveyancers" --location Reading
+
+# Bulk, from a CSV of vertical,location pairs (optional max_results column)
+prospector discover import my_targets.csv
+
+# 2. Reviews — Google Places Details fetch (rating, review count, up to 5
+#    review snippets) + review_target_score (0-100).
+prospector reviews fetch --run-id 9
+prospector reviews list --min-score 50
+
+# 3. Site signals — lightweight homepage/contact-page fetch (httpx) for
+#    booking-widget/live-chat-widget absence and phone-dependency +
+#    opportunity_score (0-100, separate score from review_target_score).
+prospector site fetch --run-id 9
+
+# 4. Targets — combined sort (review_target_score desc, opportunity_score
+#    desc tiebreak) + CSV export.
+prospector targets list --min-score 50
+prospector targets export exports/targets.csv
+```
+
+### Verticals config
+
+`prospector/verticals.py` — `VERTICALS`, Andy's 9 target verticals for the
+v2 rebuild: estate agents and lettings, solicitors and conveyancers,
+accountants, heating/plumbing/electrical (larger firms, not sole
+traders), roofing/damp proofing/driveways, private dental/cosmetic/
+aesthetic clinics, vets, funeral directors, garage door/window/
+conservatory installers. `--vertical` accepts a `VERTICALS` slug (e.g.
+`vets`), its display name, or arbitrary freeform text (falls through to
+using your text directly as the search term, so you're never blocked on
+the seed list). This is a **separate config from `prospector/trade_sectors.py`**,
+not a replacement — `trade_sectors.py`'s `ticket_size_estimate`-oriented
+28-sector list still backs the legacy `prospector run` wizard used by the
+8 pre-v2 runs, and removing/repurposing it would break that command.
+
+`prospector/locations.py` — `LOCATIONS`, a starter UK town/city list;
+`--location` also accepts any freeform UK town/city/postcode district.
+
+### Scoring
+
+Both scores are centralised in `prospector/scoring_config.py` — thresholds
+and keyword lists are not hardcoded inline, so they're easy to tune.
+
+**`review_target_score`** (0-100, capped) — `enrichers/reviews.py`:
+
+| Signal | Points |
+|---|---|
+| review_count < 20 | +40 |
+| review_count 20-50 | +20 |
+| review_count 51-100 *(interpolated tier — see note)* | +10 |
+| review_count > 100 | +0 |
+| avg_rating 3.0-4.2 | +30 |
+| avg_rating < 3.0 | +15 |
+| avg_rating > 4.2 *(implicit — not a weak-review target)* | +0 |
+| has_negative_recent (any review <=2★ in the returned set) | +20 |
+| weak_gbp (no listing found, or no website AND no hours) | +10 |
+| missed_call_evidence (negative review text matches a missed-call keyword) | +15 |
+
+Andy's spec left a gap between the 50 and 100 review-count bands ("20-50:
++20. Over 100: 0."). We interpolated a third tier, 51-100 -> +10, rather
+than a hard cliff at 50, documented in `scoring_config.py` alongside the
+`MISSED_CALL_KEYWORDS` list.
+
+**Coverage caveat (Andy's note, not a change request):** Google Places
+Details returns at most 5 reviews per fetch, so `missed_call_evidence`
+only catches complaints that happen to surface in that 5-review set. When
+it does hit, it's a strong opener ("saw a review mentioning calls going
+unanswered") — worth the flag despite patchy coverage. Built as
+specified.
+
+**`opportunity_score`** (0-100, capped, kept **separate** from
+`review_target_score`) — `enrichers/site.py`:
+
+| Signal | Points |
+|---|---|
+| no_booking (no booking-widget signature or "book online" language) | +5 |
+| no_chat (no chat-widget signature or chat language) | +5 |
+| phone_dependent (contact page: phone number/form, no callback-promise wording) | +5 |
+
+Detection is heuristic HTML/text scanning — booking-widget signatures
+(Calendly, Acuity, Fresha, Cliniko, etc.), chat-widget signatures
+(Intercom, Drift, Tawk, Crisp, Zendesk, etc.), and keyword scanning, all
+listed in `scoring_config.py` for Andy to tune as he sees false
+positives/negatives on real prospect sites. Not designed to be perfect —
+"it's a lightweight signal" per spec.
+
+### Compliance — PECR / TPS screening
+
+Outreach against these targets is **phone-first** against corporate
+numbers. Under PECR (Privacy and Electronic Communications Regulations),
+that requires screening numbers against the Telephone Preference Service
+(TPS) / Corporate TPS (CTPS) **before calling** — this tool does not do
+that screening. `prospector targets export` includes a `tps_checked`
+column, defaulting to `false` for every row, as a compliance placeholder
+and reminder: **treat every exported number as unscreened until you've
+manually checked it against TPS/CTPS**, and update the column (or your
+own CRM record) once you have. There is no TPS-checking API integration
+in this tool — that's a deliberate scope decision per Andy's spec, not an
+oversight.
+
 ## Database
 
 SQLite, `prospector.db`, three tables: `runs`, `businesses`, `reviews`.
@@ -295,13 +441,33 @@ columns are preserved — this was a migration, not a destructive rewrite.
 `prospector.db` is backed up (`prospector.db.bak-<timestamp>`) before any
 migration that drops columns.
 
+Migrations v3-v6 (Prospector v2 Phases 2-5) are all additive (`ALTER
+TABLE ... ADD COLUMN`, nullable/defaulted) — no columns dropped, no rows
+touched:
+- **v3** (Phase 2): `businesses.incorporation_date`, `company_status`,
+  `established_flag`, `email`.
+- **v4** (Phase 3): `businesses.worst_recent_rating`,
+  `has_negative_recent`, `review_target_score`, `weak_gbp`,
+  `missed_call_evidence`, `reviews_fetched_at`; `reviews.review_keyword_match`.
+- **v5** (Phase 4): `businesses.no_booking`, `no_chat`, `phone_dependent`,
+  `opportunity_score`, `site_checked_at`.
+- **v6** (Phase 5): `businesses.tps_checked` (compliance placeholder, see
+  "Compliance — PECR / TPS screening" above).
+
+`prospector.db` was backed up (`prospector.db.bak-<timestamp>-phase2`)
+before v3-v6 were first applied. All 8 pre-existing runs / 291 businesses
+/ 2302 reviews were verified intact before and after.
+
 ## Error handling
 
-Every external call (SerpAPI, Companies House) goes through
-`prospector/http.py`, which retries up to 2 times with exponential
-backoff on network errors, timeouts, 429s, and 5xx responses. A failure on
-one business/sector is logged and skipped rather than aborting the whole
-run.
+Every external call (SerpAPI, Companies House, Google Places) goes
+through `prospector/http.py`, which retries up to 2 times with
+exponential backoff on network errors, timeouts, 429s, and 5xx responses.
+A failure on one business/sector is logged and skipped rather than
+aborting the whole run. `enrichers/site.py` (Phase 4) reimplements the
+same retry/backoff shape for `httpx` (since `http.py` itself is
+`requests`-based and site.py is the one module using `httpx`), plus a
+rotating User-Agent and a fixed delay between requests.
 
 ## Notes / limitations
 
@@ -314,5 +480,21 @@ run.
 - The ad-spend module (Meta Facebook Ads Library + Google Ads Transparency
   checks via Apify) was removed in Phase 1 of the "Prospector v2: UK
   High-Ticket Firms, Review-Based Targeting" rebuild. The old targeting
-  model scored businesses by ad spend; the new model (later phases) targets
-  UK high-ticket firms with weak review profiles instead.
+  model scored businesses by ad spend; the new model (Phases 2-5, see
+  "Prospector v2: discovery, reviews, site signals, targets" above)
+  targets UK high-ticket firms with weak review profiles instead.
+- Discovery's domain-fallback dedupe (Phase 2) is intentionally
+  aggressive: a chain/group business with multiple branches on a shared
+  corporate domain (e.g. a CVS Group vet practice) will dedupe against
+  its first-discovered sibling branch even though they're different
+  physical practices. This is the documented behaviour of "dedupe on
+  phone/domain as fallback" per spec, not a bug — if Andy wants
+  per-branch discovery for chains, place_id-only dedupe (`--` no CLI flag
+  for this yet) would need to be added.
+- `enrichers/site.py`'s heuristics will occasionally get blocked outright
+  by anti-bot protection on larger/corporate sites (observed: a CVS Group
+  site returning HTTP 406 to a full browser User-Agent string) — handled
+  as an "unreachable" result (conservative flags, `opportunity_score`
+  left at 0 rather than scored off unverified data) rather than crashing,
+  but it means opportunity_score coverage will be thinner for
+  larger/more defended sites than for small independent ones.

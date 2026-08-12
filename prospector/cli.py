@@ -13,6 +13,7 @@ from prospector.discovery.places import discover_run, import_csv
 from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
 from prospector.enrichers.site import fetch_all as fetch_all_site_signals
 from prospector.export import export_run_csv
+from prospector.targets import export_targets_csv, list_targets
 from prospector.pipeline import print_summary, run_pipeline
 from prospector.report import generate_business_report, generate_run_report
 from prospector.wizard import confirm_to_proceed, print_cost_estimate, run_wizard
@@ -225,6 +226,41 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
             f"phone_dependent={r.phone_dependent}  opportunity_score={r.opportunity_score}"
             + (f"  email={r.email}" if r.email else "")
         )
+
+
+@cli.group()
+def targets() -> None:
+    """Prospector v2 combined targeting (Phase 5) — review_target_score
+    (primary) + opportunity_score (tiebreak) sorted list/export."""
+
+
+@targets.command(name="list")
+@click.option("--min-score", "min_score", type=int, default=0, help="Only show businesses with review_target_score >= this.")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+def targets_list_cmd(min_score: int, run_id: int | None) -> None:
+    """List targets sorted review_target_score desc, opportunity_score desc tiebreak."""
+    with get_conn() as conn:
+        rows = list_targets(conn, min_score=min_score, run_id=run_id)
+    if not rows:
+        click.echo("No targets match. Run `discover run` -> `reviews fetch` -> `site fetch` first.")
+        return
+    for row in rows:
+        click.echo(
+            f"#{row['id']} {row['name']} | {row['vertical']} | {row['town']} | {row['phone']} | "
+            f"reviews={row['review_count']} rating={row['rating']} | "
+            f"review_target_score={row['review_target_score']} opportunity_score={row['opportunity_score']}"
+        )
+
+
+@targets.command(name="export")
+@click.argument("csv_path", type=click.Path(path_type=Path), required=False, default=None)
+@click.option("--min-score", "min_score", type=int, default=0, help="Only export businesses with review_target_score >= this.")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+def targets_export_cmd(csv_path: Path | None, min_score: int, run_id: int | None) -> None:
+    """Export targets to CSV (default ./exports/targets_<timestamp>.csv)."""
+    with get_conn() as conn:
+        path = export_targets_csv(conn, out_path=csv_path, min_score=min_score, run_id=run_id)
+    click.echo(f"Exported targets to {path}")
 
 
 if __name__ == "__main__":
