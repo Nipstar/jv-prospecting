@@ -6,7 +6,7 @@ import click
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.export import export_run_csv
-from prospector.pipeline import collect_pending_apify_runs, print_summary, run_pipeline
+from prospector.pipeline import print_summary, run_pipeline
 from prospector.report import generate_business_report, generate_run_report
 from prospector.wizard import confirm_to_proceed, print_cost_estimate, run_wizard
 
@@ -36,8 +36,8 @@ def run() -> None:
 
     print_summary(result)
     if cfg.dry_run:
-        click.echo("\nDry run finished — no Apify calls were made, no businesses were written to the DB.")
-        click.echo("Re-run and answer 'No' to the dry-run prompt to spend on Apify and persist results.")
+        click.echo("\nDry run finished — no Companies House calls were made, no businesses were written to the DB.")
+        click.echo("Re-run and answer 'No' to the dry-run prompt to persist results.")
 
 
 @cli.command()
@@ -52,22 +52,6 @@ def export(run_id: int, fmt: str) -> None:
             return
         path = export_run_csv(conn, run_id)
     click.echo(f"Exported {count} businesses to {path}")
-
-
-@cli.command()
-@click.option("--run-id", "run_id", type=int, required=True, help="Run id to collect pending Apify results for.")
-def collect(run_id: int) -> None:
-    """Poll any Apify runs still pending from `prospector run` (the async
-    fallback for runs that didn't finish inside the 60s sync-poll window)
-    and, for any that have now finished, update the stored businesses'
-    fb_ads_active / google_ads_active and re-score them."""
-    with get_conn() as conn:
-        resolved, still_pending = collect_pending_apify_runs(conn, run_id)
-    if resolved == 0 and still_pending == 0:
-        click.echo(f"No pending Apify runs for run_id={run_id}.")
-        return
-    click.echo(f"Resolved {resolved} pending Apify run entr{'y' if resolved == 1 else 'ies'}; "
-               f"{still_pending} still running (re-run `prospector collect --run-id {run_id}` later).")
 
 
 @cli.command()

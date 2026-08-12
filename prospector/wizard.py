@@ -8,10 +8,13 @@ Uses questionary for all prompts, in the exact order specified:
   5. Minimum rating
   6. Max businesses per sector
   7. Ownership filter
-  8. Ad qualification rule
-  9. Dry run?
+  8. Dry run?
 
 After the wizard, prints a cost estimate and asks for final confirmation.
+
+The ad-qualification question (Meta/Google ad spend rule) was removed in
+the "Prospector v2" rebuild's Phase 1, along with the rest of the ad-spend
+module — see prospector/pipeline.py and prospector/scoring.py.
 """
 from __future__ import annotations
 
@@ -20,15 +23,9 @@ from dataclasses import dataclass, field
 import questionary
 from questionary import Choice, Separator
 
-from prospector.config import APIFY_COST_PER_FB_RUN, APIFY_COST_PER_GOOGLE_RUN
 from prospector.trade_sectors import TRADE_SECTORS, sectors_by_category
 
 RADIUS_CHOICES = ["5 miles", "10 miles", "20 miles", "county-wide"]
-AD_QUALIFICATION_CHOICES = [
-    "Require Meta OR Google ads",
-    "Require Meta AND Google ads",
-    "No ad requirement (list only)",
-]
 
 
 @dataclass
@@ -41,7 +38,6 @@ class RunConfig:
     min_rating: float
     max_per_sector: int
     exclude_group_owned: bool
-    ad_qualification: str  # "or" | "and" | "none"
     dry_run: bool
     notes: str = ""
 
@@ -126,7 +122,7 @@ def run_wizard() -> RunConfig:
     min_rating = float(min_rating_raw.strip() or 4.0)
 
     max_per_sector_raw = questionary.text(
-        "6) Max businesses per sector (controls SerpAPI + Apify spend):",
+        "6) Max businesses per sector (controls SerpAPI spend):",
         default="25",
         validate=_positive_int(25),
     ).ask()
@@ -137,19 +133,8 @@ def run_wizard() -> RunConfig:
         default=True,
     ).ask()
 
-    ad_choice = questionary.select(
-        "8) Ad qualification:",
-        choices=AD_QUALIFICATION_CHOICES,
-        default=AD_QUALIFICATION_CHOICES[0],
-    ).ask()
-    ad_qualification = {
-        AD_QUALIFICATION_CHOICES[0]: "or",
-        AD_QUALIFICATION_CHOICES[1]: "and",
-        AD_QUALIFICATION_CHOICES[2]: "none",
-    }[ad_choice]
-
     dry_run = questionary.confirm(
-        "9) Dry run? (SerpAPI discovery only, stop before any Apify spend)",
+        "8) Dry run? (discovery only, stop before Companies House)",
         default=True,
     ).ask()
 
@@ -162,37 +147,22 @@ def run_wizard() -> RunConfig:
         min_rating=min_rating,
         max_per_sector=max_per_sector,
         exclude_group_owned=bool(exclude_group_owned),
-        ad_qualification=ad_qualification,
         dry_run=bool(dry_run),
     )
 
 
-def estimate_apify_cost(sector_count: int, max_per_sector: int) -> float:
-    n = sector_count * max_per_sector
-    return n * (APIFY_COST_PER_FB_RUN + APIFY_COST_PER_GOOGLE_RUN)
-
-
 def print_cost_estimate(cfg: RunConfig) -> None:
     sector_count = len(cfg.sector_slugs) + len(cfg.custom_sectors)
-    apify_cost = estimate_apify_cost(sector_count, cfg.max_per_sector)
     max_businesses = sector_count * cfg.max_per_sector
 
     print("\n--- Cost estimate ---")
     print(f"SerpAPI: up to {sector_count} discovery calls + up to {max_businesses} review calls "
           f"(free tier assumed — check your SerpAPI plan; paid plans bill per search).")
     print("Companies House: free (public API, rate-limited to 600 req/5min).")
-    if cfg.dry_run:
-        print(f"Apify: SKIPPED (dry run) — would be ~${apify_cost:.2f} "
-              f"for up to {max_businesses} businesses "
-              f"({sector_count} sectors x {cfg.max_per_sector} max/sector).")
-    else:
-        print(f"Apify estimated spend: ~${apify_cost:.2f} "
-              f"({sector_count} sectors x {cfg.max_per_sector} max/sector "
-              f"x (${APIFY_COST_PER_FB_RUN} FB + ${APIFY_COST_PER_GOOGLE_RUN} Google avg)).")
     print("---------------------\n")
 
 
 def confirm_to_proceed(cfg: RunConfig) -> bool:
-    label = "Proceed with dry run (SerpAPI discovery only)?" if cfg.dry_run else \
-        "Proceed and spend on SerpAPI + Companies House + Apify as estimated above?"
+    label = "Proceed with dry run (discovery only)?" if cfg.dry_run else \
+        "Proceed and spend on SerpAPI + Companies House as estimated above?"
     return bool(questionary.confirm(label, default=True).ask())

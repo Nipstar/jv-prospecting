@@ -17,8 +17,8 @@ which doesn't map onto prospector's data. This module ports the *mechanism*
 defines two prospector-specific layouts:
 
   - Run report: one-page-per-N "top prospects" snapshot for a whole run —
-    priority mix, then a card per business (name/address/priority/score/ad
-    signals/ownership/top pain quote/contact).
+    priority mix, then a card per business (name/address/priority/score/
+    ownership/review pain signal/top pain quote/contact).
   - Business report: a single-business one-page sales-readiness snapshot,
     for when you want to hand one prospect's findings to a rep.
 """
@@ -36,8 +36,8 @@ from prospector.config import REPORTS_DIR
 PRIORITY_ORDER = {"A": 0, "B": 1, "C": 2}
 
 PRIORITY_LABEL = {
-    "A": "Priority A — ads on both channels, pain signal, independent",
-    "B": "Priority B — ads on one channel, plus pain signal or independent",
+    "A": "Priority A — pain signal and independently owned",
+    "B": "Priority B — pain signal or independently owned",
     "C": "Priority C — qualified, lower urgency",
 }
 
@@ -341,29 +341,11 @@ def _tag(label: str, on: bool) -> str:
     return f'<span class="{cls}">{escape(label)}</span>'
 
 
-def _ads_tags(row: sqlite3.Row) -> str:
-    tags = []
-    fb = row["fb_ads_active"]
-    if fb == 1 or fb is True:
-        n = row["fb_ads_creative_count"]
-        tags.append(_tag(f"Meta ads active" + (f" ({n} creatives)" if n else ""), True))
-    elif fb is None:
-        tags.append(_tag("Meta ads unknown", False))
-    else:
-        tags.append(_tag("Meta ads: none", False))
-
-    g = row["google_ads_active"]
-    if g == 1 or g is True:
-        n = row["google_ads_creative_count"]
-        d = row["google_ads_days_active"]
-        extra = ", ".join(x for x in [f"{n} creatives" if n else "", f"{d}d active" if d else ""] if x)
-        tags.append(_tag("Google ads active" + (f" ({extra})" if extra else ""), True))
-    elif g is None:
-        tags.append(_tag("Google ads unknown", False))
-    else:
-        tags.append(_tag("Google ads: none", False))
-
-    tags.append(_tag("Independent" if not row["is_group_owned"] else "Group-owned", not row["is_group_owned"]))
+def _ownership_pain_tags(row: sqlite3.Row, has_pain: bool) -> str:
+    tags = [
+        _tag("Independent" if not row["is_group_owned"] else "Group-owned", not row["is_group_owned"]),
+        _tag("Pain-flagged review" if has_pain else "No pain-flagged review", has_pain),
+    ]
     return "\n".join(tags)
 
 
@@ -471,7 +453,7 @@ def _biz_card(entry: dict) -> str:
             <div class="biz-meta">{meta}</div>
             <div class="tag-row">
                 <span class="tag priority">PRIORITY {escape(priority)}</span>
-                {_ads_tags(row)}
+                {_ownership_pain_tags(row, bool(entry["top_pain_review"]))}
             </div>
             {f'<div class="biz-meta" style="margin-top:2px">{address}</div>' if address else ''}
             {quote}
@@ -576,28 +558,16 @@ def render_business_report(entry: dict) -> str:
             <div class="signal-value">{escape(value)}</div>
         </div>"""
 
-    fb = row["fb_ads_active"]
-    fb_val = "Active" if fb in (1, True) else ("Unknown" if fb is None else "Not active")
-    fb_extra = row["fb_ads_creative_count"]
-    if fb in (1, True) and fb_extra:
-        fb_val += f" ({fb_extra} creatives)"
+    has_pain = bool(entry["top_pain_review"])
+    pain_val = "Pain-flagged review found" if has_pain else "No pain-flagged review"
 
-    g = row["google_ads_active"]
-    g_val = "Active" if g in (1, True) else ("Unknown" if g is None else "Not active")
-    if g in (1, True):
-        bits = []
-        if row["google_ads_creative_count"]:
-            bits.append(f"{row['google_ads_creative_count']} creatives")
-        if row["google_ads_days_active"]:
-            bits.append(f"{row['google_ads_days_active']}d active")
-        if bits:
-            g_val += f" ({', '.join(bits)})"
+    rating_val = f'{row["rating"]}★ ({row["review_count"] or 0} reviews)' if row["rating"] else "Not captured"
 
     ownership_val = "Group / corporate owned" if row["is_group_owned"] else "Independently owned"
 
     signal_grid = "\n".join([
-        signal_cell("Meta (Facebook) ads", fb_val, fb in (1, True)),
-        signal_cell("Google ads", g_val, g in (1, True)),
+        signal_cell("Reviews", rating_val, False),
+        signal_cell("Review pain signal", pain_val, has_pain),
         signal_cell("Ownership", ownership_val, not row["is_group_owned"]),
     ])
 

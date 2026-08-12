@@ -17,9 +17,6 @@ CREATE TABLE IF NOT EXISTS runs (
     area TEXT,
     trade_sectors TEXT,       -- JSON array of sectors run in this batch
     notes TEXT
-    -- pending_apify_runs TEXT added by migration v1 below (JSON list of
-    -- Apify runs still going after the 60s sync-poll window, to be picked
-    -- up later by `prospector collect`)
 );
 
 CREATE TABLE IF NOT EXISTS businesses (
@@ -39,18 +36,6 @@ CREATE TABLE IF NOT EXISTS businesses (
     director_name TEXT,
     companies_house_number TEXT,
     is_group_owned INTEGER,        -- 1/0, from PSC/officer check
-    fb_ads_active INTEGER,         -- 1/0/NULL. NULL = unknown/couldn't
-                                    -- check (Apify run failed, timed out,
-                                    -- or came back empty); 0 = checked,
-                                    -- confirmed not found. See
-                                    -- prospector/apify_client.py.
-    fb_ads_creative_count INTEGER,
-    fb_ads_earliest_seen TEXT,
-    google_ads_active INTEGER,     -- 1/0/NULL, same NULL-vs-0 semantics as
-                                    -- fb_ads_active above.
-    google_ads_creative_count INTEGER,
-    google_ads_days_active INTEGER,
-    google_ads_advertiser_name TEXT,  -- flag if != business name (agency-run)
     priority TEXT,                 -- A / B / C
     priority_score INTEGER,
     created_at TEXT
@@ -71,14 +56,52 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
 );
 """
 
-# Ordered list of (version, sql) migrations applied after the base schema.
+# Ordered list of (version, migration) applied after the base schema, each
+# tracked (once) in schema_migrations. A migration is either a raw SQL
+# string (executed via executescript) or a callable taking the open
+# connection, for migrations that need to check existing state before
+# acting (e.g. conditionally dropping columns that may or may not exist
+# depending on whether this is a fresh DB or an upgrade from an older one).
+#
 # v1 — the base schema originally shipped without runs.pending_apify_runs;
-# add it for any prospector.db created before the Apify async-collection
-# feature existed. CREATE TABLE IF NOT EXISTS above already includes the
-# column for brand-new databases, so this is a no-op there (guarded by
-# schema_migrations) but required for upgrading an existing file.
-MIGRATIONS: list[tuple[int, str]] = [
+# add it for any prospector.db created before the (now-removed) Apify
+# async-collection feature existed. Kept as historical/no-op-safe so old
+# DBs still upgrade cleanly; v2 below removes the column again for
+# everyone, since Phase 1 of the v2 rebuild removed the ad-spend module
+# this supported.
+#
+# v2 — Phase 1 of the "Prospector v2: UK High-Ticket Firms, Review-Based
+# Targeting" rebuild removed the ad-spend module (Facebook Ads Library +
+# Google Ads Transparency via Apify) entirely. This migration drops the
+# now-unused ad-spend columns from `businesses` and the `pending_apify_runs`
+# async-collection column from `runs`. Uses native `ALTER TABLE ... DROP
+# COLUMN` (supported since SQLite 3.35; this environment runs 3.40.1).
+# Columns are dropped conditionally (checked via PRAGMA table_info) so this
+# is safe both for the 8 pre-existing real runs (which have the columns)
+# and for a brand-new DB (whose CREATE TABLE no longer defines them, but
+# which still gets a pending_apify_runs column from v1 above and needs it
+# dropped too).
+_V2_DROPPED_BUSINESS_COLUMNS = [
+    "fb_ads_active", "fb_ads_creative_count", "fb_ads_earliest_seen",
+    "google_ads_active", "google_ads_creative_count", "google_ads_days_active",
+    "google_ads_advertiser_name",
+]
+
+
+def _migration_v2_drop_ad_columns(conn: sqlite3.Connection) -> None:
+    existing_business_cols = {row[1] for row in conn.execute("PRAGMA table_info(businesses)")}
+    for col in _V2_DROPPED_BUSINESS_COLUMNS:
+        if col in existing_business_cols:
+            conn.execute(f"ALTER TABLE businesses DROP COLUMN {col}")
+
+    existing_run_cols = {row[1] for row in conn.execute("PRAGMA table_info(runs)")}
+    if "pending_apify_runs" in existing_run_cols:
+        conn.execute("ALTER TABLE runs DROP COLUMN pending_apify_runs")
+
+
+MIGRATIONS: list[tuple[int, "str | object"]] = [
     (1, "ALTER TABLE runs ADD COLUMN pending_apify_runs TEXT DEFAULT '[]';"),
+    (2, _migration_v2_drop_ad_columns),
 ]
 
 
@@ -104,10 +127,13 @@ def init_db(db_path: Path | None = None) -> None:
             row[0]
             for row in conn.execute("SELECT version FROM schema_migrations").fetchall()
         }
-        for version, sql in MIGRATIONS:
+        for version, migration in MIGRATIONS:
             if version in applied:
                 continue
-            conn.executescript(sql)
+            if callable(migration):
+                migration(conn)
+            else:
+                conn.executescript(migration)
             conn.execute(
                 "INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)",
                 (version, _utcnow()),
@@ -140,9 +166,7 @@ def insert_business(conn: sqlite3.Connection, run_id: int, biz: dict) -> int:
         "run_id", "name", "vertical", "town", "postcode", "address", "website",
         "domain", "phone", "google_place_id", "rating", "review_count",
         "director_name", "companies_house_number", "is_group_owned",
-        "fb_ads_active", "fb_ads_creative_count", "fb_ads_earliest_seen",
-        "google_ads_active", "google_ads_creative_count", "google_ads_days_active",
-        "google_ads_advertiser_name", "priority", "priority_score", "created_at",
+        "priority", "priority_score", "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
     placeholders = ", ".join(["?"] * len(cols))
@@ -166,53 +190,6 @@ def insert_review(conn: sqlite3.Connection, business_id: int, review: dict) -> i
         ),
     )
     return int(cur.lastrowid)
-
-
-# --- Pending Apify run bookkeeping (async fallback for the 60s sync-poll
-# window — see prospector/apify_client.py) ------------------------------
-
-def get_pending_apify_runs(conn: sqlite3.Connection, run_id: int) -> list[dict]:
-    """All pending Apify run entries stashed against this run, each a dict
-    with at least {apify_run_id, kind ("fb"|"google"), business_id}, plus
-    `domain` for "google" entries."""
-    row = conn.execute("SELECT pending_apify_runs FROM runs WHERE id = ?", (run_id,)).fetchone()
-    if not row or not row["pending_apify_runs"]:
-        return []
-    return json.loads(row["pending_apify_runs"])
-
-
-def set_pending_apify_runs(conn: sqlite3.Connection, run_id: int, entries: list[dict]) -> None:
-    conn.execute(
-        "UPDATE runs SET pending_apify_runs = ? WHERE id = ?",
-        (json.dumps(entries), run_id),
-    )
-
-
-def add_pending_apify_run(conn: sqlite3.Connection, run_id: int, entry: dict) -> None:
-    entries = get_pending_apify_runs(conn, run_id)
-    entries.append(entry)
-    set_pending_apify_runs(conn, run_id, entries)
-
-
-def update_business_ad_fields(conn: sqlite3.Connection, business_id: int, fields: dict) -> None:
-    """Patch a subset of columns on a businesses row — used when a pending
-    Apify run is collected later and we learn the real ad-active values."""
-    if not fields:
-        return
-    cols = list(fields.keys())
-    set_clause = ", ".join(f"{c} = ?" for c in cols)
-    conn.execute(
-        f"UPDATE businesses SET {set_clause} WHERE id = ?",
-        [fields[c] for c in cols] + [business_id],
-    )
-
-
-def get_business_for_rescore(conn: sqlite3.Connection, business_id: int) -> sqlite3.Row | None:
-    return conn.execute(
-        "SELECT id, fb_ads_active, google_ads_active, is_group_owned, review_count "
-        "FROM businesses WHERE id = ?",
-        (business_id,),
-    ).fetchone()
 
 
 def has_pain_flagged_review(conn: sqlite3.Connection, business_id: int) -> bool:

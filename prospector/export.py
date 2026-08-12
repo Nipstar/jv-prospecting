@@ -20,9 +20,7 @@ BUSINESS_COLUMNS = [
     "id", "run_id", "name", "vertical", "town", "postcode", "address", "website",
     "domain", "phone", "google_place_id", "rating", "review_count",
     "director_name", "companies_house_number", "is_group_owned",
-    "fb_ads_active", "fb_ads_creative_count", "fb_ads_earliest_seen",
-    "google_ads_active", "google_ads_creative_count", "google_ads_days_active",
-    "google_ads_advertiser_name", "priority", "priority_score", "created_at",
+    "priority", "priority_score", "created_at",
 ]
 
 

@@ -3,13 +3,20 @@
 Local business prospecting pipeline for **Antek Automation**. Runs an
 interactive wizard, pulls data from Google Places (primary business
 discovery) with SerpAPI as an automatic fallback (also used for reviews),
-Companies House (ownership/PSC check), and Apify (Meta + Google ad spend
-signals), scores each business, and stores everything in SQLite with CSV
-export.
+Companies House (ownership/PSC check), scores each business, and stores
+everything in SQLite with CSV export.
+
+**Prospector v2 note:** the original ad-spend targeting model (score
+businesses by whether they run Meta/Google ads, via two Apify actors) was
+removed in Phase 1 of the "Prospector v2: UK High-Ticket Firms,
+Review-Based Targeting" rebuild. The new targeting model — UK high-ticket
+firms with weak review profiles — is being built out in later phases; this
+README reflects the current (Phase 1) state: ad-spend module gone,
+everything else intact.
 
 This is a standalone tool that lives alongside Andy's existing
 `geo-prospecting` project and **reuses its API keys** (Google Places,
-SerpAPI, Companies House, Apify) rather than requiring new ones — see
+SerpAPI, Companies House) rather than requiring new ones — see
 "Credentials" below. It does not modify or depend on `geo-prospecting`'s
 code, though `places_client.py` follows the same Google Places API (New)
 conventions already established there (see
@@ -19,7 +26,7 @@ conventions already established there (see
 
 1. **Wizard** (`prospector run`) asks for area, radius, trade sector(s),
    minimum review count/rating, max businesses per sector, an ownership
-   filter, an ad-qualification rule, and whether to dry-run.
+   filter, and whether to dry-run.
 2. **Discover** — Google Places API (New) Text Search per sector/area is
    tried first (`places_client.py`); if it raises (missing/invalid key, HTTP
    error, etc.) or returns 0 results, prospector logs a warning and falls
@@ -37,21 +44,15 @@ conventions already established there (see
    the business — see "Discovery source & fallback" below for why.
 5. **Ownership** — Companies House PSC/officer lookup, to filter out
    group/corporate-owned businesses (optional, on by default).
-6. **Ad spend** — Meta (Facebook Ads Library) and Google (Ads Transparency
-   Center) checks via two Apify actors, to find businesses already paying
-   for ads (i.e. already have marketing budget and buying intent). See
-   "Apify sync/async + NULL vs 0" below for how failures, empty results,
-   and slow runs are handled.
-7. **Score** — a plain weighted function (not ML) assigns Priority
+6. **Score** — a plain weighted function (not ML) assigns Priority
    A/B/C and a numeric score. See `prospector/scoring.py`.
-8. **Store** — everything lands in `prospector.db` (SQLite).
-9. **Export** (`prospector export --run-id N --format csv`) writes a sorted
+7. **Store** — everything lands in `prospector.db` (SQLite).
+8. **Export** (`prospector export --run-id N --format csv`) writes a sorted
    CSV to `./exports/`.
 
 A **dry run** stops after step 3 (discovery/filtering only) — no Companies
-House or Apify calls, no spend, no DB writes — so you can see roughly how
-many businesses would qualify and what Apify would cost before committing
-to a real run.
+House calls, no DB writes — so you can see roughly how many businesses
+would qualify before committing to a real run.
 
 ## Project layout
 
@@ -66,24 +67,22 @@ prospector/
   pyproject.toml          # deps + `prospector` console script
   requirements.txt        # same deps, plain pip form
   .env -> ../geo-prospecting/.env   # symlink, shares Andy's existing keys
-  .env.example             # documents the 4 keys this tool needs
+  .env.example             # documents the keys this tool needs
   prospector/
     __init__.py
     wizard.py                    # the interactive "series of asks"
     places_client.py              # Google Places API (New) discovery — PRIMARY
     serpapi_client.py             # Google Maps discovery (FALLBACK) + reviews (always)
     companies_house_client.py      # PSC/officer ownership lookup
-    apify_client.py                 # Meta + Google ad spend actors — sync/async
-                                      # polling + NULL-vs-0 policy (see below)
     scoring.py                       # priority scoring function
     db.py                             # SQLite schema + queries
     pipeline.py                        # orchestrates: discover -> filter ->
-                                         # reviews -> ownership -> ads -> score -> store
+                                         # reviews -> ownership -> score -> store
     trade_sectors.py                    # TRADE_SECTORS constant
-    cli.py                                # `prospector run` / `export` / `collect` / `list-runs` / `report`
+    cli.py                                # `prospector run` / `export` / `list-runs` / `report`
     # --- internal support modules, not part of Andy's named list ---
     http.py                               # shared retry/backoff wrapper
-    config.py                              # env vars, paths, pricing constants
+    config.py                              # env vars, paths
     pain.py                                 # pain keyword list + matcher
     export.py                                # CSV export
     report.py                                 # branded PDF report (ported from geo-slab)
@@ -91,6 +90,10 @@ exports/                    # CSV exports land here
 reports/                     # HTML + PDF reports land here
 prospector.db                # created on first run
 ```
+
+**Note:** `apify_client.py` (Meta + Google ad spend actors) was removed in
+Phase 1 of the Prospector v2 rebuild, along with the `collect` CLI command
+and the ad-spend scoring/columns. See git history for the removal commit.
 
 ## Setup
 
@@ -120,9 +123,12 @@ prospector --help
 
 `prospector/.env` is a **symlink** to
 `/data/workspaces/worker/geo-prospecting/.env`, so it automatically picks up
-the same `GOOGLE_PLACES_API_KEY`, `SERPAPI_KEY`, `COMPANIES_HOUSE_API_KEY`,
-and `APIFY_TOKEN` that geo-prospecting already uses — nothing to configure
-out of the box.
+the same `GOOGLE_PLACES_API_KEY`, `SERPAPI_KEY`, and
+`COMPANIES_HOUSE_API_KEY` that geo-prospecting already uses — nothing to
+configure out of the box. That shared `.env` may still contain
+`APIFY_TOKEN` (used by geo-prospecting), but prospector no longer reads or
+requires it since the ad-spend module was removed in Phase 1 of the
+Prospector v2 rebuild.
 
 `GOOGLE_PLACES_API_KEY` is required for the primary (Places) discovery
 path — Andy already pays for it, so it's the default. It's not *strictly*
@@ -134,8 +140,8 @@ fallback discovery source and the only reviews source.
 
 If you ever want prospector to use its own separate keys, delete the
 symlink and create a real `prospector/.env` file (see `.env.example` for
-the four variables it reads). Keys are always read from `.env` at runtime;
-none are hardcoded anywhere in the codebase.
+the variables it reads). Keys are always read from `.env` at runtime; none
+are hardcoded anywhere in the codebase.
 
 ## Discovery source & fallback
 
@@ -184,10 +190,6 @@ prospector list-runs
 prospector export --run-id 1 --format csv
 # writes ./exports/run_1_<timestamp>.csv
 
-# Collect any Apify runs that were still going after the 60s sync-poll
-# window during `prospector run` (see "Apify sync/async" below)
-prospector collect --run-id 1
-
 # Generate a branded PDF report (see "PDF reports" below)
 prospector report --run-id 1
 prospector report --business-id 7
@@ -201,17 +203,13 @@ prospector report --business-id 7
    free-text sectors)
 4. Minimum review count (default 10)
 5. Minimum rating (default 4.0)
-6. Max businesses per sector (default 25 — controls SerpAPI + Apify spend)
+6. Max businesses per sector (default 25 — controls SerpAPI spend)
 7. Ownership filter — exclude group/corporate-owned via Companies House
    (default Y)
-8. Ad qualification — Meta OR Google / Meta AND Google / no requirement
-   (default OR)
-9. Dry run? (default Y — SerpAPI discovery only, no Apify spend)
+8. Dry run? (default Y — discovery only, no Companies House calls)
 
 After the wizard it prints a cost estimate (SerpAPI + Companies House are
-free-tier/free; Apify estimate = `sectors x max_per_sector x ($0.00075 FB +
-$0.002 Google avg)`) and asks for a final confirmation before spending
-anything.
+free-tier/free) and asks for a final confirmation before spending anything.
 
 ## Trade sectors
 
@@ -221,64 +219,25 @@ services, other independents — 28 sectors) lives in
 `{name, category, ticket_size_estimate, google_search_term}`. Add new
 sectors there; the wizard picks them up automatically.
 
-## Apify sync/async polling + NULL vs 0
-
-`fb_ads_active` and `google_ads_active` are nullable ints, and the NULL vs
-0 distinction is meaningful and preserved end-to-end (schema ->
-`apify_client.py` -> `pipeline.py` -> `scoring.py` -> CSV export):
-
-- **NULL** = unknown / couldn't check (actor run failed, timed out, is
-  still running, or came back empty — see below).
-- **0** = checked, confirmed not active.
-- **1** = checked, confirmed active.
-
-Every Apify actor run is started asynchronously
-(`POST /v2/acts/{actor}/runs`) and polled via
-`GET /v2/actor-runs/{runId}` every 5s for up to 60s total (Apify's
-synchronous run-and-wait endpoints only guarantee ~45s, which isn't always
-enough). If a run is still going after 60s, prospector stops blocking: the
-Apify run id is stashed on the current run's `pending_apify_runs` JSON
-column (`runs` table) instead of failing or hanging the batch, and
-`prospector collect --run-id N` picks up the result later, updating the
-affected businesses' ad-active fields and re-scoring them.
-
-A run that outright fails (or a single-business Facebook check that comes
-back with 0 items) is set to NULL rather than 0 — these two actors are
-known to be flaky, and an empty result for one lookup is indistinguishable
-from "got blocked/rate-limited" without a second signal to check against.
-The batched Google check is the one place a real 0 gets written: if the
-batch as a whole succeeds with a non-empty result, any domain absent from
-it is a confirmed 0 (the actor demonstrably ran and had the chance to
-report on every domain in the batch); only a wholly empty/failed/pending
-batch falls back to NULL for every domain in it. See the docstring at the
-top of `prospector/apify_client.py` for the full policy and rationale.
-
-`prospector/scoring.py` treats NULL as "unknown — don't reward, don't
-penalize": only a channel confirmed `True`/`1` counts toward the
-ads-channel score; NULL contributes 0, same as a confirmed 0, since the
-scoring function never penalizes an inactive/unknown channel — it only
-ever rewards a confirmed-active one. The NULL vs 0 distinction still
-matters upstream in storage/export as a data-quality signal ("worth
-re-checking via `prospector collect`" vs "genuinely no ads"), it just
-doesn't change the score itself.
-
-The exported CSV shows NULL ad-active fields as a blank cell (Python's
-`csv` module writes `None` as empty), distinct from an explicit `0`.
-
 ## Scoring
 
 `prospector/scoring.py` — plain weighted function:
 
-- ads on both channels: +40, one channel: +20 (NULL/unknown channels don't
-  count as active — see "Apify sync/async polling + NULL vs 0" above)
 - pain-flagged review present: +25
 - independently owned (not group/corporate): +15
 - review count bonus: +1 per ~20 reviews, capped at +10
 
 Priority bands:
-- **A** — ads on both channels AND a pain-flagged review AND independent
-- **B** — ads on one channel AND (pain-flagged review OR independent)
+- **A** — a pain-flagged review AND independent
+- **B** — a pain-flagged review OR independent
 - **C** — everything else that survived the filters
+
+**Note (Prospector v2 Phase 1):** the old ad-spend scoring factors (ads on
+both/one channel via Meta + Google Apify checks, worth +40/+20) were
+removed along with the ad-spend module — see git history. This is Phase
+1's interim scoring, stripped of ads but not yet carrying the new
+review-weight model that later phases of the Prospector v2 rebuild will
+add (targeting weak review profiles rather than ad spend).
 
 ## PDF reports
 
@@ -321,20 +280,27 @@ playwright install chromium
 ## Database
 
 SQLite, `prospector.db`, three tables: `runs`, `businesses`, `reviews`.
-Schema in `prospector/db.py` matches the spec exactly, plus a
-`runs.pending_apify_runs` JSON column (added via a `schema_migrations`
-migration so it can be applied to a pre-existing database) for the
-Apify async-collection fallback described above. `db.init_db()` runs
-automatically on every CLI invocation and is idempotent (`CREATE TABLE IF
-NOT EXISTS` + `schema_migrations` for any future changes).
+`db.init_db()` runs automatically on every CLI invocation and is idempotent
+(`CREATE TABLE IF NOT EXISTS` + a `schema_migrations` table tracking
+applied migrations for any schema changes since the base schema).
+
+The Prospector v2 rebuild's Phase 1 migration (`schema_migrations` version
+2) dropped the ad-spend columns (`fb_ads_active`, `fb_ads_creative_count`,
+`fb_ads_earliest_seen`, `google_ads_active`, `google_ads_creative_count`,
+`google_ads_days_active`, `google_ads_advertiser_name`) from `businesses`
+and the `pending_apify_runs` JSON column from `runs` (both were part of the
+now-removed ad-spend module), via native `ALTER TABLE ... DROP COLUMN`
+(SQLite 3.35+; this environment runs 3.40.1). Existing rows and all other
+columns are preserved — this was a migration, not a destructive rewrite.
+`prospector.db` is backed up (`prospector.db.bak-<timestamp>`) before any
+migration that drops columns.
 
 ## Error handling
 
-Every external call (SerpAPI, Companies House, Apify) goes through
+Every external call (SerpAPI, Companies House) goes through
 `prospector/http.py`, which retries up to 2 times with exponential
 backoff on network errors, timeouts, 429s, and 5xx responses. A failure on
-one business/sector/Apify actor run is logged and skipped — set to NULL
-where it's an ad-active field, see above — rather than aborting the whole
+one business/sector is logged and skipped rather than aborting the whole
 run.
 
 ## Notes / limitations
@@ -345,7 +311,8 @@ run.
 - Companies House name-matching is best-effort (`search/companies?q=name`,
   top result). It fails open — if no confident match is found, the business
   is not excluded by the ownership filter.
-- Do **not** wire up any Checkatrade or Trustpilot Apify actor — both were
-  tested and found unreliable/broken as of Aug 2026. Stick to
-  `curious_coder/facebook-ads-library-scraper` and
-  `scrapesage/google-ads-transparency-scraper`.
+- The ad-spend module (Meta Facebook Ads Library + Google Ads Transparency
+  checks via Apify) was removed in Phase 1 of the "Prospector v2: UK
+  High-Ticket Firms, Review-Based Targeting" rebuild. The old targeting
+  model scored businesses by ad spend; the new model (later phases) targets
+  UK high-ticket firms with weak review profiles instead.

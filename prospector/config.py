@@ -24,7 +24,6 @@ REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 # --- Secrets (read from .env, never hardcoded) ------------------------------
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "")
 COMPANIES_HOUSE_API_KEY = os.getenv("COMPANIES_HOUSE_API_KEY", "")
-APIFY_TOKEN = os.getenv("APIFY_TOKEN", "")
 # Google Places API (New) — primary business-discovery source. SerpAPI is
 # kept as an automatic fallback (see pipeline.py) so discovery still works
 # if this key is unset/invalid or Places errors/returns 0 results. Shared
@@ -35,21 +34,13 @@ GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
 # --- API endpoints -----------------------------------------------------------
 SERPAPI_BASE_URL = "https://serpapi.com/search"
 COMPANIES_HOUSE_BASE_URL = "https://api.company-information.service.gov.uk"
-APIFY_BASE_URL = "https://api.apify.com/v2"
 # Official Places API (New) — Text Search endpoint (not the legacy
 # maps.googleapis.com/maps/api/place API).
 GOOGLE_PLACES_BASE_URL = "https://places.googleapis.com/v1/places:searchText"
 
-APIFY_ACTOR_FB_ADS = "curious_coder/facebook-ads-library-scraper"
-APIFY_ACTOR_GOOGLE_ADS = "scrapesage/google-ads-transparency-scraper"
-
 # --- Retry / backoff ----------------------------------------------------------
 MAX_RETRIES = 2
 BACKOFF_BASE_SECONDS = 1.5
-
-# --- Apify pricing estimate (per spec) ---------------------------------------
-APIFY_COST_PER_FB_RUN = 0.00075
-APIFY_COST_PER_GOOGLE_RUN = 0.002  # avg for ~10 ads
 
 # --- Google search geo defaults -----------------------------------------------
 GOOGLE_DOMAIN = "google.co.uk"
@@ -64,6 +55,4 @@ def missing_keys() -> list[str]:
         missing.append("SERPAPI_KEY")
     if not COMPANIES_HOUSE_API_KEY:
         missing.append("COMPANIES_HOUSE_API_KEY")
-    if not APIFY_TOKEN:
-        missing.append("APIFY_TOKEN")
     return missing
