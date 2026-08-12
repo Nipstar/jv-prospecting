@@ -20,6 +20,17 @@ command groups that sit alongside the original `prospector run` /
 pipeline and it still works). See "Prospector v2: discovery, reviews,
 site signals, targets" below for the new workflow.
 
+**Phase 6 note:** a standing exclusion rule was added after Phase 2
+testing surfaced a gap — "Mildmay Veterinary Hospital" (a CVS Group plc
+sibling practice) was discovered and scored as if independent, because
+Companies House name-search false-positive-matched it to an unrelated
+company with no PSC records. `prospector` now flags corporate/franchise/
+chain businesses (`is_chain`) via a combination of known-brand
+keyword/domain matching, Companies House ownership data, and
+multi-location detection, and excludes them from `prospector targets
+list`/`export` by default (never deletes data — `--include-chains`
+overrides). See "Chain / franchise / corporate exclusion" below.
+
 This is a standalone tool that lives alongside Andy's existing
 `geo-prospecting` project and **reuses its API keys** (Google Places,
 SerpAPI, Companies House) rather than requiring new ones — see
@@ -338,10 +349,84 @@ prospector reviews list --min-score 50
 prospector site fetch --run-id 9
 
 # 4. Targets — combined sort (review_target_score desc, opportunity_score
-#    desc tiebreak) + CSV export.
+#    desc tiebreak) + CSV export. Excludes is_chain=1 businesses by default
+#    (see "Chain / franchise / corporate exclusion" below) — pass
+#    --include-chains to see/export them anyway.
 prospector targets list --min-score 50
 prospector targets export exports/targets.csv
+prospector targets list --min-score 50 --include-chains
 ```
+
+### Chain / franchise / corporate exclusion
+
+**Standing rule, added post-rebuild:** Andy's pitch (AI call answering +
+review generation) targets owner-operators who feel a missed call
+personally — not corporate entities with dedicated marketing/reception
+teams. `prospector` now flags **corporate, franchise, or chain businesses**
+(`businesses.is_chain`) and excludes them from `prospector targets
+list`/`export`'s default view. Nothing is deleted — flagged businesses stay
+in the DB with a `chain_reason` audit trail; pass `--include-chains` to
+`targets list`/`targets export` to see/export them anyway (e.g. to sanity
+check why something got flagged).
+
+This was prompted by a live discovery test that caught "Mildmay Veterinary
+Hospital" — a CVS Group plc sibling practice — sliding through as an
+apparently-independent target: it scored `established_flag=1` (incorporated
+1985) and had no `is_group_owned` signal, because Companies House
+name-search false-positive-matched it to an unrelated London hospice
+charity ("MILDMAY HOSPITAL LTD", zero PSC records) rather than the vet
+practice's real (and not name-matchable) corporate structure. Verified live
+against the real Companies House API while building this fix — see
+`prospector/chain_signals.py`'s module docstring for the full trace.
+
+Three signals feed `is_chain`, most to least reliable (`chain_reason`
+records exactly which fired):
+
+1. **Known chain/franchise brand name or domain match** (primary signal) —
+   `prospector/chain_signals.py`, config-only (no code changes needed to
+   add a brand): `CHAIN_BRAND_NAMES_BY_VERTICAL` (per-vertical UK chain
+   lists — e.g. vets: CVS Group, IVC Evidensia, Linnaeus, Medivet,
+   Vets4Pets; dental: mydentist, Bupa Dental Care, Portman Dental Care,
+   Rodericks Dental; estate agents: Purplebricks, Foxtons, Connells,
+   haart, Hunters; similar lists for solicitors/conveyancers, accountants,
+   heating/plumbing/electrical, roofing/damp/driveways, funeral directors,
+   garage/window/conservatory installers — see the file for full lists),
+   `GENERIC_CHAIN_BRAND_NAMES` (cross-vertical corporate groups, e.g.
+   Rentokil, Anglian Home Improvements, HomeServe), and
+   `CHAIN_DOMAIN_PATTERNS` (chain-owned web properties, e.g.
+   `cvsvets.com` — this is what actually catches Mildmay, since CVS Group
+   routes every sibling practice's site through its own domain even though
+   the Google-listed business name stays the pre-acquisition local trading
+   name). Matching is case-insensitive substring, scoped to the
+   business's own vertical plus the generic list — deliberately **not**
+   every vertical's list combined, since some brand strings (e.g.
+   "hunters") are short enough to false-positive against an unrelated
+   vertical (caught in testing: "Hunters Brook" kitchen fitters wrongly
+   matched the estate-agents-only "hunters" entry before this was scoped).
+2. **Companies House ownership** — reuses the pre-Phase-1 ad-spend model's
+   `is_group_owned` concept (`companies_house_client.py`'s PSC/officer
+   check, still in the codebase; `discovery/places.py`'s
+   `enrich_companies_house()` now also runs it, using the same matched
+   company_number as the incorporation-date lookup rather than a second
+   name search). Flags when a Companies House PSC is a corporate entity
+   rather than an individual. Secondary/supporting signal only — as the
+   Mildmay case shows, CH name-search can miss real chain ownership
+   entirely; it can in principle also mismatch to an unrelated
+   same-named company.
+3. **Multi-location** — the same `domain` or `companies_house_number`
+   already appears on another discovered business (any run, any
+   vertical). Extends the existing place_id/phone/domain dedupe
+   (`db.py`, Phase 2) rather than duplicating it
+   (`count_businesses_sharing_domain` / `count_businesses_sharing_company_number`);
+   free, no extra API calls. When a new discovery reveals an
+   earlier-discovered business is also part of the same chain, both ends
+   get retroactively flagged (`mark_chain_by_domain` /
+   `mark_chain_by_company_number`).
+
+`prospector chain rescan` recomputes `is_chain`/`chain_reason` for every
+business already in the DB using only already-stored data (no new API
+calls) — run once after upgrading to backfill businesses discovered before
+this feature existed.
 
 ### Verticals config
 
@@ -441,7 +526,7 @@ columns are preserved — this was a migration, not a destructive rewrite.
 `prospector.db` is backed up (`prospector.db.bak-<timestamp>`) before any
 migration that drops columns.
 
-Migrations v3-v6 (Prospector v2 Phases 2-5) are all additive (`ALTER
+Migrations v3-v7 (Prospector v2 Phases 2-6) are all additive (`ALTER
 TABLE ... ADD COLUMN`, nullable/defaulted) — no columns dropped, no rows
 touched:
 - **v3** (Phase 2): `businesses.incorporation_date`, `company_status`,
@@ -453,10 +538,17 @@ touched:
   `opportunity_score`, `site_checked_at`.
 - **v6** (Phase 5): `businesses.tps_checked` (compliance placeholder, see
   "Compliance — PECR / TPS screening" above).
+- **v7** (Phase 6): `businesses.is_chain`, `chain_reason` (chain/franchise/
+  corporate exclusion, see "Chain / franchise / corporate exclusion"
+  above).
 
 `prospector.db` was backed up (`prospector.db.bak-<timestamp>-phase2`)
-before v3-v6 were first applied. All 8 pre-existing runs / 291 businesses
-/ 2302 reviews were verified intact before and after.
+before v3-v6 were first applied, and again
+(`prospector.db.bak-<timestamp>-phase6`) before v7. All 8 pre-existing
+runs / 291 businesses / 2302 reviews (grown to 295 businesses / 2322
+reviews / 9 runs by the time v7 ran, after Phase 2-5 testing added a
+9th run of 4 test vets in Winchester) were verified intact before and
+after every migration.
 
 ## Error handling
 

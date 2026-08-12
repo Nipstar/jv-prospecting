@@ -143,6 +143,19 @@ _V6_ADD_BUSINESS_COLUMNS = [
     ("tps_checked", "INTEGER DEFAULT 0"),
 ]
 
+# v7 — Chain/franchise/corporate exclusion rule (post-rebuild standing
+# request): flags businesses matching a known chain brand/domain, a
+# corporate-entity Companies House PSC, or a multi-location domain/company
+# number match (see prospector/chain_signals.py). Additive/nullable, same
+# safe pattern as v3-v6 — no columns dropped, no rows touched.
+# chain_reason is a free-text, semicolon-joined audit trail of *why* a
+# business was flagged, so Andy can inspect (not silently lose) excluded
+# businesses via `--include-chains`.
+_V7_ADD_BUSINESS_COLUMNS = [
+    ("is_chain", "INTEGER DEFAULT 0"),
+    ("chain_reason", "TEXT"),
+]
+
 
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
@@ -168,6 +181,10 @@ def _migration_v6_tps_placeholder(conn: sqlite3.Connection) -> None:
     _add_columns_if_missing(conn, "businesses", _V6_ADD_BUSINESS_COLUMNS)
 
 
+def _migration_v7_chain_flag(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V7_ADD_BUSINESS_COLUMNS)
+
+
 MIGRATIONS: list[tuple[int, "str | object"]] = [
     (1, "ALTER TABLE runs ADD COLUMN pending_apify_runs TEXT DEFAULT '[]';"),
     (2, _migration_v2_drop_ad_columns),
@@ -175,6 +192,7 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (4, _migration_v4_review_scoring),
     (5, _migration_v5_site_signals),
     (6, _migration_v6_tps_placeholder),
+    (7, _migration_v7_chain_flag),
 ]
 
 
@@ -239,6 +257,7 @@ def insert_business(conn: sqlite3.Connection, run_id: int, biz: dict) -> int:
         "run_id", "name", "vertical", "town", "postcode", "address", "website",
         "domain", "phone", "google_place_id", "rating", "review_count",
         "director_name", "companies_house_number", "is_group_owned",
+        "is_chain", "chain_reason",
         "priority", "priority_score", "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
@@ -297,6 +316,7 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
         "domain", "phone", "google_place_id", "rating", "review_count",
         "director_name", "companies_house_number", "is_group_owned",
         "incorporation_date", "company_status", "established_flag",
+        "is_chain", "chain_reason",
         "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
@@ -306,6 +326,83 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
         values,
     )
     return int(cur.lastrowid)
+
+
+def count_businesses_sharing_domain(conn: sqlite3.Connection, domain: str | None, exclude_id: int | None = None) -> int:
+    """How many *other* businesses already in the DB share this domain —
+    the chain-signals "multi-location" check (prospector/chain_signals.py).
+    Extends the existing place_id/phone/domain dedupe (db.py, Phase 2)
+    rather than duplicating its matching logic; NULL/empty domains never
+    match (avoids every no-website business falsely "sharing" a NULL)."""
+    if not domain:
+        return 0
+    query = "SELECT COUNT(*) FROM businesses WHERE domain = ?"
+    params: list = [domain.lower()]
+    if exclude_id is not None:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    return int(conn.execute(query, params).fetchone()[0])
+
+
+def count_businesses_sharing_company_number(conn: sqlite3.Connection, company_number: str | None, exclude_id: int | None = None) -> int:
+    """How many *other* businesses already in the DB share this Companies
+    House company number — same idea as count_businesses_sharing_domain,
+    for firms that reuse one legal entity across branches even when each
+    branch has its own website/domain."""
+    if not company_number:
+        return 0
+    query = "SELECT COUNT(*) FROM businesses WHERE companies_house_number = ?"
+    params: list = [company_number]
+    if exclude_id is not None:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    return int(conn.execute(query, params).fetchone()[0])
+
+
+def mark_chain_by_domain(conn: sqlite3.Connection, domain: str | None, reason: str, exclude_id: int | None = None) -> int:
+    """Retroactively flag existing businesses sharing `domain` as
+    is_chain=1 (appending `reason` to any existing chain_reason) — used
+    when a *newly* discovered business reveals that an earlier-discovered
+    sibling business is also part of the same chain, so both ends of a
+    multi-location match get flagged, not just whichever was discovered
+    second."""
+    if not domain:
+        return 0
+    query = "SELECT id, chain_reason FROM businesses WHERE domain = ?"
+    params: list = [domain.lower()]
+    if exclude_id is not None:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    rows = conn.execute(query, params).fetchall()
+    for row in rows:
+        _append_chain_reason(conn, row["id"], row["chain_reason"], reason)
+    return len(rows)
+
+
+def mark_chain_by_company_number(conn: sqlite3.Connection, company_number: str | None, reason: str, exclude_id: int | None = None) -> int:
+    """Companies-House-number counterpart to mark_chain_by_domain."""
+    if not company_number:
+        return 0
+    query = "SELECT id, chain_reason FROM businesses WHERE companies_house_number = ?"
+    params: list = [company_number]
+    if exclude_id is not None:
+        query += " AND id != ?"
+        params.append(exclude_id)
+    rows = conn.execute(query, params).fetchall()
+    for row in rows:
+        _append_chain_reason(conn, row["id"], row["chain_reason"], reason)
+    return len(rows)
+
+
+def _append_chain_reason(conn: sqlite3.Connection, business_id: int, existing_reason: str | None, new_reason: str) -> None:
+    if existing_reason and new_reason in existing_reason:
+        conn.execute("UPDATE businesses SET is_chain = 1 WHERE id = ?", (business_id,))
+        return
+    combined = f"{existing_reason}; {new_reason}" if existing_reason else new_reason
+    conn.execute(
+        "UPDATE businesses SET is_chain = 1, chain_reason = ? WHERE id = ?",
+        (combined, business_id),
+    )
 
 
 def insert_review(conn: sqlite3.Connection, business_id: int, review: dict) -> int:

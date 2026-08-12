@@ -7,6 +7,7 @@ from pathlib import Path
 
 import click
 
+from prospector import chain_signals
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.discovery.places import discover_run, import_csv
@@ -125,7 +126,7 @@ def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool
         result = discover_run(conn, vertical, location, max_results=max_results, do_ch=not no_ch)
 
     click.echo(f"Run #{result.run_id}: {result.vertical} in {result.location}")
-    click.echo(f"  found={result.found}  deduped_skipped={result.deduped_skipped}  inserted={result.inserted}")
+    click.echo(f"  found={result.found}  deduped_skipped={result.deduped_skipped}  inserted={result.inserted}  chain_flagged={result.chain_flagged}")
 
 
 @discover.command(name="import")
@@ -140,9 +141,10 @@ def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool) -> None:
     total_found = sum(r.found for r in results)
     total_inserted = sum(r.inserted for r in results)
     total_deduped = sum(r.deduped_skipped for r in results)
+    total_chain = sum(r.chain_flagged for r in results)
     for r in results:
-        click.echo(f"Run #{r.run_id}: {r.vertical} in {r.location} — found={r.found} deduped={r.deduped_skipped} inserted={r.inserted}")
-    click.echo(f"\nTotal: {len(results)} rows, found={total_found}, deduped_skipped={total_deduped}, inserted={total_inserted}")
+        click.echo(f"Run #{r.run_id}: {r.vertical} in {r.location} — found={r.found} deduped={r.deduped_skipped} inserted={r.inserted} chain_flagged={r.chain_flagged}")
+    click.echo(f"\nTotal: {len(results)} rows, found={total_found}, deduped_skipped={total_deduped}, inserted={total_inserted}, chain_flagged={total_chain}")
 
 
 @cli.group()
@@ -229,6 +231,22 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
 
 
 @cli.group()
+def chain() -> None:
+    """Chain/franchise/corporate exclusion rule (prospector/chain_signals.py)."""
+
+
+@chain.command(name="rescan")
+def chain_rescan_cmd() -> None:
+    """Recompute is_chain/chain_reason for every business already in the
+    DB, using only already-stored data (no new API calls) — run this once
+    after upgrading to backfill businesses discovered before this feature
+    existed."""
+    with get_conn() as conn:
+        flagged = chain_signals.rescan_existing(conn)
+    click.echo(f"Rescan complete — {flagged} businesses now flagged is_chain=1.")
+
+
+@cli.group()
 def targets() -> None:
     """Prospector v2 combined targeting (Phase 5) — review_target_score
     (primary) + opportunity_score (tiebreak) sorted list/export."""
@@ -237,18 +255,24 @@ def targets() -> None:
 @targets.command(name="list")
 @click.option("--min-score", "min_score", type=int, default=0, help="Only show businesses with review_target_score >= this.")
 @click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
-def targets_list_cmd(min_score: int, run_id: int | None) -> None:
-    """List targets sorted review_target_score desc, opportunity_score desc tiebreak."""
+@click.option("--include-chains", "include_chains", is_flag=True, default=False, help="Include businesses flagged is_chain=1 (corporate/franchise/chain — excluded by default, see README 'Chain/franchise exclusion').")
+def targets_list_cmd(min_score: int, run_id: int | None, include_chains: bool) -> None:
+    """List targets sorted review_target_score desc, opportunity_score desc tiebreak.
+
+    Excludes businesses flagged is_chain=1 (corporate/franchise/chain) by
+    default — pass --include-chains to see them anyway.
+    """
     with get_conn() as conn:
-        rows = list_targets(conn, min_score=min_score, run_id=run_id)
+        rows = list_targets(conn, min_score=min_score, run_id=run_id, include_chains=include_chains)
     if not rows:
         click.echo("No targets match. Run `discover run` -> `reviews fetch` -> `site fetch` first.")
         return
     for row in rows:
+        chain_tag = " [CHAIN]" if row["is_chain"] else ""
         click.echo(
             f"#{row['id']} {row['name']} | {row['vertical']} | {row['town']} | {row['phone']} | "
             f"reviews={row['review_count']} rating={row['rating']} | "
-            f"review_target_score={row['review_target_score']} opportunity_score={row['opportunity_score']}"
+            f"review_target_score={row['review_target_score']} opportunity_score={row['opportunity_score']}{chain_tag}"
         )
 
 
@@ -256,10 +280,16 @@ def targets_list_cmd(min_score: int, run_id: int | None) -> None:
 @click.argument("csv_path", type=click.Path(path_type=Path), required=False, default=None)
 @click.option("--min-score", "min_score", type=int, default=0, help="Only export businesses with review_target_score >= this.")
 @click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
-def targets_export_cmd(csv_path: Path | None, min_score: int, run_id: int | None) -> None:
-    """Export targets to CSV (default ./exports/targets_<timestamp>.csv)."""
+@click.option("--include-chains", "include_chains", is_flag=True, default=False, help="Include businesses flagged is_chain=1 (corporate/franchise/chain — excluded by default, see README 'Chain/franchise exclusion').")
+def targets_export_cmd(csv_path: Path | None, min_score: int, run_id: int | None, include_chains: bool) -> None:
+    """Export targets to CSV (default ./exports/targets_<timestamp>.csv).
+
+    Excludes businesses flagged is_chain=1 (corporate/franchise/chain) by
+    default — pass --include-chains to include them (e.g. to audit why
+    something got flagged, via the chain_reason column).
+    """
     with get_conn() as conn:
-        path = export_targets_csv(conn, out_path=csv_path, min_score=min_score, run_id=run_id)
+        path = export_targets_csv(conn, out_path=csv_path, min_score=min_score, run_id=run_id, include_chains=include_chains)
     click.echo(f"Exported targets to {path}")
 
 

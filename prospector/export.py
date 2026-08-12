@@ -20,6 +20,7 @@ BUSINESS_COLUMNS = [
     "id", "run_id", "name", "vertical", "town", "postcode", "address", "website",
     "domain", "phone", "google_place_id", "rating", "review_count",
     "director_name", "companies_house_number", "is_group_owned",
+    "is_chain", "chain_reason",
     "priority", "priority_score", "created_at",
 ]
 

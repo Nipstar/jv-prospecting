@@ -72,3 +72,17 @@ def resolve_search_term(vertical: str) -> tuple[str, str]:
         if info["name"].lower() == lowered:
             return info["name"], info["google_search_term"]
     return key, key
+
+
+def slug_for_label(vertical_label: str) -> str | None:
+    """Reverse lookup: VERTICALS display name -> slug, used by
+    chain_signals.py to pick the vertical-specific known-chain-brand list
+    (businesses.vertical stores the label, not the slug). Returns None for
+    freeform/custom verticals not in the seed list — callers should fall
+    back to the generic (cross-vertical) chain brand list in that case.
+    """
+    lowered = vertical_label.strip().lower()
+    for slug, info in VERTICALS.items():
+        if info["name"].lower() == lowered:
+            return slug
+    return None

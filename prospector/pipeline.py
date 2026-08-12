@@ -17,11 +17,13 @@ from dataclasses import dataclass, field
 from rich.console import Console
 from rich.table import Table
 
-from prospector import companies_house_client, places_client, serpapi_client
+from prospector import chain_signals, companies_house_client, places_client, serpapi_client
 from prospector.db import (
     create_run,
     insert_business,
     insert_review,
+    mark_chain_by_company_number,
+    mark_chain_by_domain,
 )
 from prospector.http import ApiError
 from prospector.pain import has_pain_signal
@@ -159,9 +161,16 @@ def run_pipeline(conn: sqlite3.Connection, cfg: RunConfig) -> RunResult:
         biz["priority_score"] = score
         result.priority_counts[priority] += 1
 
+        is_chain, chain_reason = chain_signals.detect_chain(conn, biz)
+        biz["is_chain"] = int(is_chain)
+        biz["chain_reason"] = chain_reason
+
         business_id = insert_business(conn, run_id, biz)
         for r in biz.get("_reviews", []):
             insert_review(conn, business_id, r)
+        if is_chain:
+            mark_chain_by_domain(conn, biz.get("domain"), chain_reason, exclude_id=business_id)
+            mark_chain_by_company_number(conn, biz.get("companies_house_number"), chain_reason, exclude_id=business_id)
 
     return result
 

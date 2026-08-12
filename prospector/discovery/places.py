@@ -27,6 +27,29 @@ same-named different company).
 
 established_flag = 1 if incorporation_date is 3+ years before today —
 Andy's "more to lose" heuristic for established firms.
+
+This same enrichment step also runs the PSC/officer ownership check
+(companies_house_client.get_psc — the pre-Phase-1 ad-spend model's
+`is_group_owned` concept, still present in companies_house_client.py, now
+reused for the chain-exclusion rule; see prospector/chain_signals.py) using
+the *same* matched company_number, rather than a second name search.
+
+Chain/franchise/corporate exclusion (standing rule)
+-----------------------------------------------------
+After Companies House enrichment, every discovered business is run through
+prospector.chain_signals.detect_chain() — known chain/franchise brand
+name/domain match (primary signal; catches cases Companies House
+name-search misses, e.g. "Mildmay Veterinary Hospital" was a CVS Group
+sibling practice whose website is on CVS's own cvsvets.com domain but whose
+CH name-search false-positive-matched an unrelated London hospice charity
+with zero PSC records), `is_group_owned` from the PSC check above
+(secondary signal), and a multi-location check (same domain/company number
+already seen on another discovered business — extends the existing
+place_id/phone/domain dedupe below rather than duplicating it). Matches set
+`is_chain=1` + a human-readable `chain_reason`; businesses are NOT dropped
+from the pipeline (Andy wants to inspect what got excluded, not lose the
+data) — `prospector targets list`/`export` filter them out of the default
+view instead (see targets.py), with `--include-chains` to see them anyway.
 """
 from __future__ import annotations
 
@@ -36,12 +59,14 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
 
-from prospector import companies_house_client, places_client
+from prospector import chain_signals, companies_house_client, places_client
 from prospector.db import (
     create_run,
     find_business_by_phone_or_domain,
     find_business_by_place_id,
     insert_discovered_business,
+    mark_chain_by_company_number,
+    mark_chain_by_domain,
 )
 from prospector.http import ApiError
 from prospector.verticals import resolve_search_term
@@ -73,15 +98,23 @@ def enrich_companies_house(business_name: str) -> dict:
     """Best-effort Companies House enrichment for one business name.
 
     Returns {company_number, incorporation_date, company_status,
-    established_flag} — all None/0 if no confident (non-dissolved) match is
-    found. Fails open (never raises) — a Companies House hiccup shouldn't
-    block discovery.
+    established_flag, is_group_owned, director_name} — all None/0/False if
+    no confident (non-dissolved) match is found. Fails open (never
+    raises) — a Companies House hiccup shouldn't block discovery.
+
+    is_group_owned/director_name reuse the pre-Phase-1 ad-spend model's PSC
+    ownership-check logic (companies_house_client.get_psc/get_officers,
+    originally wired via check_ownership() for a second name-search — here
+    reusing the *same* matched company_number from the incorporation-date
+    lookup above instead of searching twice).
     """
     result = {
         "companies_house_number": None,
         "incorporation_date": None,
         "company_status": None,
         "established_flag": 0,
+        "is_group_owned": False,
+        "director_name": None,
     }
     try:
         match = companies_house_client.search_company(business_name)
@@ -115,11 +148,32 @@ def enrich_companies_house(business_name: str) -> dict:
         except ValueError:
             pass
 
+    is_group_owned = False
+    try:
+        pscs = companies_house_client.get_psc(company_number)
+        is_group_owned = any((p.get("kind") or "").startswith("corporate-entity") for p in pscs)
+    except ApiError:
+        pass
+
+    director_name = None
+    try:
+        for officer in companies_house_client.get_officers(company_number):
+            if officer.get("resigned_on"):
+                continue
+            role = (officer.get("officer_role") or "").lower()
+            if role in ("director", "llp-member") and officer.get("name"):
+                director_name = officer["name"]
+                break
+    except ApiError:
+        pass
+
     result.update({
         "companies_house_number": company_number,
         "incorporation_date": incorporation_date,
         "company_status": status,
         "established_flag": established,
+        "is_group_owned": is_group_owned,
+        "director_name": director_name,
     })
     return result
 
@@ -132,6 +186,7 @@ class DiscoverResult:
     found: int = 0
     deduped_skipped: int = 0
     inserted: int = 0
+    chain_flagged: int = 0
     inserted_ids: list[int] = field(default_factory=list)
 
 
@@ -174,11 +229,24 @@ def discover_run(conn, vertical: str, location: str, max_results: int = 20, do_c
                 "incorporation_date": None,
                 "company_status": None,
                 "established_flag": 0,
+                "is_group_owned": False,
+                "director_name": None,
             })
+
+        is_chain, chain_reason = chain_signals.detect_chain(conn, biz)
+        biz["is_chain"] = int(is_chain)
+        biz["chain_reason"] = chain_reason
 
         business_id = insert_discovered_business(conn, run_id, biz)
         result.inserted += 1
         result.inserted_ids.append(business_id)
+        if is_chain:
+            result.chain_flagged += 1
+            # Retroactively flag any earlier-discovered sibling business
+            # that shares this domain/company number too — see module
+            # docstring ("multi-location" signal).
+            mark_chain_by_domain(conn, biz.get("domain"), chain_reason, exclude_id=business_id)
+            mark_chain_by_company_number(conn, biz.get("companies_house_number"), chain_reason, exclude_id=business_id)
 
     return result
 
