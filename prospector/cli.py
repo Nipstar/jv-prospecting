@@ -11,6 +11,7 @@ from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.discovery.places import discover_run, import_csv
 from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
+from prospector.enrichers.site import fetch_all as fetch_all_site_signals
 from prospector.export import export_run_csv
 from prospector.pipeline import print_summary, run_pipeline
 from prospector.report import generate_business_report, generate_run_report
@@ -195,6 +196,34 @@ def reviews_list_cmd(min_score: int) -> None:
         click.echo(
             f"#{row['id']} {row['name']} ({row['vertical']}, {row['town']}) — "
             f"score={row['review_target_score']} rating={row['rating']} reviews={row['review_count']}{flag_str}"
+        )
+
+
+@cli.group()
+def site() -> None:
+    """Prospector v2 website signal module (Phase 4) — lightweight homepage/
+    contact-page fetch for booking/chat-widget and phone-dependency signals."""
+
+
+@site.command(name="fetch")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+@click.option("--business-id", "business_id", type=int, default=None, help="Limit to one business.")
+@click.option("--refresh", "refresh", is_flag=True, default=False, help="Re-fetch even businesses already checked.")
+@click.option("--limit", "limit", type=int, default=None, help="Cap how many businesses to fetch this invocation (polite default: no cap, but useful for small test batches).")
+def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, limit: int | None) -> None:
+    """Fetch website signals (booking/chat widgets, phone-dependency) for businesses with a website."""
+    with get_conn() as conn:
+        results = fetch_all_site_signals(conn, run_id=run_id, business_id=business_id, refresh=refresh, limit=limit)
+
+    if not results:
+        click.echo("No businesses to fetch (already checked, or none with a website — run `discover run` first).")
+        return
+    for r in results:
+        status = "fetched" if r.fetched else "UNREACHABLE/NO WEBSITE"
+        click.echo(
+            f"#{r.business_id} {r.name}: {status}  no_booking={r.no_booking}  no_chat={r.no_chat}  "
+            f"phone_dependent={r.phone_dependent}  opportunity_score={r.opportunity_score}"
+            + (f"  email={r.email}" if r.email else "")
         )
 
 
