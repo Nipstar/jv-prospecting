@@ -23,7 +23,7 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
-from prospector.http import ApiError, post
+from prospector.http import ApiError, get, post
 from prospector.config import GOOGLE_PLACES_API_KEY, GOOGLE_PLACES_BASE_URL
 
 # Same rough radius labels as serpapi_client.RADIUS_MILES — kept here for
@@ -115,6 +115,64 @@ def discover_businesses(sector_term: str, area: str, radius_label: str, max_resu
         body = {**body, "pageToken": token}
 
     return results[:max_results]
+
+
+_DETAILS_FIELD_MASK = (
+    "id,displayName,rating,userRatingCount,websiteUri,businessStatus,"
+    "regularOpeningHours,reviews"
+)
+
+
+def get_place_details(place_id: str) -> dict[str, Any]:
+    """Google Places API (New) Place Details fetch — used by
+    enrichers/reviews.py (Phase 3) for review-profile scoring.
+
+    Distinct from fetch_reviews() below: this uses the Details endpoint
+    (`places.googleapis.com/v1/places/{place_id}`), which is what actually
+    returns per-place review snippets (capped at 5 by Google — see Phase 3
+    docs), rating, userRatingCount, websiteUri, and regularOpeningHours (used
+    for the weak_gbp "unclaimed-looking profile" heuristic). This is a
+    different, additive use case from fetch_reviews()'s NotImplementedError
+    below, which is specifically about *not* using Places as the reviews
+    source for the legacy pain-flag pipeline (which needs ~20 reviews, not
+    5) — Phase 3's review_target_score is a different, new feature that
+    explicitly wants Places' 5-review snippet set, caveat documented and
+    accepted (see enrichers/reviews.py module docstring).
+
+    Returns a dict with keys: rating, user_ratings_total, website, has_hours,
+    business_status, reviews (list of {rating, text, publish_time}).
+    Raises ApiError on failure — callers should catch and treat as "no
+    listing found" per the weak_gbp heuristic.
+    """
+    if not GOOGLE_PLACES_API_KEY:
+        raise ApiError("GOOGLE_PLACES_API_KEY is not set — check .env")
+
+    url = f"https://places.googleapis.com/v1/places/{place_id}"
+    headers = {
+        "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+        "X-Goog-FieldMask": _DETAILS_FIELD_MASK,
+    }
+    resp = get(url, headers=headers)
+    if resp.status_code != 200:
+        raise ApiError(f"Google Places details failed: HTTP {resp.status_code}: {resp.text[:300]}")
+    data = resp.json()
+
+    reviews = []
+    for r in (data.get("reviews") or []):
+        reviews.append({
+            "rating": r.get("rating"),
+            "text": (r.get("text") or {}).get("text"),
+            "publish_time": r.get("publishTime"),
+        })
+
+    return {
+        "rating": data.get("rating"),
+        "user_ratings_total": data.get("userRatingCount"),
+        "website": data.get("websiteUri"),
+        "has_hours": bool(data.get("regularOpeningHours")),
+        "business_status": data.get("businessStatus"),
+        "reviews": reviews,
+    }
 
 
 def fetch_reviews(place_id: str, limit: int = 20) -> list[dict[str, Any]]:

@@ -10,6 +10,7 @@ import click
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.discovery.places import discover_run, import_csv
+from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
 from prospector.export import export_run_csv
 from prospector.pipeline import print_summary, run_pipeline
 from prospector.report import generate_business_report, generate_run_report
@@ -140,6 +141,61 @@ def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool) -> None:
     for r in results:
         click.echo(f"Run #{r.run_id}: {r.vertical} in {r.location} — found={r.found} deduped={r.deduped_skipped} inserted={r.inserted}")
     click.echo(f"\nTotal: {len(results)} rows, found={total_found}, deduped_skipped={total_deduped}, inserted={total_inserted}")
+
+
+@cli.group()
+def reviews() -> None:
+    """Prospector v2 review profile module (Phase 3) — Google Places
+    review-snippet fetch + review_target_score."""
+
+
+@reviews.command(name="fetch")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+@click.option("--business-id", "business_id", type=int, default=None, help="Limit to one business.")
+@click.option("--refresh", "refresh", is_flag=True, default=False, help="Re-fetch even businesses already scored.")
+def reviews_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool) -> None:
+    """Fetch review profile + score for businesses with a google_place_id."""
+    with get_conn() as conn:
+        results = fetch_and_score_reviews(conn, run_id=run_id, business_id=business_id, refresh=refresh)
+
+    if not results:
+        click.echo("No businesses to fetch (already scored, or none with a google_place_id — run `discover run` first).")
+        return
+    for r in results:
+        listing = "listing found" if r.found_listing else "NO LISTING"
+        click.echo(
+            f"#{r.business_id} {r.name}: {listing}  rating={r.avg_rating}  reviews={r.review_count}  "
+            f"score={r.review_target_score}  weak_gbp={r.weak_gbp}  "
+            f"has_negative_recent={r.has_negative_recent}  missed_call_evidence={r.missed_call_evidence}"
+        )
+
+
+@reviews.command(name="list")
+@click.option("--min-score", "min_score", type=int, default=0, help="Only show businesses with review_target_score >= this.")
+def reviews_list_cmd(min_score: int) -> None:
+    """List scored businesses, sorted review_target_score descending."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT id, name, vertical, town, rating, review_count, review_target_score, "
+            "weak_gbp, missed_call_evidence FROM businesses "
+            "WHERE review_target_score IS NOT NULL AND review_target_score >= ? "
+            "ORDER BY review_target_score DESC",
+            (min_score,),
+        ).fetchall()
+    if not rows:
+        click.echo("No scored businesses match. Run `prospector reviews fetch` first.")
+        return
+    for row in rows:
+        flags = []
+        if row["weak_gbp"]:
+            flags.append("weak_gbp")
+        if row["missed_call_evidence"]:
+            flags.append("missed_call_evidence")
+        flag_str = f" [{', '.join(flags)}]" if flags else ""
+        click.echo(
+            f"#{row['id']} {row['name']} ({row['vertical']}, {row['town']}) — "
+            f"score={row['review_target_score']} rating={row['rating']} reviews={row['review_count']}{flag_str}"
+        )
 
 
 if __name__ == "__main__":

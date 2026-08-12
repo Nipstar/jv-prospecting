@@ -310,17 +310,50 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
 
 def insert_review(conn: sqlite3.Connection, business_id: int, review: dict) -> int:
     cur = conn.execute(
-        "INSERT INTO reviews (business_id, rating, text, review_date, pain_flag) "
-        "VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO reviews (business_id, rating, text, review_date, pain_flag, review_keyword_match) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
         (
             business_id,
             review.get("rating"),
             review.get("text"),
             review.get("review_date"),
             1 if review.get("pain_flag") else 0,
+            1 if review.get("review_keyword_match") else 0,
         ),
     )
     return int(cur.lastrowid)
+
+
+def update_business_fields(conn: sqlite3.Connection, business_id: int, fields: dict) -> None:
+    """Generic partial-update helper, used by enrichers/reviews.py (Phase 3)
+    and enrichers/site.py (Phase 4) to write their scoring columns without
+    each needing its own bespoke UPDATE statement."""
+    if not fields:
+        return
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    conn.execute(
+        f"UPDATE businesses SET {set_clause} WHERE id = ?",
+        [*fields.values(), business_id],
+    )
+
+
+def businesses_needing_review_fetch(
+    conn: sqlite3.Connection, run_id: int | None = None, business_id: int | None = None, refresh: bool = False
+) -> list[sqlite3.Row]:
+    """Businesses with a google_place_id, optionally filtered to one run or
+    one business, that haven't had reviews_fetched_at set yet (unless
+    refresh=True, which re-fetches everything matching the filter)."""
+    query = "SELECT * FROM businesses WHERE google_place_id IS NOT NULL"
+    params: list = []
+    if run_id is not None:
+        query += " AND run_id = ?"
+        params.append(run_id)
+    if business_id is not None:
+        query += " AND id = ?"
+        params.append(business_id)
+    if not refresh:
+        query += " AND reviews_fetched_at IS NULL"
+    return conn.execute(query, params).fetchall()
 
 
 def has_pain_flagged_review(conn: sqlite3.Connection, business_id: int) -> bool:
