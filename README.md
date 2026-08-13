@@ -294,14 +294,20 @@ layout since geo-slab's template is built around 0-100 GEO audit scores that
 don't apply here.
 
 ```bash
-# One PDF per run: priority-tier counts, then a card per qualified
-# business (name, address, priority tier + score, ad signals, ownership,
-# top pain-flagged review quote, contact info) — sorted priority A->C then
-# score, same order as the CSV export.
-prospector report --run-id 1
+# One PDF per run: target-count stats, then a card per targetable business
+# (name/vertical/location, review_target_score + opportunity_score, which
+# signals fired for each score, director/company details, top pain-flagged
+# review quote, contact info) — sorted review_target_score desc,
+# opportunity_score desc tiebreak, same order as `targets export`.
+# Excludes is_chain=1 by default (same as `targets list`/`export`).
+prospector report --run-id 11
 # optional: --limit N (default 25) caps how many businesses are shown
+# optional: --include-chains includes is_chain=1 businesses (flagged CHAIN/FRANCHISE)
 
-# One-page sales-readiness snapshot for a single business.
+# One-page sales-readiness snapshot for a single business (works for any
+# business id, including chain-flagged ones — shown with a chain-reason
+# note in the contact block rather than being excluded, since you asked
+# for it by id).
 prospector report --business-id 7
 ```
 
@@ -309,6 +315,18 @@ Both write an `.html` and a `.pdf` to `./reports/` (created automatically),
 named `PROSPECTOR-RUN-<id>-<area>.pdf` / `PROSPECTOR-BIZ-<id>-<name>.pdf`.
 The HTML is kept alongside the PDF for a quick eyeball in a browser without
 regenerating.
+
+**v2 note:** this report was originally built around the pre-v2 `priority`
+(A/B/C) + `priority_score` model from the legacy `prospector run` wizard.
+Businesses discovered via `prospector discover run` (Phase 2 onwards) never
+populate those columns, so against v2 data the old report silently rendered
+every card as "PRIORITY C / SCORE 0" with a 0/0/0/0 stat grid — no error,
+just meaningless output (confirmed live against run #11 before this was
+fixed). `prospector/report.py` now reads `review_target_score` /
+`opportunity_score` / the weak_gbp/has_negative_recent/missed_call_evidence/
+no_booking/no_chat/phone_dependent flags / `director_name` / `is_chain`
+directly, matching `targets.py`'s sort and chain-exclusion behaviour — see
+the module docstring for the full history.
 
 **Setup**: `prospector report` needs Playwright's Chromium browser, which
 is a separate download from the `playwright` pip package:

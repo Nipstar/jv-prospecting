@@ -66,9 +66,10 @@ def export(run_id: int, fmt: str) -> None:
 @cli.command()
 @click.option("--run-id", "run_id", type=int, default=None, help="Run id to report on (whole-run snapshot).")
 @click.option("--business-id", "business_id", type=int, default=None, help="Single business id (one-page sales snapshot).")
-@click.option("--limit", "limit", type=int, default=25, help="Max businesses to include in a run report (default 25, sorted priority then score). Ignored for --business-id.")
-def report(run_id: int | None, business_id: int | None, limit: int) -> None:
-    """Generate a branded PDF report — either a run-wide top-prospects
+@click.option("--limit", "limit", type=int, default=25, help="Max businesses to include in a run report (default 25, sorted review_target_score desc, opportunity_score desc tiebreak). Ignored for --business-id.")
+@click.option("--include-chains", "include_chains", is_flag=True, default=False, help="Include businesses flagged is_chain=1 in a run report (excluded by default, same as `targets list`/`export` — see README 'Chain/franchise exclusion'). Ignored for --business-id.")
+def report(run_id: int | None, business_id: int | None, limit: int, include_chains: bool) -> None:
+    """Generate a branded PDF report — either a run-wide top-targets
     snapshot (--run-id) or a single-business sales-readiness one-pager
     (--business-id). Requires `playwright install chromium` once."""
     if bool(run_id) == bool(business_id):
@@ -76,7 +77,7 @@ def report(run_id: int | None, business_id: int | None, limit: int) -> None:
 
     with get_conn() as conn:
         if run_id:
-            html_path, pdf_path = generate_run_report(conn, run_id, limit=limit)
+            html_path, pdf_path = generate_run_report(conn, run_id, limit=limit, include_chains=include_chains)
         else:
             html_path, pdf_path = generate_business_report(conn, business_id)
 

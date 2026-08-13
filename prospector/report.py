@@ -14,13 +14,29 @@ Borrows the rendering approach and brand system built for geo-slab
 geo-slab's template is GEO-audit-shaped (0-100 scores, AI citability, etc.)
 which doesn't map onto prospector's data. This module ports the *mechanism*
 (HTML template -> Playwright -> PDF, same fonts/palette/card language) and
-defines two prospector-specific layouts:
+defines two prospector-specific layouts, rebuilt for the Prospector v2
+dual-score model (see prospector/targets.py):
 
-  - Run report: one-page-per-N "top prospects" snapshot for a whole run —
-    priority mix, then a card per business (name/address/priority/score/
-    ownership/review pain signal/top pain quote/contact).
+  - Run report: one-page-per-N "top targets" snapshot for a whole run —
+    target-count stats, then a card per business (name/vertical/location,
+    review_target_score + opportunity_score, which signals fired for each
+    score, director/company details, top pain-flagged review quote,
+    contact info). Sorted review_target_score desc, opportunity_score desc
+    tiebreak, same order as `prospector targets export`. Excludes
+    is_chain=1 businesses by default, same as `targets list`/`export` —
+    pass --include-chains to include them (flagged with a CHAIN tag).
   - Business report: a single-business one-page sales-readiness snapshot,
     for when you want to hand one prospect's findings to a rep.
+
+NOTE (history): this module originally rendered the pre-v2 model
+(`priority` A/B/C + `priority_score`, populated only by the legacy
+`prospector run` wizard pipeline). Businesses discovered via `prospector
+discover run` (Phase 2 onwards) never populate those columns, so against
+v2 data every card silently rendered "PRIORITY C / SCORE 0" and the header
+stat grid showed 0/0/0/0 — no error, just meaningless output. Confirmed
+live against run #11 (Hampshire HVAC) before this rewrite. Rebuilt below
+to read review_target_score/opportunity_score/flags/is_chain/director_name
+directly, matching targets.py's sort and chain-exclusion behaviour.
 """
 from __future__ import annotations
 
@@ -33,13 +49,34 @@ from pathlib import Path
 
 from prospector.config import REPORTS_DIR
 
-PRIORITY_ORDER = {"A": 0, "B": 1, "C": 2}
+# review_target_score contributing signals (enrichers/reviews.py) — label,
+# row-column, and short description shown when the flag is on.
+REVIEW_SIGNAL_TAGS: list[tuple[str, str]] = [
+    ("weak_gbp", "Weak/unclaimed listing"),
+    ("has_negative_recent", "Recent low-star review"),
+    ("missed_call_evidence", "Missed-call evidence in reviews"),
+]
 
-PRIORITY_LABEL = {
-    "A": "Priority A — pain signal and independently owned",
-    "B": "Priority B — pain signal or independently owned",
-    "C": "Priority C — qualified, lower urgency",
-}
+# opportunity_score contributing signals (enrichers/site.py).
+OPPORTUNITY_SIGNAL_TAGS: list[tuple[str, str]] = [
+    ("no_booking", "No booking widget"),
+    ("no_chat", "No live chat"),
+    ("phone_dependent", "Phone-dependent contact page"),
+]
+
+
+def _review_count_tier(review_count: int | None) -> str:
+    """Informational label for which review_target_score review-count band
+    a business falls in — see scoring_config.REVIEW_COUNT_BANDS. Purely
+    descriptive for the report; not a stored flag."""
+    count = review_count or 0
+    if count < 20:
+        return f"{count} reviews (low volume, +40)"
+    if count <= 50:
+        return f"{count} reviews (20-50 band, +20)"
+    if count <= 100:
+        return f"{count} reviews (51-100 band, +10)"
+    return f"{count} reviews (100+, +0)"
 
 
 # ── Brand system (ported from geo-slab/scripts/generate_prospect_report.py) ──
@@ -341,9 +378,10 @@ def _tag(label: str, on: bool) -> str:
     return f'<span class="{cls}">{escape(label)}</span>'
 
 
-def _ownership_pain_tags(row: sqlite3.Row, has_pain: bool) -> str:
+def _chain_ownership_tags(row: sqlite3.Row, has_pain: bool) -> str:
     tags = [
-        _tag("Independent" if not row["is_group_owned"] else "Group-owned", not row["is_group_owned"]),
+        _tag("CHAIN/FRANCHISE" if row["is_chain"] else "Independent", not row["is_chain"]),
+        _tag("Group-owned" if row["is_group_owned"] else "Standalone entity", not row["is_group_owned"]),
         _tag("Pain-flagged review" if has_pain else "No pain-flagged review", has_pain),
     ]
     return "\n".join(tags)
@@ -360,35 +398,52 @@ def _top_pain_review(conn: sqlite3.Connection, business_id: int) -> str:
     return text[:280] + ("..." if len(text) > 280 else "")
 
 
-# ── Data fetch ───────────────────────────────────────────────────────────────
+# ── Data fetch (Prospector v2: review_target_score / opportunity_score) ─────
 
-def fetch_run_data(conn: sqlite3.Connection, run_id: int, limit: int | None = None) -> dict:
+_ORDER_SQL = "ORDER BY review_target_score DESC, opportunity_score DESC"
+
+
+def fetch_run_data(conn: sqlite3.Connection, run_id: int, limit: int | None = None,
+                    include_chains: bool = False) -> dict:
+    """Same targeting query/sort as prospector/targets.py::list_targets —
+    review_target_score DESC, opportunity_score DESC tiebreak, is_chain=1
+    excluded by default. `limit` caps how many cards render (report is a
+    "top N" snapshot); the stat grid always reflects the full matching set,
+    not just the shown slice."""
     run = conn.execute(
         "SELECT id, created_at, area, trade_sectors, notes FROM runs WHERE id = ?", (run_id,)
     ).fetchone()
     if not run:
         raise SystemExit(f"No run found with id={run_id}.")
 
-    rows = conn.execute(
-        "SELECT * FROM businesses WHERE run_id = ?", (run_id,)
-    ).fetchall()
+    query = "SELECT * FROM businesses WHERE run_id = ? AND review_target_score IS NOT NULL"
+    params: list = [run_id]
+    if not include_chains:
+        query += " AND (is_chain IS NULL OR is_chain = 0)"
+    query += f" {_ORDER_SQL}"
+    rows = conn.execute(query, params).fetchall()
     if not rows:
-        raise SystemExit(f"No businesses found for run_id={run_id}. Nothing to report.")
+        raise SystemExit(
+            f"No scored, targetable businesses found for run_id={run_id}. "
+            "Run `prospector reviews fetch --run-id " + str(run_id) + "` (and "
+            "`site fetch`) first, or pass --include-chains if everything got "
+            "chain-flagged."
+        )
 
-    def sort_key(row: sqlite3.Row):
-        return (PRIORITY_ORDER.get(row["priority"], 99), -(row["priority_score"] or 0))
+    total = len(rows)
+    shown_rows = rows[:limit] if limit else rows
 
-    rows = sorted(rows, key=sort_key)
-    if limit:
-        rows = rows[:limit]
-
-    counts = {"A": 0, "B": 0, "C": 0}
-    for row in conn.execute("SELECT priority FROM businesses WHERE run_id = ?", (run_id,)).fetchall():
-        if row["priority"] in counts:
-            counts[row["priority"]] += 1
+    weak_gbp_n = sum(1 for r in rows if r["weak_gbp"])
+    missed_call_n = sum(1 for r in rows if r["missed_call_evidence"])
+    avg_review_score = round(sum(r["review_target_score"] or 0 for r in rows) / total)
+    chain_excluded_n = 0
+    if not include_chains:
+        chain_excluded_n = conn.execute(
+            "SELECT COUNT(*) FROM businesses WHERE run_id = ? AND is_chain = 1", (run_id,)
+        ).fetchone()[0]
 
     businesses = []
-    for row in rows:
+    for row in shown_rows:
         businesses.append({
             "row": row,
             "top_pain_review": _top_pain_review(conn, row["id"]),
@@ -400,8 +455,12 @@ def fetch_run_data(conn: sqlite3.Connection, run_id: int, limit: int | None = No
         "trade_sectors": run["trade_sectors"],
         "created_at": run["created_at"],
         "notes": run["notes"],
-        "counts": counts,
-        "total": sum(counts.values()),
+        "total": total,
+        "avg_review_score": avg_review_score,
+        "weak_gbp_n": weak_gbp_n,
+        "missed_call_n": missed_call_n,
+        "chain_excluded_n": chain_excluded_n,
+        "include_chains": include_chains,
         "businesses": businesses,
     }
 
@@ -420,12 +479,13 @@ def fetch_business_data(conn: sqlite3.Connection, business_id: int) -> dict:
 
 def _biz_card(entry: dict) -> str:
     row = entry["row"]
-    priority = row["priority"] or "C"
-    cls = " priority-a" if priority == "A" else ""
+    review_score = row["review_target_score"] or 0
+    opportunity_score = row["opportunity_score"] or 0
+    cls = " priority-a" if review_score >= 40 else ""
     name = escape(row["name"] or "Unnamed business")
-    score = row["priority_score"] or 0
     addr_bits = [b for b in [row["address"], row["town"], row["postcode"]] if b]
     address = escape(", ".join(addr_bits)) if addr_bits else ""
+
     meta_bits = []
     if row["rating"]:
         meta_bits.append(f'<span>{row["rating"]}★ ({row["review_count"] or 0} reviews)</span>')
@@ -433,9 +493,24 @@ def _biz_card(entry: dict) -> str:
         meta_bits.append(f'<span>{escape(row["phone"])}</span>')
     if row["website"]:
         meta_bits.append(f'<span>{escape(row["website"])}</span>')
-    if row["director_name"]:
-        meta_bits.append(f'<span>Director: {escape(row["director_name"])}</span>')
     meta = "".join(meta_bits)
+
+    detail_bits = []
+    if row["director_name"]:
+        detail_bits.append(f'<span>Director: {escape(row["director_name"])}</span>')
+    if row["companies_house_number"]:
+        detail_bits.append(f'<span>Co. no. {escape(row["companies_house_number"])}</span>')
+    if row["incorporation_date"]:
+        detail_bits.append(f'<span>Incorporated {escape(row["incorporation_date"])}</span>')
+    details = "".join(detail_bits)
+
+    review_tags = "\n".join(
+        _tag(label, bool(row[col])) for col, label in REVIEW_SIGNAL_TAGS
+    )
+    opportunity_tags = "\n".join(
+        _tag(label, bool(row[col])) for col, label in OPPORTUNITY_SIGNAL_TAGS
+    )
+    chain_tag = _tag("CHAIN/FRANCHISE", True) if row["is_chain"] else ""
 
     quote = ""
     if entry["top_pain_review"]:
@@ -448,13 +523,19 @@ def _biz_card(entry: dict) -> str:
         <div class="biz-card{cls}">
             <div class="biz-card-top">
                 <div class="biz-name">{name}{f' &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">{escape(row["vertical"])}</span>' if row["vertical"] else ''}</div>
-                <div class="biz-score">SCORE {score}</div>
+                <div class="biz-score">REVIEW {review_score} &middot; OPPORTUNITY {opportunity_score}</div>
             </div>
             <div class="biz-meta">{meta}</div>
             <div class="tag-row">
-                <span class="tag priority">PRIORITY {escape(priority)}</span>
-                {_ownership_pain_tags(row, bool(entry["top_pain_review"]))}
+                <span class="tag priority">REVIEW SIGNALS ({_review_count_tier(row["review_count"])})</span>
+                {review_tags}
             </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                {opportunity_tags}
+                {chain_tag}
+            </div>
+            {f'<div class="biz-meta" style="margin-top:2px">{details}</div>' if details else ''}
             {f'<div class="biz-meta" style="margin-top:2px">{address}</div>' if address else ''}
             {quote}
         </div>"""
@@ -463,7 +544,6 @@ def _biz_card(entry: dict) -> str:
 def render_run_report(data: dict) -> str:
     area = escape(data["area"] or "Unspecified area")
     date = _fmt_date()
-    counts = data["counts"]
     total = data["total"]
     shown = len(data["businesses"])
 
@@ -478,11 +558,17 @@ def render_run_report(data: dict) -> str:
 
     cards = "\n".join(_biz_card(e) for e in data["businesses"])
 
+    chain_note = (
+        f" ({data['chain_excluded_n']} chain/franchise businesses excluded — pass --include-chains to see them)"
+        if not data["include_chains"] and data["chain_excluded_n"]
+        else ""
+    )
     subtitle = (
-        f"{total} qualified businesses across {sectors_str}. "
-        f"Showing top {shown} sorted by priority tier, then score."
+        f"{total} targets across {sectors_str}{chain_note}. "
+        f"Showing top {shown} sorted by review_target_score desc, opportunity_score desc tiebreak."
         if shown < total else
-        f"{total} qualified businesses across {sectors_str}, sorted by priority tier, then score."
+        f"{total} targets across {sectors_str}{chain_note}, sorted by review_target_score desc, "
+        f"opportunity_score desc tiebreak."
     )
 
     body = f"""\
@@ -494,31 +580,31 @@ def render_run_report(data: dict) -> str:
 
     <section class="hero">
         <span class="eyebrow">Sales-readiness snapshot</span>
-        <h1>Top prospects &mdash; {area}</h1>
+        <h1>Top targets &mdash; {area}</h1>
         <p class="sub">{subtitle}</p>
     </section>
 
     <div class="stat-grid">
         <div class="stat-cell priority-a">
-            <span class="stat-label">Priority A</span>
-            <div class="stat-num">{counts['A']}</div>
-        </div>
-        <div class="stat-cell">
-            <span class="stat-label">Priority B</span>
-            <div class="stat-num">{counts['B']}</div>
-        </div>
-        <div class="stat-cell">
-            <span class="stat-label">Priority C</span>
-            <div class="stat-num">{counts['C']}</div>
-        </div>
-        <div class="stat-cell">
-            <span class="stat-label">Total qualified</span>
+            <span class="stat-label">Total targets</span>
             <div class="stat-num">{total}</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">{data['avg_review_score']}</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">{data['weak_gbp_n']}</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">{data['missed_call_n']}</div>
         </div>
     </div>
 
     <section class="section">
-        <span class="section-label">Ranked prospect list</span>
+        <span class="section-label">Ranked target list</span>
         <h2>who to call first</h2>
         <div>
 {cards}
@@ -541,8 +627,8 @@ def render_run_report(data: dict) -> str:
 def render_business_report(entry: dict) -> str:
     row = entry["row"]
     name = escape(row["name"] or "Unnamed business")
-    priority = row["priority"] or "C"
-    score = row["priority_score"] or 0
+    review_score = row["review_target_score"] or 0
+    opportunity_score = row["opportunity_score"] or 0
     date = _fmt_date()
 
     head = BRAND_HEAD.format(title=f"Prospector Snapshot — {row['name'] or 'Business'}")
@@ -559,16 +645,17 @@ def render_business_report(entry: dict) -> str:
         </div>"""
 
     has_pain = bool(entry["top_pain_review"])
-    pain_val = "Pain-flagged review found" if has_pain else "No pain-flagged review"
 
     rating_val = f'{row["rating"]}★ ({row["review_count"] or 0} reviews)' if row["rating"] else "Not captured"
 
-    ownership_val = "Group / corporate owned" if row["is_group_owned"] else "Independently owned"
-
     signal_grid = "\n".join([
         signal_cell("Reviews", rating_val, False),
-        signal_cell("Review pain signal", pain_val, has_pain),
-        signal_cell("Ownership", ownership_val, not row["is_group_owned"]),
+    ] + [
+        signal_cell(label, "Yes" if row[col] else "No", bool(row[col]))
+        for col, label in REVIEW_SIGNAL_TAGS
+    ] + [
+        signal_cell(label, "Yes" if row[col] else "No", bool(row[col]))
+        for col, label in OPPORTUNITY_SIGNAL_TAGS
     ])
 
     quote_block = ""
@@ -586,13 +673,22 @@ def render_business_report(entry: dict) -> str:
     contact_rows = []
     if row["phone"]:
         contact_rows.append(f'<div class="contact-row"><strong>Phone</strong>{escape(row["phone"])}</div>')
+    if row["email"]:
+        contact_rows.append(f'<div class="contact-row"><strong>Email</strong>{escape(row["email"])}</div>')
     if row["website"]:
         contact_rows.append(f'<div class="contact-row"><strong>Website</strong>{escape(row["website"])}</div>')
     if row["director_name"]:
         contact_rows.append(f'<div class="contact-row"><strong>Director</strong>{escape(row["director_name"])}</div>')
     if row["companies_house_number"]:
-        contact_rows.append(f'<div class="contact-row"><strong>Companies House</strong>{escape(row["companies_house_number"])}</div>')
+        contact_rows.append(f'<div class="contact-row"><strong>Companies House</strong>{escape(row["companies_house_number"])}'
+                             f'{" &mdash; incorporated " + escape(row["incorporation_date"]) if row["incorporation_date"] else ""}</div>')
+    if row["is_chain"]:
+        contact_rows.append(f'<div class="contact-row"><strong>Chain flag</strong>{escape(row["chain_reason"] or "Flagged chain/franchise/corporate — excluded from targets by default")}</div>')
     contact_html = "\n".join(contact_rows) or '<div class="contact-row">No contact details captured.</div>'
+
+    eyebrow = "Review-target + opportunity snapshot"
+    if row["is_chain"]:
+        eyebrow = "CHAIN/FRANCHISE — normally excluded from targets"
 
     body = f"""\
 <body>
@@ -603,11 +699,13 @@ def render_business_report(entry: dict) -> str:
 
     <section class="score-hero">
         <div>
-            <span class="score-big">{score}</span>
-            <span class="score-denom">priority score</span>
+            <span class="score-big" style="font-size:64px;">{review_score}<span class="score-denom" style="font-size:16px;">/100</span></span>
+            <span class="score-denom" style="display:block;margin-top:2px;">review target score</span>
+            <span class="score-big" style="font-size:40px;margin-top:14px;display:block;color:var(--charcoal);opacity:.55;">{opportunity_score}<span class="score-denom" style="font-size:14px;">/100</span></span>
+            <span class="score-denom" style="display:block;">opportunity score</span>
         </div>
         <div>
-            <span class="eyebrow">{escape(PRIORITY_LABEL.get(priority, 'Priority ' + priority))}</span>
+            <span class="eyebrow">{escape(eyebrow)}</span>
             <h1 style="font-family:'Outfit',sans-serif;font-weight:900;font-size:32px;line-height:1.05;margin-bottom:10px;">{name}</h1>
             <p style="font-size:14px;opacity:.75;max-width:520px;">{address}{' &middot; ' + escape(row['vertical']) if row['vertical'] else ''}</p>
         </div>
@@ -676,11 +774,11 @@ def _safe_slug(text: str) -> str:
 
 
 def generate_run_report(conn: sqlite3.Connection, run_id: int, limit: int | None = None,
-                         output_dir: Path | None = None) -> tuple[Path, Path]:
+                         output_dir: Path | None = None, include_chains: bool = False) -> tuple[Path, Path]:
     output_dir = output_dir or REPORTS_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    data = fetch_run_data(conn, run_id, limit=limit)
+    data = fetch_run_data(conn, run_id, limit=limit, include_chains=include_chains)
     html = render_run_report(data)
 
     area_slug = _safe_slug(data["area"] or "run")
