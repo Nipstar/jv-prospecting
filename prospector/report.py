@@ -351,6 +351,40 @@ BRAND_HEAD = """\
             break-inside: avoid;
             page-break-inside: avoid;
         }}
+        .download-bar {{
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }}
+        .download-btn {{
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        .download-btn:hover {{ background: var(--cream); }}
+        .download-btn.secondary {{ background: var(--cream); color: var(--charcoal); }}
+        .index-link-bar {{
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }}
+        .index-link-bar a {{ color: var(--coral); text-decoration: none; font-weight: 700; }}
+        .index-link-bar a:hover {{ text-decoration: underline; }}
         .footer-brand {{
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
@@ -541,7 +575,17 @@ def _biz_card(entry: dict) -> str:
         </div>"""
 
 
-def render_run_report(data: dict) -> str:
+def render_run_report(
+    data: dict,
+    download_links: dict[str, str] | None = None,
+    index_href: str | None = None,
+) -> str:
+    """Render the run report HTML. `download_links` (e.g.
+    {"pdf": "PROSPECTOR-RUN-11-Hampshire.pdf", "csv": "run_11_....csv"})
+    adds a download bar under the header — used for the live Cloudflare
+    Pages page (prospector/deploy.py); left None for the PDF-source HTML
+    (unchanged print output). `index_href` adds a "back to all reports"
+    link, also only used on the live page."""
     area = escape(data["area"] or "Unspecified area")
     date = _fmt_date()
     total = data["total"]
@@ -571,12 +615,27 @@ def render_run_report(data: dict) -> str:
         f"opportunity_score desc tiebreak."
     )
 
+    download_bar = ""
+    if download_links:
+        btns = []
+        if download_links.get("pdf"):
+            btns.append(f'<a class="download-btn" href="{escape(download_links["pdf"])}" download>&#8595; Download PDF</a>')
+        if download_links.get("csv"):
+            btns.append(f'<a class="download-btn secondary" href="{escape(download_links["csv"])}" download>&#8595; Download CSV</a>')
+        download_bar = f'<div class="download-bar">{"".join(btns)}</div>'
+
+    index_bar = ""
+    if index_href:
+        index_bar = f'<div class="index-link-bar"><a href="{escape(index_href)}">&larr; All Prospector reports</a></div>'
+
     body = f"""\
 <body>
     <header class="site-header">
         <div class="header-brand">Antek Automation — Prospector</div>
         <div class="header-meta">Run #{data['run_id']} &mdash; {date}</div>
     </header>
+    {index_bar}
+    {download_bar}
 
     <section class="hero">
         <span class="eyebrow">Sales-readiness snapshot</span>

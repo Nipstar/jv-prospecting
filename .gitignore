@@ -15,3 +15,8 @@ reports/*.pdf
 !exports/runs/
 !exports/runs/*
 prospector.db.bak-*
+
+# Cloudflare Pages deploy build output (prospector/deploy.py) — rebuilt
+# fresh from reports/runs/ + exports/runs/ on every `prospector deploy`.
+.pages_dist/
+.wrangler/

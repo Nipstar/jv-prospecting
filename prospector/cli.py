@@ -68,7 +68,8 @@ def export(run_id: int, fmt: str) -> None:
 @click.option("--business-id", "business_id", type=int, default=None, help="Single business id (one-page sales snapshot).")
 @click.option("--limit", "limit", type=int, default=25, help="Max businesses to include in a run report (default 25, sorted review_target_score desc, opportunity_score desc tiebreak). Ignored for --business-id.")
 @click.option("--include-chains", "include_chains", is_flag=True, default=False, help="Include businesses flagged is_chain=1 in a run report (excluded by default, same as `targets list`/`export` — see README 'Chain/franchise exclusion'). Ignored for --business-id.")
-def report(run_id: int | None, business_id: int | None, limit: int, include_chains: bool) -> None:
+@click.option("--deploy", "do_deploy", is_flag=True, default=False, help="Also push a live HTML version of this run's report (+ the full reports index) to Cloudflare Pages. Run-report only, ignored for --business-id.")
+def report(run_id: int | None, business_id: int | None, limit: int, include_chains: bool, do_deploy: bool) -> None:
     """Generate a branded PDF report — either a run-wide top-targets
     snapshot (--run-id) or a single-business sales-readiness one-pager
     (--business-id). Requires `playwright install chromium` once."""
@@ -84,6 +85,32 @@ def report(run_id: int | None, business_id: int | None, limit: int, include_chai
     size_kb = round(pdf_path.stat().st_size / 1024)
     click.echo(f"Report written to: {html_path}")
     click.echo(f"PDF written to: {pdf_path} ({size_kb} KB)")
+
+    if do_deploy:
+        if not run_id:
+            raise click.UsageError("--deploy only applies to --run-id reports.")
+        from prospector.deploy import deploy_run
+        with get_conn() as conn:
+            result = deploy_run(conn, run_id, force_regenerate=True)
+        click.echo(f"Deployed to Cloudflare Pages: {result['run_url']}")
+        click.echo(f"Reports index: {result['index_url']}")
+
+
+@cli.command()
+@click.option("--run-id", "run_id", type=int, required=True, help="Run id to deploy a live report for.")
+@click.option("--force", "force_regenerate", is_flag=True, default=False, help="Re-render this run's PDF/HTML even if reports/runs/ already has one.")
+def deploy(run_id: int, force_regenerate: bool) -> None:
+    """Build (if needed) and deploy this run's report — plus every other
+    run's already-generated report and the master index — to Cloudflare
+    Pages. Equivalent to `prospector report --run-id N --deploy` but
+    doesn't re-render the PDF unless --force is passed or reports/runs/
+    doesn't have one yet."""
+    from prospector.deploy import deploy_run
+    with get_conn() as conn:
+        result = deploy_run(conn, run_id, force_regenerate=force_regenerate)
+    click.echo(f"Deployed to Cloudflare Pages: {result['run_url']}")
+    click.echo(f"Reports index: {result['index_url']}")
+    click.echo(f"Runs on site: {result['run_ids']}")
 
 
 @cli.command(name="list-runs")

@@ -335,6 +335,64 @@ is a separate download from the `playwright` pip package:
 playwright install chromium
 ```
 
+## Live reports (Cloudflare Pages)
+
+Every run's report can also go live as a branded HTML page — same design
+as the PDF, viewable in a browser, with same-origin download buttons for
+that run's PDF and CSV — plus a master index of every run ever generated.
+Both are pushed to Cloudflare Pages by `prospector/deploy.py`, reusing the
+credentials/pattern already set up for geo-prospecting's `antek-claim`
+Pages site (`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` in `.env`,
+`npx wrangler pages deploy`, no global install needed).
+
+```bash
+# Generate the PDF/CSV for a run AND deploy it (+ the whole site, index
+# included) in one step — the "standard output at the end of a run":
+prospector report --run-id 11 --deploy
+
+# Or deploy without regenerating the PDF (fast — reuses whatever's already
+# in reports/runs/ + exports/runs/ for this run and every other run):
+prospector deploy --run-id 11
+# --force re-renders this run's PDF/HTML even if one already exists
+```
+
+Live site: **https://jv-prospecting-reports.pages.dev**
+(`/` = master index of every run; `/runs/<id>/` = that run's live report,
+with `PROSPECTOR-RUN-<id>-<area>.pdf` and `run_<id>_<timestamp>.csv`
+co-located alongside it for the download buttons).
+
+**How it works** (`prospector/deploy.py`):
+- Rebuilds the *entire* site into `.pages_dist/` on every deploy — Cloudflare
+  Pages has no incremental deploy, so each run's page must be reconstructed
+  from files already tracked in `reports/runs/` + `exports/runs/`, not just
+  the run you're currently deploying, or older runs would vanish from the
+  live index.
+- `discover_deployable_run_ids()` scans `reports/runs/PROSPECTOR-RUN-*.pdf`
+  for every run_id that already has a report, intersected with the `runs`
+  table.
+- Per run, it tries a live re-render from the DB (`fetch_run_data` +
+  `render_run_report`, freshest data, exact same template as the PDF). If a
+  run's businesses no longer carry `review_target_score` in the current DB
+  (some early runs predate a rescoring pass and can't be regenerated without
+  re-running discovery/scoring, which is out of scope for a deploy step),
+  it falls back to patching the *existing* static HTML in `reports/runs/`
+  with the same download bar instead of dropping the run from the site.
+- The master index (`/index.html`) is regenerated from the `runs` table
+  every deploy — run id, area, vertical, date, business count, link to the
+  live page, and direct PDF/CSV download links — so it's always current,
+  not a one-off snapshot.
+- Creates the Cloudflare Pages project (`jv-prospecting-reports`) on first
+  deploy if it doesn't exist yet (`wrangler pages project create`), same
+  convention as `antek-claim`.
+
+**GitHub-side index**: `reports/INDEX.md` lists every run with links to its
+GitHub-hosted PDF/CSV (`reports/runs/...`, `exports/runs/...`) *and* its
+live Cloudflare Pages URL. It's a hand-maintained snapshot, not
+auto-regenerated on every deploy (the live `/index.html` above is the
+always-current one) — update it manually when you commit a new run's
+`reports/runs/`/`exports/runs/` artifacts, mirroring the row format already
+there.
+
 ## Prospector v2: discovery, reviews, site signals, targets
 
 This is the new workflow built in Phases 2-5 of the "Prospector v2: UK
