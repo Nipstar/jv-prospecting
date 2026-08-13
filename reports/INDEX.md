@@ -21,6 +21,7 @@ a page for any of them on request.
 | Run | Location | Vertical | Date | Targets | PDF | CSV | Live report |
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
+| #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 32 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_20260813T210703.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a

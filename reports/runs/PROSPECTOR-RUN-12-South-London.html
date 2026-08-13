@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #12</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #12 &mdash; 13 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; South London</h1>
+        <p class="sub">27 targets across air conditioning companies (5 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">27</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">33</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">0</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">5</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Excel Cooling Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 90 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>3.4★ (5 reviews)</span><span>020 8633 1748</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (5 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DIXON, Jason Roy</span><span>Co. no. 05414848</span><span>Incorporated 2005-04-06</span></div>
+            <div class="biz-meta" style="margin-top:2px">3, Spitfire Business Park, 1 Hawker Rd, Croydon CR0 4WD, UK, South London, CR0 4WD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">JP Air Conditioning Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 85 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.1★ (37 reviews)</span><span>020 8333 1191</span><span>https://jpaircon.com/contact/bromley?utm_source=gmb&amp;utm_medium=organic</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (37 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PRETORIUS, Jacques</span><span>Co. no. 16263132</span><span>Incorporated 2025-02-19</span></div>
+            <div class="biz-meta" style="margin-top:2px">53 Homesdale Rd, Bromley BR2 9LB, UK, South London, BR2 9LB</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Toropro Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 85 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>3.6★ (33 reviews)</span><span>020 8610 9100</span><span>http://www.toropro.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (33 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BELECKY, Tomas</span><span>Co. no. 08630357</span><span>Incorporated 2013-07-30</span></div>
+            <div class="biz-meta" style="margin-top:2px">270 Rosendale Rd, Norwood, London SE24 9DL, UK, South London, SE24 9DL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Carrier Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 75 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.5★ (8 reviews)</span><span>01372 220220</span><span>https://www.carrier.com/commercial/en/uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (8 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">22 Worple Rd, London SW1 9DD, UK, South London, SW1 9DD</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;Didn&#x27;t answer the phone&rdquo;</div>
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">DG Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 45 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (81 reviews)</span><span>07802 423540</span><span>http://www.dgairconditioning.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (81 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GUYVER, Danny</span><span>Co. no. 12189345</span><span>Incorporated 2019-09-04</span></div>
+            <div class="biz-meta" style="margin-top:2px">265-269 Wimbledon Park Rd, London SW19 6NW, UK, South London, SW19 6NW</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">South London Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 45 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (72 reviews)</span><span>020 3620 5800</span><span>https://www.southlondonheating.co.uk/?utm_source=Google&amp;utm_medium=Organic&amp;utm_campaign=google_my_business</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (72 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GALLAGHER, Mark Steven</span><span>Co. no. 06408521</span><span>Incorporated 2007-10-25</span></div>
+            <div class="biz-meta" style="margin-top:2px">67 High St, London SE20 7HW, UK, South London, SE20 7HW</div>
+            <div class="biz-quote"><span class="quote-label">Pain-flagged review</span>&ldquo;This company used to be good but has gone downhill. Their customer service is terrible and it takes a long time before you get through to a real person on the phone. I used SLH to install a new boiler and four new column radiators. We were only sent one option for the radiators w...&rdquo;</div>
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Air Conditioning Cooling &amp; Heating - Croydon &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (11 reviews)</span><span>020 8611 2849</span><span>http://www.accah.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (11 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GATSI, Joseph</span><span>Co. no. 10169958</span><span>Incorporated 2016-05-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">The Lansdowne Building, Lansdowne Rd, Croydon CR9 2ER, UK, South London, CR9 2ER</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Lee Air Conditioning (Services) Ltd. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (3 reviews)</span><span>020 8680 8926</span><span>http://www.leeairconditioning.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (3 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GREENSMYTH, Niall</span><span>Co. no. 01442861</span><span>Incorporated 1979-08-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit 8, Spitfire Business Park, 1 Hawker Rd, Croydon CR0 4WD, UK, South London, CR0 4WD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">SS Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (13 reviews)</span><span>07857 571205</span><span>https://ssairconditioning.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (13 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SONO, Sonila</span><span>Co. no. 14723172</span><span>Incorporated 2023-03-11</span></div>
+            <div class="biz-meta" style="margin-top:2px">20 Amberley Ct, Christchurch Park, Sutton SM2 5UD, UK, South London, SM2 5UD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Prism Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>01342 894550</span><span>http://www.prism-ac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HUMPHRIES, Peter Paul</span><span>Co. no. 04984777</span><span>Incorporated 2003-12-04</span></div>
+            <div class="biz-meta" style="margin-top:2px">Vestry Hall, 338 London Rd, Mitcham CR4 3UD, UK, South London, CR4 3UD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">GW Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>020 8686 6226</span><span>http://www.gwac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GARDNER, Gary William</span><span>Co. no. 04239157</span><span>Incorporated 2001-06-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">36 Lodge Ave, Croydon CR0 4JZ, UK, South London, CR0 4JZ</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Aircon Company London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>020 3903 7225</span><span>https://www.aircon-company.com/?utm_source=gmb&amp;utm_medium=map</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FILIP, Adriana-Cristina</span><span>Co. no. 13504592</span><span>Incorporated 2021-07-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">Flat 3, 47 Ennismore Gardens, London SW7 1AH, UK, South London, SW7 1AH</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Art Cool Services LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (3 reviews)</span><span>020 3719 7108</span><span>http://www.artcoolservices.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (3 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FERREIRA PIRES, Emilio Jose</span><span>Co. no. 13938527</span><span>Incorporated 2022-02-24</span></div>
+            <div class="biz-meta" style="margin-top:2px">1593 London Rd, Norbury, London SW16 4AA, UK, South London, SW16 4AA</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Abbottsway Engineering Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.4★ (14 reviews)</span><span>020 7183 3593</span><span>https://www.fixy247.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (14 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LILANI, Munawar Ali</span><span>Co. no. 08391855</span><span>Incorporated 2013-02-07</span></div>
+            <div class="biz-meta" style="margin-top:2px">59 Stanford Rd, Norbury, London SW16 4PP, UK, South London, SW16 4PP</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">London Vents Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>020 3795 9120</span><span>http://www.londonvents.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HODSON, Stewart Hamilton</span><span>Co. no. 12136365</span><span>Incorporated 2019-08-02</span></div>
+            <div class="biz-meta" style="margin-top:2px">196 Morland Rd, Croydon CR0 6NF, UK, South London, CR0 6NF</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Aircooltech ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (24 reviews)</span><span>020 8337 7083</span><span>http://aircooltech.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (24 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KIM, Hak Jae</span><span>Co. no. 07556476</span><span>Incorporated 2011-03-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">suite 13, Lynwood Dr, Worcester Park KT4 7AT, UK, South London, KT4 7AT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Hidden cool Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (26 reviews)</span><span>020 8669 1112</span><span>https://www.hiddencool.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (26 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BRIDGE, Jonathan Gary</span><span>Co. no. 16442900</span><span>Incorporated 2025-05-12</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit A1, Connaught Business Centre, 22 Willow Ln, Mitcham CR4 4NA, UK, South London, CR4 4NA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Avon Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (42 reviews)</span><span>020 8409 0173</span><span>http://www.avonair.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (42 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MIRIHANA, Rasika Udara Sampath</span><span>Co. no. 12299139</span><span>Incorporated 2019-11-05</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit 21-25, Marshall House, 124 Middleton Rd, Morden SM4 6RW, UK, South London, SM4 6RW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Air Conditioning Installation &amp; Repair &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (22 reviews)</span><span>07418 351426</span><span>https://acinstallationandrepair.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (22 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SEMIRAS, Jan Mark</span><span>Co. no. 09065418</span><span>Incorporated 2014-06-02</span></div>
+            <div class="biz-meta" style="margin-top:2px">20 Cobden Mews, London SE26 6UX, UK, South London, SE26 6UX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">FRS Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (55 reviews)</span><span>020 3876 3690</span><span>https://frsairconditioning.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (55 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SORATO, Elizandro</span><span>Co. no. 15728384</span><span>Incorporated 2024-05-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">Campbell Cl, London SW16 6NJ, UK, South London, SW16 6NJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Air Cool Environmental Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (80 reviews)</span><span>020 8249 5061</span><span>https://www.aircoolenvironmental.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (80 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: JAMES, Cindy Jane</span><span>Co. no. 04446074</span><span>Incorporated 2002-05-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">12 Farwig Ln, Bromley BR1 3RB, UK, South London, BR1 3RB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">WDI Group (surrey) Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (67 reviews)</span><span>020 3727 2578</span><span>http://www.wdigroupltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (67 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: WARD, Bradley</span><span>Co. no. 15560511</span><span>Incorporated 2024-03-13</span></div>
+            <div class="biz-meta" style="margin-top:2px">sbc house, Restmor Way, Hackbridge, Wallington SM6 7AH, UK, South London, SM6 7AH</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Southwest Mobile Autocare Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (119 reviews)</span><span>07770 883926</span><span>http://www.swmautocare.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (119 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FERNANDEZ, Fausto Francisco Alberto</span><span>Co. no. 11918160</span><span>Incorporated 2019-04-01</span></div>
+            <div class="biz-meta" style="margin-top:2px">Shackleton Lodge, 1j Gleneagle Rd, London SW16 6GE, UK, South London, SW16 6GE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">All Star Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (213 reviews)</span><span>020 3519 1340</span><span>https://www.allstar-aircon.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (213 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FLUEN, Garry Joe</span><span>Co. no. 12952167</span><span>Incorporated 2020-10-14</span></div>
+            <div class="biz-meta" style="margin-top:2px">105 Eade Rd, Harringay Warehouse District, London N4 1TJ, UK, South London, N4 1TJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Just Services Group &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (260 reviews)</span><span>020 7323 2999</span><span>https://justservicesgroup.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (260 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BURLS, Christopher Luke</span><span>Co. no. 10177302</span><span>Incorporated 2016-05-12</span></div>
+            <div class="biz-meta" style="margin-top:2px">Highland House, 165 The Broadway, London SW19 1NE, UK, South London, SW19 1NE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">BlueFlame Plumbing and Heating | Brixton &amp; Clapham &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (127 reviews)</span><span>020 8059 2307</span><span>https://www.blueflameplumbingandheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (127 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Flat 18, Hermes House, 59a Josephine Ave, London SW2 2JG, UK, South London, SW2 2JG</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">South London Electricians &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">air conditioning companies</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (167 reviews)</span><span>07956 523316</span><span>https://southlondonelectricians.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (167 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: COUPLAND, Nicholas John Patrick</span><span>Co. no. 08033149</span><span>Incorporated 2012-04-17</span></div>
+            <div class="biz-meta" style="margin-top:2px">37 Kingswood Ave, South Croydon CR2 9DQ, UK, South London, CR2 9DQ</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #12 &mdash; 13 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>
