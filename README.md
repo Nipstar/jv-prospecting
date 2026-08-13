@@ -361,6 +361,17 @@ prospector targets export exports/targets.csv
 prospector targets list --min-score 50 --include-chains
 ```
 
+`targets export` CSV columns (in order): `firm_name`, `vertical`, `location`,
+`postcode`, `phone`, `email`, `website`, `review_count`, `avg_rating`,
+`review_target_score`, `opportunity_score`, `flags`, `company_number`,
+`director_name`, `years_trading`, `tps_checked`, `is_chain`, `chain_reason`.
+`director_name` is the first natural-person officer name from the
+Companies House lookup done during discovery (`businesses.director_name`,
+same source `prospector report`'s contact block uses) — placed next to
+`company_number`/`years_trading` since it's the other Companies-House-derived
+field. `targets list`'s console output includes the same `director_name`
+value (when present) alongside the score columns.
+
 ### Chain / franchise / corporate exclusion
 
 **Standing rule, added post-rebuild:** Andy's pitch (AI call answering +

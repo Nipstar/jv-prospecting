@@ -26,13 +26,14 @@ from prospector.config import EXPORTS_DIR
 
 TARGET_LIST_COLUMNS = [
     "id", "name", "vertical", "town", "phone", "review_count", "rating",
-    "review_target_score", "opportunity_score",
+    "review_target_score", "opportunity_score", "director_name",
 ]
 
 EXPORT_COLUMNS = [
     "firm_name", "vertical", "location", "postcode", "phone", "email", "website",
     "review_count", "avg_rating", "review_target_score", "opportunity_score",
-    "flags", "company_number", "years_trading", "tps_checked", "is_chain", "chain_reason",
+    "flags", "company_number", "director_name", "years_trading", "tps_checked",
+    "is_chain", "chain_reason",
 ]
 
 _ORDER_SQL = "ORDER BY review_target_score DESC, opportunity_score DESC"
@@ -131,6 +132,7 @@ def export_targets_csv(
                 row["opportunity_score"],
                 _flags_for(row),
                 row["companies_house_number"],
+                row["director_name"] or "",
                 _years_trading(row["incorporation_date"]),
                 "true" if row["tps_checked"] else "false",
                 "true" if row["is_chain"] else "false",

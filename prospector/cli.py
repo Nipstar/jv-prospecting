@@ -276,10 +276,12 @@ def targets_list_cmd(min_score: int, run_id: int | None, include_chains: bool) -
         return
     for row in rows:
         chain_tag = " [CHAIN]" if row["is_chain"] else ""
+        director = f" | director={row['director_name']}" if row["director_name"] else ""
         click.echo(
             f"#{row['id']} {row['name']} | {row['vertical']} | {row['town']} | {row['phone']} | "
             f"reviews={row['review_count']} rating={row['rating']} | "
-            f"review_target_score={row['review_target_score']} opportunity_score={row['opportunity_score']}{chain_tag}"
+            f"review_target_score={row['review_target_score']} opportunity_score={row['opportunity_score']}"
+            f"{director}{chain_tag}"
         )
 
 
