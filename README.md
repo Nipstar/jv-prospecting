@@ -115,7 +115,8 @@ prospector/
     enrichers/
       __init__.py
       reviews.py                                     # review profile + review_target_score (Phase 3)
-      site.py                                         # booking/chat/phone signals + opportunity_score (Phase 4)
+      site.py                                         # booking/chat/phone signals + opportunity_score (Phase 4;
+                                                        # 3-layer fetch escalation httpx->Playwright->Apify)
 exports/                    # CSV exports land here
 reports/                     # HTML + PDF reports land here
 prospector.db                # created on first run
@@ -343,9 +344,12 @@ prospector discover import my_targets.csv
 prospector reviews fetch --run-id 9
 prospector reviews list --min-score 50
 
-# 3. Site signals — lightweight homepage/contact-page fetch (httpx) for
+# 3. Site signals — lightweight homepage/contact-page fetch for
 #    booking-widget/live-chat-widget absence and phone-dependency +
 #    opportunity_score (0-100, separate score from review_target_score).
+#    Fetch escalates through 3 layers if a site blocks the previous one —
+#    httpx -> Playwright headless Chromium -> Apify browser actor (last
+#    resort, costs a little money) — see "Site-fetch escalation" below.
 prospector site fetch --run-id 9
 
 # 4. Targets — combined sort (review_target_score desc, opportunity_score
@@ -494,6 +498,69 @@ listed in `scoring_config.py` for Andy to tune as he sees false
 positives/negatives on real prospect sites. Not designed to be perfect —
 "it's a lightweight signal" per spec.
 
+### Site-fetch escalation (httpx -> Playwright -> Apify)
+
+`enrichers/site.py` fetches each prospect's homepage through **three
+escalating layers**, cheapest/free first, stopping as soon as one
+succeeds:
+
+1. **httpx** (original Phase 4 mechanism) — plain HTTP client, up to 2
+   retries with backoff, rotating User-Agent. Free (no external service),
+   but some corporate sites' anti-bot protection blocks it outright.
+   Confirmed live: CVS Group's site (`cvsvets.com`) returns **HTTP 406**
+   to httpx on every retry, regardless of User-Agent.
+2. **Playwright headless Chromium** — tried when httpx fails. **Not a new
+   dependency** — it's the same Playwright install already used by
+   `report.py`'s HTML→PDF pipeline (Chromium already cached at
+   `~/.cache/ms-playwright`), just a new usage. **Cost: free** (local
+   CPU/compute only), just slower than httpx (a real browser launch +
+   render vs. a plain GET). In live testing against the same CVS Group
+   URL, a bare `browser.new_page()` still got HTTP 406 — bypassing the
+   block required a browser *context* with realistic `Accept`/
+   `Accept-Language` headers, an `en-GB` locale, and Chromium's
+   automation-controlled flag disabled (`--disable-blink-features=
+   AutomationControlled`). With that context, the same URL returned a
+   clean 200 with the full page HTML. These settings are in
+   `scoring_config.py` (`PLAYWRIGHT_*`) so Andy can tune them further if
+   another site needs something different.
+3. **Apify** (`apify/rag-web-browser` actor) — last resort, tried only if
+   Playwright also fails. **This is the one layer that costs real money**
+   (small, but not zero — see below), so it's expected to rarely trigger:
+   Playwright already gets past most anti-bot blocks that stop httpx. The
+   actor is called with `scrapingTool: browser-playwright` explicitly set
+   (its *default* mode, `raw-http`, is itself just a plain HTTP fetch —
+   leaving the default would hit the same kind of block httpx already
+   hit). Requires `APIFY_TOKEN` in `.env`; if unset, this layer is simply
+   skipped (not an error) and the fetch falls through to "unreachable."
+
+**Cost honesty, for Andy:** the `apify/rag-web-browser` actor itself is
+listed under Apify's **FREE pricing tier** (no per-actor markup on top of
+platform usage), but every Apify Actor run still consumes ordinary Apify
+platform compute, billed against your account's plan/free-tier compute
+credits — it is not literally $0 forever at any volume, just cheap and
+covered by Apify's generous free-tier credits at the volumes this tool
+should hit it (a rare last-resort path, not a routine third fetch
+attempt). Playwright, by contrast, really is free beyond your own CPU
+time — it never leaves your machine.
+
+If all three layers fail, behaviour is **unchanged from the original
+Phase 4 spec**: the business is marked "no signal detected"
+(`no_booking=True`, `no_chat=True`, `phone_dependent=True`,
+`opportunity_score=0`) — a fetch failure is never scored as if it were a
+verified absence of booking/chat.
+
+Which layer succeeded (or that all three failed) is logged to the console
+during `prospector site fetch` (per-business line + an end-of-run tally
+of `httpx`/`playwright`/`apify`/`unreachable` counts) and stored per
+business in the `site_fetch_method` column (`schema_migrations` v8 — see
+"Database" below), so Andy can see from the DB alone how often each
+fallback layer was needed across a run, e.g.:
+
+```sql
+SELECT site_fetch_method, COUNT(*) FROM businesses
+WHERE site_checked_at IS NOT NULL GROUP BY site_fetch_method;
+```
+
 ### Compliance — PECR / TPS screening
 
 Outreach against these targets is **phone-first** against corporate
@@ -526,9 +593,9 @@ columns are preserved — this was a migration, not a destructive rewrite.
 `prospector.db` is backed up (`prospector.db.bak-<timestamp>`) before any
 migration that drops columns.
 
-Migrations v3-v7 (Prospector v2 Phases 2-6) are all additive (`ALTER
-TABLE ... ADD COLUMN`, nullable/defaulted) — no columns dropped, no rows
-touched:
+Migrations v3-v8 (Prospector v2 Phases 2-6 plus the site-fetch-escalation
+follow-up) are all additive (`ALTER TABLE ... ADD COLUMN`,
+nullable/defaulted) — no columns dropped, no rows touched:
 - **v3** (Phase 2): `businesses.incorporation_date`, `company_status`,
   `established_flag`, `email`.
 - **v4** (Phase 3): `businesses.worst_recent_rating`,
@@ -541,6 +608,9 @@ touched:
 - **v7** (Phase 6): `businesses.is_chain`, `chain_reason` (chain/franchise/
   corporate exclusion, see "Chain / franchise / corporate exclusion"
   above).
+- **v8** (site-fetch escalation): `businesses.site_fetch_method` — which
+  of httpx/playwright/apify fetched the site (or NULL if unreachable/no
+  website), see "Site-fetch escalation" above.
 
 `prospector.db` was backed up (`prospector.db.bak-<timestamp>-phase2`)
 before v3-v6 were first applied, and again
@@ -559,7 +629,10 @@ A failure on one business/sector is logged and skipped rather than
 aborting the whole run. `enrichers/site.py` (Phase 4) reimplements the
 same retry/backoff shape for `httpx` (since `http.py` itself is
 `requests`-based and site.py is the one module using `httpx`), plus a
-rotating User-Agent and a fixed delay between requests.
+rotating User-Agent and a fixed delay between requests — and, since the
+site-fetch-escalation follow-up, two further fallback layers
+(Playwright, then Apify) if httpx itself is blocked; see "Site-fetch
+escalation" above for the full chain and its cost implications.
 
 ## Notes / limitations
 
@@ -585,8 +658,16 @@ rotating User-Agent and a fixed delay between requests.
   for this yet) would need to be added.
 - `enrichers/site.py`'s heuristics will occasionally get blocked outright
   by anti-bot protection on larger/corporate sites (observed: a CVS Group
-  site returning HTTP 406 to a full browser User-Agent string) — handled
-  as an "unreachable" result (conservative flags, `opportunity_score`
-  left at 0 rather than scored off unverified data) rather than crashing,
-  but it means opportunity_score coverage will be thinner for
-  larger/more defended sites than for small independent ones.
+  site returning HTTP 406 even to a full browser User-Agent string over
+  plain httpx) — as of the site-fetch-escalation follow-up this now
+  retries via Playwright headless Chromium, then Apify, before giving up
+  (see "Site-fetch escalation" above). Live-tested against the CVS Group
+  site that originally exposed this gap: Playwright alone got past the
+  block (200, full HTML) once given a realistic browser context, so Apify
+  wasn't even needed for that case — Apify remains as a last resort for
+  sites that block a real headless browser too. When all three layers
+  fail, the result is still handled as "unreachable" (conservative flags,
+  `opportunity_score` left at 0 rather than scored off unverified data)
+  rather than crashing, so opportunity_score coverage will still be
+  thinner for the rare site that defeats all three layers than for small
+  independent ones.

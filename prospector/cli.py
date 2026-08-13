@@ -222,11 +222,18 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
         click.echo("No businesses to fetch (already checked, or none with a website — run `discover run` first).")
         return
     for r in results:
-        status = "fetched" if r.fetched else "UNREACHABLE/NO WEBSITE"
+        status = f"fetched via {r.fetch_method}" if r.fetched else "UNREACHABLE/NO WEBSITE"
         click.echo(
             f"#{r.business_id} {r.name}: {status}  no_booking={r.no_booking}  no_chat={r.no_chat}  "
             f"phone_dependent={r.phone_dependent}  opportunity_score={r.opportunity_score}"
             + (f"  email={r.email}" if r.email else "")
+        )
+    methods = [r.fetch_method for r in results if r.fetched]
+    if methods:
+        counts = {m: methods.count(m) for m in ("httpx", "playwright", "apify")}
+        click.echo(
+            f"Fetch layer usage: httpx={counts['httpx']}  playwright={counts['playwright']}  "
+            f"apify={counts['apify']}  unreachable={len(results) - len(methods)}"
         )
 
 

@@ -136,3 +136,57 @@ CONTACT_PAGE_PATHS: list[str] = ["/contact", "/contact-us", "/contactus", "/get-
 # Simple UK-ish phone number pattern for detecting "shows a phone number"
 # on the contact page — loose on purpose (landlines, mobiles, +44, 0800 etc).
 PHONE_PATTERN = r"(\+44\s?\d[\d\s]{8,12}|0\d{2,4}[\s-]?\d{3,4}[\s-]?\d{3,4})"
+
+# --- Site-fetch escalation (Phase 4 follow-up) -------------------------------
+#
+# httpx (plain HTTP client) gets outright blocked by anti-bot protection on
+# some corporate sites — confirmed live against CVS Group's site
+# (cvsvets.com), which returns HTTP 406 to every httpx retry regardless of
+# User-Agent. Andy asked for two escalating fallback layers instead of
+# giving up after httpx: a headless-browser fetch (Playwright — already a
+# project dependency, reused from prospector/report.py's PDF pipeline, not
+# a new install), and, only if that also fails, a paid last-resort browser
+# fetch via Apify.
+#
+# Cost note for Andy: Playwright is free/local compute (just slower — a
+# real Chromium launch+render vs. httpx's plain GET), so it costs nothing
+# beyond CPU time and is expected to resolve most of what httpx can't.
+# Apify is the one paid step in this chain. It should rarely trigger.
+
+# Playwright fallback (layer 2). A bare `browser.new_page()` was NOT enough
+# to get past CVS Group's block in live testing — it still returned 406.
+# A browser *context* with a realistic Accept/Accept-Language header set,
+# an en-GB locale, and the automation-controlled Blink flag disabled was
+# required and got a clean 200 with full HTML in testing. Kept here (not
+# hardcoded in site.py) so Andy can tune if another site needs a different
+# header set.
+PLAYWRIGHT_TIMEOUT_MS = 20000
+PLAYWRIGHT_LOCALE = "en-GB"
+PLAYWRIGHT_VIEWPORT = {"width": 1366, "height": 768}
+PLAYWRIGHT_EXTRA_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-GB,en;q=0.9",
+}
+PLAYWRIGHT_LAUNCH_ARGS = ["--disable-blink-features=AutomationControlled"]
+
+# Apify fallback (layer 3, last resort). Uses the "RAG Web Browser" actor
+# (apify/rag-web-browser) — chosen because Apify's own pricing page lists
+# it under "FREE" pricing tier (no per-actor markup on top of platform
+# compute; billed only against Apify's plan/free-tier compute credits,
+# same as any other actor run — see README "Site-fetch escalation" section
+# for the exact cost mechanics Andy should know about before this runs at
+# volume). `scrapingTool: browser-playwright` is required explicitly —
+# the actor's *default* scraping mode is `raw-http` (a plain HTTP fetch,
+# same class of request as httpx, which would just hit the same 406 block
+# again), so leaving it on the default silently defeats the point of this
+# fallback layer.
+APIFY_RAG_BROWSER_ACTOR_ID = "apify~rag-web-browser"
+APIFY_ACTOR_RUN_ENDPOINT = (
+    "https://api.apify.com/v2/acts/{actor_id}/run-sync-get-dataset-items"
+)
+APIFY_TIMEOUT_SECONDS = 60.0
+APIFY_INPUT_DEFAULTS = {
+    "outputFormats": ["html"],
+    "scrapingTool": "browser-playwright",
+    "requestTimeoutSecs": 40,
+}

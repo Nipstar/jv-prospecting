@@ -156,6 +156,16 @@ _V7_ADD_BUSINESS_COLUMNS = [
     ("chain_reason", "TEXT"),
 ]
 
+# v8 — Site-fetch escalation follow-up to Phase 4: records which of the
+# three fetch layers (httpx / playwright / apify) actually succeeded for
+# a business's site_checked_at result, or NULL for unreachable/no-website.
+# Small, additive, worth a column (not just a console log) so Andy can
+# query "how often did each fallback fire" across a run with plain SQL
+# instead of re-running and grepping console output.
+_V8_ADD_BUSINESS_COLUMNS = [
+    ("site_fetch_method", "TEXT"),
+]
+
 
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
@@ -185,6 +195,10 @@ def _migration_v7_chain_flag(conn: sqlite3.Connection) -> None:
     _add_columns_if_missing(conn, "businesses", _V7_ADD_BUSINESS_COLUMNS)
 
 
+def _migration_v8_site_fetch_method(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V8_ADD_BUSINESS_COLUMNS)
+
+
 MIGRATIONS: list[tuple[int, "str | object"]] = [
     (1, "ALTER TABLE runs ADD COLUMN pending_apify_runs TEXT DEFAULT '[]';"),
     (2, _migration_v2_drop_ad_columns),
@@ -193,6 +207,7 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (5, _migration_v5_site_signals),
     (6, _migration_v6_tps_placeholder),
     (7, _migration_v7_chain_flag),
+    (8, _migration_v8_site_fetch_method),
 ]
 
 

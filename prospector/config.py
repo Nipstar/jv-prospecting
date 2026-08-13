@@ -30,6 +30,13 @@ COMPANIES_HOUSE_API_KEY = os.getenv("COMPANIES_HOUSE_API_KEY", "")
 # with geo-prospecting via the symlinked .env — see src/config.py there for
 # the sibling usage this mirrors.
 GOOGLE_PLACES_API_KEY = os.getenv("GOOGLE_PLACES_API_KEY", "")
+# Apify — narrowly re-introduced (post-Phase-1 removal of the ad-spend
+# model) as the last-resort (layer 3 of 3) site-fetch fallback in
+# enrichers/site.py, for prospect sites that block both httpx and a
+# Playwright headless-browser fetch. Optional: if unset, that fallback
+# layer is simply skipped (site.py logs it and falls through to the
+# existing "no signal detected" behaviour), it does not error the run.
+APIFY_TOKEN = os.getenv("APIFY_TOKEN", "")
 
 # --- API endpoints -----------------------------------------------------------
 SERPAPI_BASE_URL = "https://serpapi.com/search"
