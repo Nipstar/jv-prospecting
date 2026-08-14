@@ -251,16 +251,67 @@ def site() -> None:
     contact-page fetch for booking/chat-widget and phone-dependency signals."""
 
 
+_SITE_FETCH_DEFAULT_BATCH_SIZE = 10
+# Each business can trigger up to 2 URL fetches (homepage + contact page),
+# each of which may escalate through httpx -> a fresh Playwright Chromium
+# launch -> an Apify actor call. Processing an unbounded batch in one
+# `fetch_all` call was found to be unreliable in practice — a run of ~28
+# businesses got killed (exit 137) partway through with zero progress
+# committed, because a single interrupted Python process loses everything
+# that hadn't reached its per-row commit yet even though update_business_
+# fields() commits per business (the interrupt can land mid-network-call,
+# before that business's row is ever written). Auto-chunking into small
+# batches, each a *separate* `fetch_all` call with its own `with get_conn()`
+# transaction, bounds the blast radius of any one crash to at most one
+# batch's worth of businesses rather than the whole run, and turns "resume
+# after a crash" into "just re-run the same command" since already-checked
+# businesses (site_checked_at IS NOT NULL) are automatically skipped on the
+# next batch's query. This is the default behavior now — --limit no longer
+# needs to be set manually for reliability, only to intentionally do less.
+
 @site.command(name="fetch")
 @click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
 @click.option("--business-id", "business_id", type=int, default=None, help="Limit to one business.")
 @click.option("--refresh", "refresh", is_flag=True, default=False, help="Re-fetch even businesses already checked.")
-@click.option("--limit", "limit", type=int, default=None, help="Cap how many businesses to fetch this invocation (polite default: no cap, but useful for small test batches).")
-def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, limit: int | None) -> None:
-    """Fetch website signals (booking/chat widgets, phone-dependency) for businesses with a website."""
-    with get_conn() as conn:
-        results = fetch_all_site_signals(conn, run_id=run_id, business_id=business_id, refresh=refresh, limit=limit)
+@click.option("--limit", "limit", type=int, default=None, help="Cap how many businesses to fetch in TOTAL this invocation (across all batches). Default: no total cap, but still auto-chunked into small batches — see --batch-size.")
+@click.option("--batch-size", "batch_size", type=int, default=_SITE_FETCH_DEFAULT_BATCH_SIZE, help=f"Businesses processed per internal batch/transaction (default {_SITE_FETCH_DEFAULT_BATCH_SIZE}) — bounds how much work a single crash can lose. Lower this further if crashes persist; raise it (or pass a huge number) to opt back into one big unbatched pass.")
+def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, limit: int | None, batch_size: int) -> None:
+    """Fetch website signals (booking/chat widgets, phone-dependency) for businesses with a website.
 
+    Auto-chunks into small batches (see --batch-size) for reliability —
+    each batch is its own DB transaction, so a crash mid-run only loses
+    that one batch's progress, and simply re-running the command resumes
+    from where it left off (already-checked businesses are skipped)."""
+    total_processed = 0
+    total_target = limit  # None = no cap, keep batching until a batch comes back empty
+    all_results = []
+    batch_num = 0
+    while True:
+        this_batch_limit = batch_size
+        if total_target is not None:
+            remaining = total_target - total_processed
+            if remaining <= 0:
+                break
+            this_batch_limit = min(batch_size, remaining)
+
+        batch_num += 1
+        with get_conn() as conn:
+            batch_results = fetch_all_site_signals(
+                conn, run_id=run_id, business_id=business_id, refresh=refresh, limit=this_batch_limit
+            )
+
+        if not batch_results:
+            break
+
+        all_results.extend(batch_results)
+        total_processed += len(batch_results)
+        if len(batch_results) == this_batch_limit and (total_target is None or total_processed < total_target):
+            click.echo(f"  [site] batch {batch_num} done ({len(batch_results)} businesses, {total_processed} so far) — continuing...")
+
+        if business_id is not None:
+            break  # single-business mode never needs a second batch
+
+    results = all_results
     if not results:
         click.echo("No businesses to fetch (already checked, or none with a website — run `discover run` first).")
         return
