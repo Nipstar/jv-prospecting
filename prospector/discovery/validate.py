@@ -84,7 +84,31 @@ _LOCAL_BUSINESS_SCHEMA_RE = re.compile(
 )
 
 _FETCH_TIMEOUT_SECONDS = 6.0
-_MAX_DISTINCT_EXTERNAL_DOMAINS_BEFORE_SUSPECT = 8  # a real business site rarely links to 8+ different other domains from its landing page
+_MAX_DISTINCT_EXTERNAL_DOMAINS_BEFORE_SUSPECT = 8  # of the NON-infra, NON-cert-body domains counted below
+
+# Domains that show up on totally normal small-business sites and tell us
+# nothing about directory/listicle-ness — CDN/font/asset hosts, social
+# profile links, map embeds, and (importantly) UK trade-body/certification
+# badge links (Gas Safe, NICEIC, TrustMark, CHAS, etc — a real independent
+# tradesperson site *should* link to these, it's a trust signal, not a
+# directory signal). Found via retroactive validation against 72 existing
+# organic-sourced DB rows: without this list the raw distinct-external-
+# domain count flagged 8 genuine independent businesses as "directories"
+# purely because their footer links to Gas Safe Register + Trustpilot +
+# Facebook + Google Fonts — see git log for the specific false positives.
+_NON_SIGNAL_DOMAIN_SUBSTRINGS = [
+    "fonts.googleapis.com", "fonts.gstatic.com", "pro.fontawesome.com", "use.typekit.net",
+    "cdnjs.cloudflare.com", "cloudflare.com", "squarespace.com", "squarespace-cdn.com", "sqspcdn.com",
+    "gmpg.org", "cdn.", "static.", "assets.",
+    "google.com", "goo.gl", "google.co.uk", "maps.app.goo.gl", "search.google.com",
+    "facebook.com", "instagram.com", "linkedin.com", "twitter.com", "x.com", "youtube.com", "a.me",
+    "trustpilot.com", "browsehappy.com",
+    # UK trade-body / certification / compliance registers — a trust
+    # signal on a real tradesperson's own site, not a directory signal.
+    "gassaferegister.co.uk", "niceic.com", "napit.org.uk", "elecsa.co.uk", "trustmark.org.uk",
+    "chas.co.uk", "thebesa.com", "safecontractor.com", "checkatrade.com", "ciphe.org.uk",
+    "recc.org.uk", "mcscertified.com",
+]
 
 
 def is_junk_title(title: str | None) -> bool:
@@ -121,7 +145,9 @@ def looks_like_directory_or_blog(url: str, html: str | None = None) -> tuple[boo
     own_domain = urlparse(url).netloc.lower().lstrip("www.")
     hrefs = re.findall(r'href=["\']https?://([^/"\'#]+)', html, re.IGNORECASE)
     external_domains = Counter(
-        d.lower().lstrip("www.") for d in hrefs if d.lower().lstrip("www.") != own_domain
+        d.lower().lstrip("www.") for d in hrefs
+        if d.lower().lstrip("www.") != own_domain
+        and not any(sig in d.lower() for sig in _NON_SIGNAL_DOMAIN_SUBSTRINGS)
     )
     distinct_external = len(external_domains)
     if distinct_external >= _MAX_DISTINCT_EXTERNAL_DOMAINS_BEFORE_SUSPECT:

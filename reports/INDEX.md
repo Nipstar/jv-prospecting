@@ -22,11 +22,11 @@ a page for any of them on request.
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
 | #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 25 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_run12_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
-| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 28 | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
+| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 27 | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
 | #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 19 | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
-| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 31 | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
+| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 32 | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
 | #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 9 | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
-| #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 6 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
+| #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 5 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -64,6 +64,24 @@ Mechanic, plus two directory/aggregator pages masquerading as businesses
 and kept — both are real commercial building-services/plumbing firms, not
 automotive, confirmed via their actual page titles rather than assumed
 from the name alone.
+
+**Content-validation filter added + retroactively applied** (Andy: some
+organic results "look like blog posts and directories," asked for a
+filter before DB insertion). New `prospector/discovery/validate.py`
+checks each organic result's title against listicle/job/course phrasing
+and, if it survives, does one page-content check (schema.org
+LocalBusiness markup, blog signals, external-link density) — wired into
+`discover_businesses()` so junk is never inserted going forward. Ran
+retroactively against all 72 existing organic-sourced businesses: found
+4 genuine junk rows (2 title-pattern directory/listicle pages already
+caught by name, plus "HVAC companies in London (100 found)" — a directory
+page — and "Air Conditioning Near Me London" — a listicle), removed from
+runs #16/#18/#20, reports regenerated and redeployed. The link-density
+check's first pass over-flagged (8 false positives — cert-body badges
+like Gas Safe/NICEIC/TrustMark and CDN/font/social links were being
+counted as "directory signal" on completely normal small-business sites)
+— fixed with a non-signal-domain exclusion list before it touched the DB;
+see commit history for the specific false positives caught in testing.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
