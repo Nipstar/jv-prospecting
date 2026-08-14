@@ -13,6 +13,17 @@ aggregator pages we already treat as their own thing (Yell itself, plus
 Checkatrade/Trustpilot/Yelp/Bark/etc.), so those domains are filtered out
 of the organic result set before it's returned (see EXCLUDED_DOMAINS).
 
+EXCLUDED_DOMAINS only catches known aggregator domains. Live sweep found
+organic also surfaces junk on domains we've never seen before — job
+boards, course-listing pages, "Top N Companies in X" blog listicles — and
+plain wrong-vertical businesses on real domains (e.g. a car-AC specialist
+showing up for "air conditioning" searches, since that term is ambiguous
+between building and vehicle trades). Each surviving result now also runs
+through discovery.validate.validate_organic_result() — a title-pattern
+check plus a one-shot page-content check for schema.org LocalBusiness
+markup / blog signals / directory-style link density — before being kept.
+See prospector/discovery/validate.py for the full rationale.
+
 Coverage caveat (documented, not a bug): organic search results give a
 title/link/snippet, not a structured business record — there is no
 phone/address/rating field the way Places/SerpAPI-maps/Yell all provide
@@ -31,6 +42,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from prospector.config import GL, GOOGLE_DOMAIN, HL, SERPAPI_BASE_URL, SERPAPI_KEY
+from prospector.discovery.validate import validate_organic_result
 from prospector.http import ApiError, get
 from prospector.scoring_config import PHONE_PATTERN
 
@@ -181,11 +193,18 @@ def discover_businesses(sector_term: str, area: str, radius_label: str, max_resu
                 # subpage) — dedupe within this source before it even
                 # reaches the DB-level phone/domain dedupe.
                 continue
+
+            name = _clean_title(item.get("title"))
+            is_valid, reject_reason = validate_organic_result(name, link)
+            if not is_valid:
+                print(f"  [organic] skipped (content filter): {name!r} — {reject_reason}")
+                continue
+
             seen_domains.add(domain)
 
             snippet = item.get("snippet")
             results.append({
-                "name": _clean_title(item.get("title")),
+                "name": name,
                 "address": None,
                 "phone": _extract_phone(snippet),
                 "website": link,
