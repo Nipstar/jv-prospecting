@@ -216,3 +216,58 @@ APIFY_INPUT_DEFAULTS = {
 APIFY_YELL_ACTOR_ID = "jungle_synthesizer~yell-uk-business-directory-scraper"
 APIFY_YELL_TIMEOUT_SECONDS = 240.0
 APIFY_YELL_MAX_ITEMS_CAP = 200  # sanity ceiling passed as the actor's own maxItems input
+
+# --- Checkatrade.com discovery source (prospector/discovery/checkatrade.py) -
+#
+# Added to replace/supplement Yell.com as a UK trade-directory source,
+# since the Yell actor above is confirmed broken for multi-word keywords
+# (see README "Known limitations — multi-source discovery"). Selected via
+# Apify's actor-search API, the same verification process the Yell actor
+# originally got — not assumed. Live-tested (2026-08-14) with real calls
+# before being wired in:
+#   - trev0n/checkatrade-scraper: 46 total users/12 monthly (modest but
+#     real, and the input schema — trade+location OR arbitrary searchUrls,
+#     requirePhone/minRating/minReviews filters, extractReviews toggle —
+#     is by far the most prospecting-shaped of the ~9 Checkatrade actors
+#     in the Store). Live-tested with {trade:"Air-Conditioning-Installation",
+#     location:"South London", maxItems:3}: SUCCEEDED, 3 real structured
+#     records (name, phone, website, city, areaServed, rating /10,
+#     reviewsCount, accreditations) — genuinely more structured than Yell
+#     or organic (has a working phone + rating on every populated record).
+#     Also tested an out-of-taxonomy multi-word slug via searchUrls
+#     (deliberately invalid, to probe multi-word-keyword robustness the
+#     way the Yell bug was found) — actor run still SUCCEEDED with 0 items
+#     rather than erroring/404ing the whole run, i.e. it fails soft on an
+#     unmatched trade slug instead of hard-failing like the Yell actor
+#     does on multi-word keywords. Modified 2026-08-07 (actively
+#     maintained, not an abandoned actor).
+#   - vulnv/checkatrade (270 total users) has more raw usage but its
+#     `category` input is an opaque numeric-ID enum (~600 magic numbers,
+#     no human-readable trade name) with no documented ID->trade mapping
+#     and no `searchUrls` escape hatch — unusable for prospector's
+#     freeform vertical terms without reverse-engineering the ID list
+#     first, so it was passed over despite the higher user count.
+#   - No better/fixed Yell.com actor turned up in the same search —
+#     jungle_synthesizer's is still the only real Yell.com actor in the
+#     Store; it remains registered as its own source (still low-value for
+#     multi-word keywords, see README) rather than being replaced.
+#
+# Checkatrade has no official slug for prospector's freeform vertical
+# terms ("heating plumbing and electrical contractors" etc. — see
+# prospector/verticals.py), and Checkatrade itself only covers trade/home-
+# services categories, not prospector's non-trade verticals (solicitors,
+# accountants, dental, vets, funeral directors) — those will just
+# harmlessly return 0 Checkatrade results, same "additional pass, not
+# guaranteed to fire" contract as Yell/organic. discovery/checkatrade.py
+# builds a best-effort trade slug (title-case, hyphenate the sector term)
+# and feeds it via `searchUrls` (bypassing the actor's `trade` enum
+# restriction — confirmed via its README that arbitrary slugs are
+# accepted this way), rather than trying to hardcode a sector-term ->
+# official-slug mapping for ~1600 categories.
+APIFY_CHECKATRADE_ACTOR_ID = "trev0n~checkatrade-scraper"
+APIFY_CHECKATRADE_TIMEOUT_SECONDS = 180.0
+APIFY_CHECKATRADE_MAX_ITEMS_CAP = 100
+# Checkatrade ratings are 0-10 ("bestRating" in its own data), not Google's
+# 0-5 scale that scoring.py's avg_rating thresholds assume (see
+# scoring_config.py's avg_rating comment). Divide by this to normalise.
+CHECKATRADE_RATING_SCALE_DIVISOR = 2.0

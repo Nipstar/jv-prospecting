@@ -468,9 +468,9 @@ same source `prospector report`'s contact block uses) — placed next to
 field. `targets list`'s console output includes the same `director_name`
 value (when present) alongside the score columns.
 
-### Multi-source discovery (Places + Yell.com + SerpAPI organic search)
+### Multi-source discovery (Places + Yell.com + SerpAPI organic search + Checkatrade.com)
 
-`discover run`/`discover import` now query up to three discovery sources
+`discover run`/`discover import` now query up to four discovery sources
 per vertical/location, additively (not as a replacement for Google
 Places) — Andy wanted extra coverage for businesses that don't surface
 well on Places/Maps. Every source returns the identical dict shape
@@ -532,14 +532,58 @@ each subsection below).
     weaker record than Places/Yell, by design — still useful as a lead
     (the domain/website is real), just don't expect a phone number to
     always be there without a site-fetch pass filling in more later.
+- **`checkatrade`** (new) — `prospector/discovery/checkatrade.py`.
+  Checkatrade.com, UK's other major trade directory (arguably more
+  relevant than Yell for prospector's trade-heavy verticals — HVAC,
+  plumbing, electrical, roofing, driveways, garage/window/conservatory
+  installers), via the Apify actor `trev0n/checkatrade-scraper`. Added
+  specifically because the Yell actor above is confirmed broken for
+  multi-word keywords (see "Known limitations" below) — Andy asked for a
+  better alternative, so the Apify Store was searched again (same
+  actor-search-API verification process, not assumed) for both a fixed
+  Yell actor and a Checkatrade one:
+  - No better/fixed Yell.com actor exists in the Store —
+    `jungle_synthesizer/yell-uk-business-directory-scraper` is still the
+    only real one; it stays registered as `yell` (see caveat above),
+    unchanged.
+  - Of ~9 Checkatrade actors found, `trev0n/checkatrade-scraper` was
+    selected after live-testing: real structured records (name, phone,
+    website, city/areaServed, rating **out of 10** — normalised to a 0-5
+    scale to match Places/SerpAPI, see `CHECKATRADE_RATING_SCALE_DIVISOR`
+    in `scoring_config.py`, `reviewsCount`, accreditations), modest but
+    real usage (46 users), modified 2026-08-07 (actively maintained). A
+    higher-usage alternative (`vulnv/checkatrade`, 270 users) was passed
+    over because its `category` input is an opaque numeric-ID enum with
+    no documented mapping and no freeform escape hatch — unusable for
+    prospector's freeform vertical terms.
+  - Live-tested against the exact class of bug that sank the Yell actor:
+    a deliberately invalid multi-word trade slug via the actor's
+    `searchUrls` input (bypassing its restrictive `trade` enum) still
+    completed with 0 items rather than erroring/404ing the whole run —
+    i.e. it fails soft on an unmatched slug, unlike Yell's hard failure.
+    A real slug (`Air-Conditioning-Installation`) in `South London`
+    returned 3 real businesses with working phones and 0-10 ratings.
+  - Checkatrade only covers trade/home-services categories — prospector's
+    non-trade verticals (solicitors, accountants, dental, vets, funeral
+    directors) will just harmlessly return 0 Checkatrade results, same
+    "additional pass, not guaranteed to fire for every vertical" contract
+    as Yell/organic.
+  - No official slug mapping exists for prospector's freeform vertical
+    terms; `checkatrade.py` builds a naive best-effort slug (title-case,
+    hyphen-join the sector term) rather than hardcoding a mapping for
+    ~1600 categories — works well for terms that happen to align with a
+    real Checkatrade trade name, returns 0 (not an error) otherwise.
+  - `google_place_id` is always `None` for Checkatrade-sourced businesses;
+    `businesses.checkatrade_listing_id` carries Checkatrade's own profile
+    URL instead (migration v10, additive).
 
 **Cross-source dedupe + provenance.** Sources run in order (`places`,
-`yell`, `organic`) against the same DB connection within one `discover
-run` call, so a later source's phone/domain dedupe check sees rows an
-earlier source in the *same* call already inserted — cross-source dedupe
-falls out of the existing place_id/phone/domain dedupe logic
-(`db.find_business_by_place_id`/`find_business_by_phone_or_domain`) for
-free, no new matching logic needed. When a later source re-finds a
+`yell`, `organic`, `checkatrade`) against the same DB connection within
+one `discover run` call, so a later source's phone/domain dedupe check
+sees rows an earlier source in the *same* call already inserted —
+cross-source dedupe falls out of the existing place_id/phone/domain
+dedupe logic (`db.find_business_by_place_id`/`find_business_by_phone_or_domain`)
+for free, no new matching logic needed. When a later source re-finds a
 business an earlier source (or an earlier run entirely) already inserted,
 that corroboration isn't silently dropped: `businesses.discovery_source`
 (migration v9, additive) records every source that found a business,
@@ -568,6 +612,127 @@ source-agnostic:**
 - Site-fetch (`enrichers/site.py`) keys off `website` only — unaffected by
   source (and Yell/organic-sourced businesses generally *do* have a
   website, since that's most of what those sources return).
+
+### Organic-search cross-check / validation
+
+`prospector crosscheck organic` (`prospector/enrichers/crosscheck.py`) —
+answers "how much of SerpAPI organic search's output is a genuinely
+findable/real local business, vs. unvalidated noise?" for businesses with
+`discovery_source LIKE '%organic%'`. Two checks, both reusing existing,
+already-working clients (per the standing "prefer a real API over new
+scraping" rule — Playwright is only used, via `enrichers/site.py`'s
+existing `_fetch_with_escalation`, when there's genuinely no API path,
+i.e. independently reading a business's own homepage):
+
+1. **GBP cross-check** — `places_client.find_place_by_name(name,
+   location)` (new; a single-result, name+location-targeted Places Text
+   Search, distinct from `discover_businesses()`'s paginated
+   vertical-wide sweep). If a real GBP listing turns up, it's strong
+   validation the organic result is a real, findable business, and its
+   phone/postcode/rating/review_count/google_place_id are backfilled onto
+   the row (only into fields that were still `NULL`) —
+   `gbp_crosscheck_status='validated_gbp'`. If no match is found even
+   with this more targeted query, that's recorded, not discarded:
+   `gbp_crosscheck_status='no_gbp_found'`, plus a free-text
+   `gbp_crosscheck_note` disambiguating (best-effort) between "looks like
+   a real business with a weak/absent GBP presence" (the organic result's
+   own homepage independently shows a phone/contact signal, or a prior
+   `site fetch` pass already found one — reused, not re-fetched) and
+   "the organic 'business name' matches a listicle/aggregator-title
+   pattern, likely not a real business record at all" (same failure mode
+   `discovery/organic.py`'s own docstring already calls out, e.g. "Local
+   Air Conditioning Companies in London for AC...").
+2. **Companies House cross-check** — already runs for every discovered
+   business regardless of source: `discovery/places.py`'s `discover_run()`
+   calls `enrich_companies_house()` unconditionally inside the per-business
+   loop, not gated on which source found the business, so organic-sourced
+   businesses already get the same CH name-search as Places/Yell/
+   Checkatrade-sourced ones (verified by reading the code — this was
+   already source-agnostic, nothing needed fixing). `crosscheck.py` just
+   *reads* the result: a live (non-dissolved) `companies_house_number` on
+   the row counts toward `organic_validated` without a second lookup.
+
+`businesses.organic_validated` (migration v11, additive) = 1 if either
+check corroborates the business; both a `validated_gbp` GBP match and a
+live CH match set it (an `error` GBP lookup — e.g. a transient Places API
+failure — doesn't count either way, and is left retriable via `--refresh`).
+
+**Real test: run #16 (South London air conditioning), 14 organic-only
+businesses (`discovery_source='organic'`, ids 403-416).** Results:
+
+| Outcome | Count |
+|---|---|
+| GBP match found (`validated_gbp`) | 13 / 14 |
+| No GBP match, but homepage independently looks real (weak_gbp candidate) | 1 / 14 |
+| Live Companies House match | 0 / 14 |
+
+At face value that reads as "13/14 validated" — but re-checking the 13
+matches' `google_place_id`s surfaced a real caveat, so this **should not
+be read as 13 genuinely distinct, confirmed net-new businesses**:
+
+- The 13 `validated_gbp` matches collapse onto only **8 distinct real GBP
+  listings**. Two clusters of near-identical-generic organic names
+  ("Air Conditioning London" / "Air Conditioning Units Installation In
+  South London" / "Aircon Installation In South London" / "London Air
+  Conditioning Specialists" — 5 records; "Air Conditioning Installation &
+  Maintenance" / "Air Conditioning Companies in South London" — 2 records)
+  all matched the *same* generic top-ranked GBP listing for their shared,
+  non-specific name-derived query. That's a false-positive risk inherent
+  to name-targeted search when the organic-derived "name" is generic
+  (exactly the title-cleaning weakness `discovery/organic.py` already
+  documents) — it confirms *a* real air-conditioning business exists for
+  that query, not that *this specific website* is that business.
+- 2 of the 8 distinct GBP listings the crosscheck found
+  (`ChIJbRk60iwNdkgRXzrkgJOpKG8` "Cooling Services Ltd",
+  `ChIJd_cwXoUBdkgRtLAo6mG2xjY` "Associated Cooling Services") turned out
+  to be `google_place_id`-identical to businesses **already in the same
+  run from the `places`/`places+organic` sources** (business ids #389,
+  #391) — i.e. these 2 organic "net-new" records were actually
+  rediscoveries of already-known businesses that the original
+  phone/domain dedupe missed (organic records had no phone/domain overlap
+  with the Places-sourced row at insert time, since organic's own record
+  had `phone=NULL`), not genuinely new leads.
+- That leaves **4 organic records with a solid, specific, plausibly
+  net-new GBP validation**: "Cool Electrics..." → Cool Guys Air
+  Conditioning Ltd, "Air Conditioning Wandsworth London" → DG Air
+  Conditioning Ltd, "Local Air Conditioning Companies in London for AC..."
+  → The Air Conditioning Company, "South Eastern Air Conditioning (London)
+  Ltd." → SOUTH EAST AIR-CONDITIONING & HVAC LTD — an interesting case
+  since the last one *looks* like the most "real" business name of the 14
+  and validated cleanly.
+- The 1 `no_gbp_found` record ("Stanley Cool: HVAC Services London") has
+  an independently-verified phone number on its own homepage — a genuine
+  `weak_gbp` candidate (no discoverable Google Business Profile at all,
+  exactly prospector's target pain-point), not a listicle false-positive.
+
+**Before/after example** (id 405, "Cool Electrics: Air Conditioning
+Installation in South West..."): before crosscheck —
+`phone=NULL, postcode=NULL, rating=NULL, review_count=NULL,
+google_place_id=NULL`; after — `phone='020 3130 4033',
+postcode='SW11 2PR', rating=5.0, review_count=2,
+google_place_id='ChIJRdn-hHcFdkgRKPz5qaZXPmE'` (matched GBP name: "Cool
+Guys Air Conditioning Ltd" — a plausible near-name match, not identical,
+worth a manual glance before outreach). Id 416 ("Stanley Cool"): no
+backfill (no GBP match), `gbp_crosscheck_status='no_gbp_found'`,
+`gbp_crosscheck_note` explains the homepage-based weak_gbp reasoning.
+
+**Honest quality assessment:** organic search is worth keeping as a
+discovery source, but its raw output should not be trusted at face value
+— only the ~4/14 (29%) genuinely distinct, specifically-matched
+validations and the 1/14 (7%) independently-verified weak_gbp candidate
+are solid outreach-ready leads from this batch; the 2/14 (14%) that
+collided with already-known businesses should be treated as duplicates,
+not new leads; and the 5/14 (36%) whose "match" collapsed onto a shared
+generic listing should be manually spot-checked rather than treated as
+confirmed (the `gbp_crosscheck_status='validated_gbp'` flag alone isn't
+sufficient evidence when the matched `google_place_id` is shared across
+multiple organic records in the same run — a quick `GROUP BY
+google_place_id HAVING COUNT(*) > 1` on `discovery_source LIKE
+'%organic%'` rows is the cheapest way to spot that pattern). Recommended
+policy: treat `organic_validated=1` **and** a `google_place_id` not
+shared with another row in the same run as the bar for "trust this
+organic result without a manual check"; discard/deprioritize the rest
+until `site fetch` + a human glance confirms it.
 
 ### Chain / franchise / corporate exclusion
 
@@ -828,15 +993,27 @@ nullable/defaulted) — no columns dropped, no rows touched:
   `discovery_source='places'` (all of them were, in fact, Places-sourced,
   since Places was the only source that existed before this migration),
   so every row has a source, not just newly-discovered ones.
+- **v10** (Checkatrade discovery source): `businesses.checkatrade_listing_id`
+  (Checkatrade's own profile URL, same idea as `yell_listing_id`, since
+  Checkatrade-sourced businesses have no `google_place_id` either — see
+  "Multi-source discovery" above).
+- **v11** (organic-search cross-check): `businesses.gbp_crosscheck_status`
+  (`'validated_gbp'` / `'no_gbp_found'` / `NULL`), `gbp_crosscheck_at`,
+  `gbp_crosscheck_note` (free-text reasoning, see "Organic-search
+  cross-check / validation" above), and `organic_validated` (1 if a
+  GBP match or a live Companies House match corroborates an
+  organic-sourced business). Bare `ADD COLUMN`s, all nullable/0-default —
+  no backfill needed since these only ever apply to businesses that have
+  gone through `prospector crosscheck organic`.
 
 `prospector.db` was backed up (`prospector.db.bak-<timestamp>-phase2`)
-before v3-v6 were first applied, and again
-(`prospector.db.bak-<timestamp>-phase6`) before v7, and again
-(`prospector.db.bak-<timestamp>-yell-organic-sources`) before v9. All 8
-pre-existing runs / 291 businesses / 2302 reviews (grown to 356
-businesses / 13 runs by the time v9 ran) were verified intact before and
-after every migration — v9 specifically backfilled all 356 pre-existing
-rows to `discovery_source='places'` with zero rows lost.
+before v3-v6 were first applied, again (`prospector.db.bak-<timestamp>-phase6`)
+before v7, again (`prospector.db.bak-<timestamp>-yell-organic-sources`)
+before v9, and again (`prospector.db.bak-<timestamp>-checkatrade-crosscheck`)
+before v10/v11. All 8 pre-existing runs / 291 businesses / 2302 reviews
+(grown to 356 businesses / 13 runs by the time v9 ran, and to 404
+businesses / 16 runs / 2580 reviews by the time v10/v11 ran) were verified
+intact before and after every migration.
 
 ## Error handling
 
@@ -890,7 +1067,7 @@ escalation" above for the full chain and its cost implications.
   thinner for the rare site that defeats all three layers than for small
   independent ones.
 
-## Known limitations — multi-source discovery (Yell, organic search)
+## Known limitations — multi-source discovery (Yell, organic search, Checkatrade)
 
 - **Yell.com actor bug**: `jungle_synthesizer/yell-uk-business-directory-scraper`
   works correctly for single-word keywords (e.g. "plumber") but its own
@@ -901,9 +1078,25 @@ escalation" above for the full chain and its cost implications.
   electrical contractors", "cosmetic dentistry / implant clinics", etc.),
   this actor is currently low-value for most real prospecting queries.
   `discover run` handles the failure gracefully (0 Yell results, logged,
-  pipeline continues) rather than erroring the whole run. Worth revisiting
-  if the actor gets fixed upstream, or swapping for a different Yell
-  scraper.
+  pipeline continues) rather than erroring the whole run. A follow-up
+  search of the Apify Store (see "Multi-source discovery" above) found no
+  better/fixed Yell.com actor — `jungle_synthesizer`'s is still the only
+  real one in the Store — but did find a genuinely better UK
+  trade-directory alternative in **Checkatrade** (`checkatrade` source,
+  `trev0n/checkatrade-scraper`), now registered alongside Yell rather than
+  replacing it (Yell still adds coverage Checkatrade doesn't, for the rare
+  multi-word query that happens to work). Worth revisiting Yell again if
+  the actor gets fixed upstream.
+- **Checkatrade actor** (`trev0n/checkatrade-scraper`) is live-tested and
+  working — real structured records with phone/rating/reviews, and
+  (unlike Yell) fails soft rather than erroring on an unmatched multi-word
+  trade slug. Its coverage is scoped to trade/home-services categories
+  only — harmlessly returns 0 for prospector's non-trade verticals
+  (solicitors, accountants, dental, vets, funeral directors) — and its
+  trade-slug matching is a best-effort naive guess (title-case/hyphenate
+  the sector term), not a hardcoded mapping to Checkatrade's ~1600 real
+  categories, so hit rate varies by how closely a vertical's search term
+  happens to resemble Checkatrade's own naming.
 - **SerpAPI organic search** (`engine=google`, 2-3 pages deep,
   directory-domain exclusions) genuinely surfaces real independent
   businesses Places misses (confirmed live: 14 net-new "air conditioning"
@@ -917,4 +1110,19 @@ escalation" above for the full chain and its cost implications.
   result title rather than an actual business name (e.g. "Local Air
   Conditioning Companies in London for AC..."). Treat organic-sourced
   rows as lower-confidence than Places/Yell until `site fetch` has run
-  and manually spot-check before an outreach batch.
+  — and now, **cross-checked** via `prospector crosscheck organic` (see
+  "Organic-search cross-check / validation" above): live-tested against
+  all 14 of run #16's organic-only businesses, 13/14 returned a GBP match
+  and 0/14 a live Companies House match, but re-examining the matched
+  `google_place_id`s showed those 13 "matches" actually correspond to
+  only 8 distinct real businesses (generic organic names collapsing onto
+  the same top-ranked GBP listing) and 2 of those 8 were already known
+  from the Places-sourced pass in the same run (missed by the original
+  phone/domain dedupe since the organic record had no phone/domain
+  overlap at insert time) — leaving only ~4/14 (29%) as solid, specific,
+  plausibly-net-new validated leads, plus 1/14 with an independently
+  verified real business site and no GBP listing at all (a genuine
+  `weak_gbp` candidate). **Recommendation**: keep organic as a discovery
+  source, but only trust `organic_validated=1` rows whose
+  `google_place_id` isn't shared with another organic row in the same
+  run — everything else needs a manual spot-check before outreach.

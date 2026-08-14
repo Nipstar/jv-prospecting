@@ -70,32 +70,36 @@ from prospector.db import (
     mark_chain_by_domain,
     merge_discovery_source,
 )
-from prospector.discovery import organic, yell
+from prospector.discovery import checkatrade, organic, yell
 from prospector.http import ApiError
 from prospector.verticals import resolve_search_term
 
 # Registry of discovery sources — Google Places (original, primary) plus
-# the two additional passes Andy asked for: Yell.com (Apify actor,
-# prospector/discovery/yell.py) and SerpAPI organic Google search
-# (prospector/discovery/organic.py). All three share the exact
-# discover_businesses(sector_term, area, radius_label, max_results) ->
-# list[dict] signature/return-shape, so discover_run below can treat them
-# identically — dedupe, Companies House enrichment, chain-detection, and
-# the DB write are all source-agnostic.
+# the additional passes Andy asked for: Yell.com (Apify actor,
+# prospector/discovery/yell.py), SerpAPI organic Google search
+# (prospector/discovery/organic.py), and Checkatrade.com (Apify actor,
+# prospector/discovery/checkatrade.py — added because the Yell actor is
+# confirmed broken for multi-word keywords, see README "Known
+# limitations"). All four share the exact discover_businesses(sector_term,
+# area, radius_label, max_results) -> list[dict] signature/return-shape,
+# so discover_run below can treat them identically — dedupe, Companies
+# House enrichment, chain-detection, and the DB write are all
+# source-agnostic.
 DISCOVERY_SOURCES: dict[str, Callable] = {
     "places": places_client.discover_businesses,
     "yell": yell.discover_businesses,
     "organic": organic.discover_businesses,
+    "checkatrade": checkatrade.discover_businesses,
 }
-DEFAULT_SOURCES: tuple[str, ...] = ("places", "yell", "organic")
+DEFAULT_SOURCES: tuple[str, ...] = ("places", "yell", "organic", "checkatrade")
 
 
 def resolve_sources(source: str | None) -> tuple[str, ...]:
-    """Parse the CLI --source value ("places", "yell", "organic", "all", or
-    a comma-list e.g. "places,yell") into an ordered tuple of source names.
-    None/"all" means all three — the new default, per Andy's request that
-    Yell + organic run alongside Places (additional passes), not instead
-    of it."""
+    """Parse the CLI --source value ("places", "yell", "organic",
+    "checkatrade", "all", or a comma-list e.g. "places,checkatrade") into
+    an ordered tuple of source names. None/"all" means all four — the
+    default, per Andy's request that Yell + organic (+ now Checkatrade)
+    run alongside Places (additional passes), not instead of it."""
     if not source or source.strip().lower() == "all":
         return DEFAULT_SOURCES
     names = tuple(s.strip().lower() for s in source.split(",") if s.strip())
@@ -296,6 +300,7 @@ def discover_run(
             biz["postcode"] = _extract_postcode(biz.get("address"))
             biz["discovery_source"] = source_name
             biz.setdefault("yell_listing_id", None)
+            biz.setdefault("checkatrade_listing_id", None)
 
             if do_ch:
                 biz.update(enrich_companies_house(biz["name"]))

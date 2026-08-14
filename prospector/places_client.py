@@ -207,3 +207,67 @@ def fetch_reviews(place_id: str, limit: int = 20) -> list[dict[str, Any]]:
         "(Places Details caps reviews at 5, too thin for pain-flag detection). "
         "See places_client.py module docstring."
     )
+
+
+def find_place_by_name(name: str, location: str) -> dict[str, Any] | None:
+    """Targeted single-result Places Text Search — "does a GBP listing for
+    *this specific business* actually exist", not a discovery pass.
+
+    Added for the organic-search cross-check (prospector/enrichers/
+    crosscheck.py): an organic-sourced business has no google_place_id
+    because it was never a Places result for the generic "{vertical} in
+    {location}" query — but it might still have a real GBP listing that
+    just didn't rank inside our page-size/page-count ceiling, or that
+    surfaces under different phrasing than the vertical search term (e.g.
+    "Cool Electrics" the business name vs. "air conditioning" the
+    vertical). Searching "{name} {location}" directly is a much more
+    targeted query than the discovery pass and will catch those.
+
+    Reuses discover_businesses()'s exact request shape (same endpoint,
+    field mask, regionCode=GB restriction) but as a single-page, top-1
+    lookup rather than a paginated discovery sweep — this is a lookup, not
+    a discovery source, so it isn't registered in discovery/places.py's
+    DISCOVERY_SOURCES.
+
+    Returns the same per-place dict shape as discover_businesses() (name,
+    address, phone, website, domain, rating, review_count,
+    google_place_id), or None if Places returns no results or a
+    non-operational-only result set. Raises ApiError if
+    GOOGLE_PLACES_API_KEY is unset or the request fails after retries —
+    callers (crosscheck.py) catch this and treat it as "couldn't check,"
+    not "no GBP listing exists."
+    """
+    if not GOOGLE_PLACES_API_KEY:
+        raise ApiError("GOOGLE_PLACES_API_KEY is not set — check .env")
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": GOOGLE_PLACES_API_KEY,
+        "X-Goog-FieldMask": _FIELD_MASK,
+    }
+    body: dict[str, Any] = {
+        "textQuery": f"{name} {location}",
+        "pageSize": 3,  # top few, not a full discovery page — we just want the best match
+        "regionCode": "GB",
+    }
+    resp = post(GOOGLE_PLACES_BASE_URL, headers=headers, json=body)
+    if resp.status_code != 200:
+        raise ApiError(f"Google Places name-lookup failed: HTTP {resp.status_code}: {resp.text[:300]}")
+    data = resp.json()
+    places = data.get("places") or []
+    for p in places:
+        if (p.get("businessStatus") or "OPERATIONAL") != "OPERATIONAL":
+            continue
+        website = p.get("websiteUri")
+        phone = p.get("nationalPhoneNumber") or p.get("internationalPhoneNumber")
+        return {
+            "name": (p.get("displayName") or {}).get("text"),
+            "address": p.get("formattedAddress"),
+            "phone": phone,
+            "website": website,
+            "domain": _domain_from_url(website),
+            "rating": p.get("rating"),
+            "review_count": p.get("userRatingCount"),
+            "google_place_id": p.get("id"),
+        }
+    return None

@@ -191,6 +191,48 @@ def _migration_v9_discovery_source(conn: sqlite3.Connection) -> None:
     )
 
 
+# v10 — Checkatrade.com discovery source (prospector/discovery/
+# checkatrade.py), added alongside Yell/organic per the "find a better
+# directory scraper than Yell" follow-up (Yell's actor is confirmed broken
+# for multi-word keywords — see README "Known limitations"). Checkatrade
+# has no Google Places ID either, same as Yell, so it needs its own
+# provenance column (Checkatrade's own profile URL) — additive/nullable,
+# same safe pattern as v9. DB backed up to
+# prospector.db.bak-<timestamp>-checkatrade-crosscheck before this
+# migration (and v11 below) ran.
+_V10_ADD_BUSINESS_COLUMNS = [
+    ("checkatrade_listing_id", "TEXT"),
+]
+
+
+def _migration_v10_checkatrade(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V10_ADD_BUSINESS_COLUMNS)
+
+
+# v11 — Organic-search cross-check/validation (prospector/enrichers/
+# crosscheck.py): for discovery_source LIKE '%organic%' businesses, a
+# targeted Google Places name+location lookup (places_client.
+# find_place_by_name) either finds a real GBP listing (in which case we
+# backfill phone/postcode/rating/review_count/google_place_id from it —
+# strong validation the business is real) or doesn't (recorded, not
+# silently dropped — "no discoverable GBP" is itself a signal, see
+# crosscheck.py module docstring for how it's disambiguated from "this
+# organic result isn't really a business"). Additive/nullable; existing
+# rows (non-organic, or organic rows not yet cross-checked) simply have
+# gbp_crosscheck_status/gbp_crosscheck_at/organic_validated all NULL/0
+# until `prospector crosscheck organic` is run against them.
+_V11_ADD_BUSINESS_COLUMNS = [
+    ("gbp_crosscheck_status", "TEXT"),  # 'validated_gbp' | 'no_gbp_found' | NULL (not organic, or not yet checked)
+    ("gbp_crosscheck_at", "TEXT"),
+    ("gbp_crosscheck_note", "TEXT"),  # free-text disambiguation note when no_gbp_found (see crosscheck.py)
+    ("organic_validated", "INTEGER DEFAULT 0"),  # 1 if an organic-sourced business is corroborated by a GBP match OR a live (non-dissolved) Companies House match
+]
+
+
+def _migration_v11_organic_crosscheck(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V11_ADD_BUSINESS_COLUMNS)
+
+
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
     for name, coltype in columns:
@@ -233,6 +275,8 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (7, _migration_v7_chain_flag),
     (8, _migration_v8_site_fetch_method),
     (9, _migration_v9_discovery_source),
+    (10, _migration_v10_checkatrade),
+    (11, _migration_v11_organic_crosscheck),
 ]
 
 
@@ -357,7 +401,7 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
         "director_name", "companies_house_number", "is_group_owned",
         "incorporation_date", "company_status", "established_flag",
         "is_chain", "chain_reason",
-        "yell_listing_id", "discovery_source",
+        "yell_listing_id", "checkatrade_listing_id", "discovery_source",
         "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]

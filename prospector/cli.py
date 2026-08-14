@@ -11,6 +11,7 @@ from prospector import chain_signals
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.discovery.places import discover_run, import_csv, resolve_sources
+from prospector.enrichers.crosscheck import crosscheck_organic
 from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
 from prospector.enrichers.site import fetch_all as fetch_all_site_signals
 from prospector.export import export_run_csv
@@ -136,9 +137,10 @@ def list_runs() -> None:
 @cli.group()
 def discover() -> None:
     """Prospector v2 discovery module (Phase 2, extended) — vertical x
-    location search across Google Places, Yell.com, and SerpAPI organic
-    search (see --source), Companies House enrichment, dedupe against the
-    DB (including across sources — see README 'Multi-source discovery')."""
+    location search across Google Places, Yell.com, SerpAPI organic
+    search, and Checkatrade.com (see --source), Companies House
+    enrichment, dedupe against the DB (including across sources — see
+    README 'Multi-source discovery')."""
 
 
 @discover.command(name="run")
@@ -146,7 +148,7 @@ def discover() -> None:
 @click.option("--location", "location", required=True, help="UK town/city (freeform, or one of prospector.locations.LOCATIONS).")
 @click.option("--max-results", "max_results", type=int, default=20, help="Max businesses to discover PER SOURCE (default 20).")
 @click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment (faster, no CH API calls).")
-@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, or a comma-list (e.g. places,yell). Default 'all' runs all three additively and dedupes across them.")
+@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, checkatrade, or a comma-list (e.g. places,checkatrade). Default 'all' runs all four additively and dedupes across them.")
 def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool, source: str) -> None:
     """Discover businesses for one vertical/location pair."""
     missing = missing_keys()
@@ -172,7 +174,7 @@ def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool
 @click.argument("csv_path", type=click.Path(exists=True, path_type=Path))
 @click.option("--max-results", "max_results", type=int, default=20, help="Default max businesses per row per source (default 20; overridable per-row via a max_results CSV column).")
 @click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment for all rows.")
-@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, or a comma-list. Default 'all'.")
+@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, checkatrade, or a comma-list. Default 'all'.")
 def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool, source: str) -> None:
     """Bulk-discover from a CSV of vertical,location pairs (optional max_results column)."""
     sources = resolve_sources(source)
@@ -276,6 +278,35 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
             f"Fetch layer usage: httpx={counts['httpx']}  playwright={counts['playwright']}  "
             f"apify={counts['apify']}  unreachable={len(results) - len(methods)}"
         )
+
+
+@cli.group()
+def crosscheck() -> None:
+    """Cross-check/validation module (prospector/enrichers/crosscheck.py)
+    — for organic-sourced businesses, a targeted GBP name+location lookup
+    plus a read of the (already source-agnostic) Companies House
+    enrichment, to gauge how much of SerpAPI organic search's output is a
+    genuinely findable/real local business vs. unvalidated."""
+
+
+@crosscheck.command(name="organic")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+@click.option("--business-id", "business_id", type=int, default=None, help="Limit to one business.")
+@click.option("--refresh", "refresh", is_flag=True, default=False, help="Re-check even businesses already cross-checked.")
+def crosscheck_organic_cmd(run_id: int | None, business_id: int | None, refresh: bool) -> None:
+    """Cross-check organic-sourced businesses against GBP + Companies House."""
+    with get_conn() as conn:
+        results = crosscheck_organic(conn, run_id=run_id, business_id=business_id, refresh=refresh)
+
+    if not results:
+        click.echo("No organic-sourced businesses to cross-check (already checked, or none found — run `discover run` first).")
+        return
+    validated = sum(1 for r in results if r.organic_validated)
+    no_gbp = sum(1 for r in results if r.gbp_status == "no_gbp_found")
+    gbp_found = sum(1 for r in results if r.gbp_status == "validated_gbp")
+    for r in results:
+        click.echo(f"#{r.business_id} {r.name}: {r.gbp_status}  organic_validated={int(r.organic_validated)}")
+    click.echo(f"\nTotal: {len(results)}  gbp_matches={gbp_found}  no_gbp_found={no_gbp}  organic_validated={validated}")
 
 
 @cli.group()
