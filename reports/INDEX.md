@@ -22,22 +22,33 @@ a page for any of them on request.
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
 | #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 32 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_20260813T210703.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
+| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 28 (chain-flagged businesses now excluded post-rescan) | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
 | #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 20 (of 22, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
-| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 34 (of 35, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
+| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 33 (of 35, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
+| #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 11 (of 18, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
+| #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 6 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
 
-**London-wide air conditioning sweep, in progress.** Chunked by sub-area
+**London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
-standing rule that single big-area queries plateau and duplicate. Done so
-far: North (#17) and East (#18) London, plus the earlier South London
-passes (#12/#16). West and Central London were not yet run — this session
-hit repeated process-reliability issues (site-fetch steps getting killed/
-losing track across session boundaries) that ate most of the available
-time; North+East London were driven directly in the foreground once that
-became clear, rather than continuing to lose progress via background
-delegation. Run `prospector discover run --vertical "air conditioning
-companies" --location "West London" --source places,checkatrade,organic
---max-results 60` (then reviews fetch / site fetch / chain rescan / report
---deploy) to continue the sweep for West and Central London on request.
+standing rule that single big-area queries plateau and duplicate. All 5
+areas done: North (#17), East (#18), West (#19), Central (#20), South
+(#12/#16, run twice — #16 supplements #12 with Checkatrade/Yell coverage
+that didn't exist when #12 originally ran). Central London had heavy
+overlap with the other 4 chunks (55 of 62 discovered results were
+duplicates already in the DB), as expected for the geographic middle.
+No wrong-country leakage found in any chunk (spot-checked). A DB-wide
+chain rescan was run after all 5 chunks completed, so chain-exclusion
+counts above reflect cross-chunk chain patterns, not just each area in
+isolation.
+
+**Process-reliability fix landed mid-sweep**: run #16's site-fetch step
+was killed (exit 137) partway through with zero progress saved, because
+`prospector site fetch` previously ran as one unbounded batch/transaction.
+Fixed in commit 8ce2b6c — `site fetch` now auto-chunks into small batches
+(10 businesses/batch by default, `--batch-size` to tune) so a crash can
+only lose one batch's worth of work, and simply re-running the command
+resumes automatically. Verified against the exact run that crashed
+before — completed cleanly in 3 batches on retry.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
