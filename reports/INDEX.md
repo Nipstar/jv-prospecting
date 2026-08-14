@@ -22,6 +22,22 @@ a page for any of them on request.
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
 | #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 32 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_20260813T210703.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
+| #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 20 (of 22, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
+| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 34 (of 35, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
+
+**London-wide air conditioning sweep, in progress.** Chunked by sub-area
+(North/South/East/West/Central) rather than one citywide query, per the
+standing rule that single big-area queries plateau and duplicate. Done so
+far: North (#17) and East (#18) London, plus the earlier South London
+passes (#12/#16). West and Central London were not yet run — this session
+hit repeated process-reliability issues (site-fetch steps getting killed/
+losing track across session boundaries) that ate most of the available
+time; North+East London were driven directly in the foreground once that
+became clear, rather than continuing to lose progress via background
+delegation. Run `prospector discover run --vertical "air conditioning
+companies" --location "West London" --source places,checkatrade,organic
+--max-results 60` (then reviews fetch / site fetch / chain rescan / report
+--deploy) to continue the sweep for West and Central London on request.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
