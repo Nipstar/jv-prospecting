@@ -216,6 +216,17 @@ standard Google place identifier valid across both APIs, so this works
 regardless of which API discovered the business. See
 `places_client.fetch_reviews`'s docstring for the same reasoning in code.
 
+**Country restriction (`regionCode: GB`):** the Places Text Search request
+body now sends `"regionCode": "GB"`. Without it, ambiguous/colloquial area
+names leaked wrong-country results into two separate live runs — a
+Canadian "Roy Inch & Sons" (`enercare.ca`) and a Kentucky, USA "Smith
+Heating & Cooling" both matched a "South London" query. Confirmed fixed by
+re-running the exact same query (`air conditioning companies` in `South
+London`) after the fix: 59 results, all genuinely UK addresses/phone
+numbers, zero non-UK leakage (the previous US/Canada matches simply don't
+come back any more). See `places_client.py`'s `discover_businesses()` for
+the field-level comment.
+
 ## Usage
 
 ```bash
@@ -404,16 +415,25 @@ ad-spend or pain-keyword scoring — it targets **weak Google review
 profiles** instead.
 
 ```bash
-# 1. Discover — vertical x location Google Places search + Companies
-#    House enrichment (company number, incorporation date, status,
-#    established_flag for 3+ year old firms). Dedupes on google_place_id,
-#    then normalised phone/domain fallback, against everything already in
-#    the DB (including legacy-pipeline businesses).
+# 1. Discover — vertical x location search across THREE discovery
+#    sources (Google Places, Yell.com, SerpAPI organic search — see
+#    "Multi-source discovery" below) + Companies House enrichment
+#    (company number, incorporation date, status, established_flag for
+#    3+ year old firms). Dedupes on google_place_id, then normalised
+#    phone/domain fallback, against everything already in the DB
+#    (including legacy-pipeline businesses) AND across sources within
+#    the same discover_run call.
 prospector discover run --vertical vets --location Winchester --max-results 20
 prospector discover run --vertical "solicitors and conveyancers" --location Reading
 
+# --source controls which discovery source(s) run (default: all three)
+prospector discover run --vertical "air conditioning" --location Croydon --source places
+prospector discover run --vertical "air conditioning" --location Croydon --source yell
+prospector discover run --vertical "air conditioning" --location Croydon --source places,yell
+prospector discover run --vertical "air conditioning" --location Croydon --source all   # same as omitting --source
+
 # Bulk, from a CSV of vertical,location pairs (optional max_results column)
-prospector discover import my_targets.csv
+prospector discover import my_targets.csv --source all
 
 # 2. Reviews — Google Places Details fetch (rating, review count, up to 5
 #    review snippets) + review_target_score (0-100).
@@ -447,6 +467,107 @@ same source `prospector report`'s contact block uses) — placed next to
 `company_number`/`years_trading` since it's the other Companies-House-derived
 field. `targets list`'s console output includes the same `director_name`
 value (when present) alongside the score columns.
+
+### Multi-source discovery (Places + Yell.com + SerpAPI organic search)
+
+`discover run`/`discover import` now query up to three discovery sources
+per vertical/location, additively (not as a replacement for Google
+Places) — Andy wanted extra coverage for businesses that don't surface
+well on Places/Maps. Every source returns the identical dict shape
+(`name`, `address`, `phone`, `website`, `domain`, `rating`, `review_count`,
+`google_place_id`), so Companies House enrichment, chain detection,
+reviews fetch, and site-signal fetch all run identically regardless of
+which source found a given business — verified live, not assumed (see
+each subsection below).
+
+- **`places`** (default/primary, unchanged behaviour) — `places_client.py`,
+  Google Places API (New) Text Search. Now sends `regionCode: GB` — see
+  "Discovery source & fallback" above.
+- **`yell`** (new) — `prospector/discovery/yell.py`. Yell.com, the UK's
+  largest business directory, via the Apify actor
+  `jungle_synthesizer/yell-uk-business-directory-scraper` (confirmed real
+  and functional via Apify's actor-search API before use, not assumed —
+  free pricing tier, actively maintained). Direct httpx/scraping against
+  Yell was ruled out: `yell.com` returns HTTP 403 to a plain fetch and
+  sits behind a Cloudflare challenge, so the Apify-actor route (which
+  solves that challenge itself, same class of problem `enrichers/site.py`
+  already handles for prospect sites) is the only realistic option here,
+  not just the convenient one. Uses the same `run-sync-get-dataset-items`
+  REST pattern as `enrichers/site.py`'s Apify fallback layer — same
+  `APIFY_TOKEN`, different actor/input/timeout.
+  - `google_place_id` is always `None` for Yell-sourced businesses (Yell
+    has no Google Places ID); `businesses.yell_listing_id` carries Yell's
+    own profile URL instead (migration v9, additive).
+  - **Live-tested caveat:** Yell's site only recognises formal town/city
+    names as a location — colloquial sub-regions fail outright. `"South
+    London"` 404s (confirmed via the actor's run log — it solves the
+    Cloudflare challenge fine, then gets a hard 404 on the resulting
+    search URL); `"London"` and `"Croydon"` both work. This mirrors the
+    Places `regionCode` issue in spirit (informal UK region names causing
+    trouble) but surfaces as a clean failure rather than silent
+    wrong-country leakage. `discover_businesses()` fails **soft** for
+    this case — catches the error, logs it, returns `[]` — so a bad
+    location string for Yell specifically never blocks the Places-sourced
+    (or organic-sourced) results in the same `discover run` call. Prefer
+    real town/borough names over colloquial regions when you want Yell
+    coverage.
+- **`organic`** (new) — `prospector/discovery/organic.py`. SerpAPI
+  `engine=google` (regular organic web search, distinct from the
+  `engine=google_maps` local-pack engine `serpapi_client.py` already
+  used as the Places fallback — that fallback is unchanged), 2-3 pages
+  deep (`start=0,10,20`, ~20-30 organic results per query). Filters out
+  big directories/aggregators (Yell, Checkatrade, Trustpilot, Yelp,
+  Facebook/Instagram/LinkedIn, Bark, MyBuilder, RatedPeople, etc. — see
+  `EXCLUDED_DOMAINS` in `discovery/organic.py`) so this source surfaces
+  independent business websites that rank organically, not directory
+  listing pages (including Yell's own — we already query Yell directly as
+  its own source, so re-finding Yell listing pages here would just be
+  noise/near-duplication rather than new coverage).
+  - Organic results carry a title/link/snippet, not a structured business
+    record — there's no phone/address/rating field the way the other two
+    sources provide one. `address`/`rating`/`review_count` are always
+    `None`; `phone` is extracted from the snippet text on a best-effort
+    basis (same UK-phone regex `enrichers/site.py` uses for
+    phone-dependency detection) and is often `None` too. A genuinely
+    weaker record than Places/Yell, by design — still useful as a lead
+    (the domain/website is real), just don't expect a phone number to
+    always be there without a site-fetch pass filling in more later.
+
+**Cross-source dedupe + provenance.** Sources run in order (`places`,
+`yell`, `organic`) against the same DB connection within one `discover
+run` call, so a later source's phone/domain dedupe check sees rows an
+earlier source in the *same* call already inserted — cross-source dedupe
+falls out of the existing place_id/phone/domain dedupe logic
+(`db.find_business_by_place_id`/`find_business_by_phone_or_domain`) for
+free, no new matching logic needed. When a later source re-finds a
+business an earlier source (or an earlier run entirely) already inserted,
+that corroboration isn't silently dropped: `businesses.discovery_source`
+(migration v9, additive) records every source that found a business,
+joined with `+` — e.g. `places`, `yell`, or `places+yell` if both Places
+and Yell independently surfaced the same firm. Pre-existing businesses
+(all Places-era) were backfilled to `discovery_source='places'` by the
+migration itself.
+
+**Companies House / chain / reviews / site-fetch all verified
+source-agnostic:**
+- Companies House enrichment (`enrich_companies_house()`) keys off the
+  business *name* only — unaffected by source.
+- Chain/franchise detection (`chain_signals.detect_chain`) keys off
+  name/domain/company-number — unaffected by source.
+- Reviews fetch (`enrichers/reviews.py`) previously *required*
+  `google_place_id IS NOT NULL` to even be considered — which would have
+  silently excluded every Yell/organic-sourced business from ever getting
+  a `review_target_score`, and therefore from ever appearing in `targets
+  list`/`export` (both filter on `review_target_score IS NOT NULL`). Fixed
+  as part of this work: `db.businesses_needing_review_fetch` no longer
+  restricts on `google_place_id`, and `fetch_and_score()` now treats a
+  missing `google_place_id` the same as "Places lookup found no listing"
+  (`found_listing=False`, `weak_gbp=True`) rather than skipping the
+  business outright — so Yell/organic-sourced businesses still get scored
+  and can still surface as targets.
+- Site-fetch (`enrichers/site.py`) keys off `website` only — unaffected by
+  source (and Yell/organic-sourced businesses generally *do* have a
+  website, since that's most of what those sources return).
 
 ### Chain / franchise / corporate exclusion
 
@@ -698,14 +819,24 @@ nullable/defaulted) — no columns dropped, no rows touched:
 - **v8** (site-fetch escalation): `businesses.site_fetch_method` — which
   of httpx/playwright/apify fetched the site (or NULL if unreachable/no
   website), see "Site-fetch escalation" above.
+- **v9** (multi-source discovery): `businesses.yell_listing_id` (Yell's
+  own profile URL, since Yell-sourced businesses have no
+  `google_place_id`) and `businesses.discovery_source` (which source(s)
+  found this business — `places`, `yell`, `organic`, or a `+`-joined
+  combination, see "Multi-source discovery" above). Unlike v3-v8, this one
+  isn't a bare `ADD COLUMN` — it also backfills every pre-existing row to
+  `discovery_source='places'` (all of them were, in fact, Places-sourced,
+  since Places was the only source that existed before this migration),
+  so every row has a source, not just newly-discovered ones.
 
 `prospector.db` was backed up (`prospector.db.bak-<timestamp>-phase2`)
 before v3-v6 were first applied, and again
-(`prospector.db.bak-<timestamp>-phase6`) before v7. All 8 pre-existing
-runs / 291 businesses / 2302 reviews (grown to 295 businesses / 2322
-reviews / 9 runs by the time v7 ran, after Phase 2-5 testing added a
-9th run of 4 test vets in Winchester) were verified intact before and
-after every migration.
+(`prospector.db.bak-<timestamp>-phase6`) before v7, and again
+(`prospector.db.bak-<timestamp>-yell-organic-sources`) before v9. All 8
+pre-existing runs / 291 businesses / 2302 reviews (grown to 356
+businesses / 13 runs by the time v9 ran) were verified intact before and
+after every migration — v9 specifically backfilled all 356 pre-existing
+rows to `discovery_source='places'` with zero rows lost.
 
 ## Error handling
 
@@ -758,3 +889,32 @@ escalation" above for the full chain and its cost implications.
   rather than crashing, so opportunity_score coverage will still be
   thinner for the rare site that defeats all three layers than for small
   independent ones.
+
+## Known limitations — multi-source discovery (Yell, organic search)
+
+- **Yell.com actor bug**: `jungle_synthesizer/yell-uk-business-directory-scraper`
+  works correctly for single-word keywords (e.g. "plumber") but its own
+  URL-building logic 404s against real Yell.com for multi-word keywords
+  (confirmed via direct Apify API testing — "air conditioning" alone,
+  no location complexity, reproduces the failure). Since most of
+  prospector's verticals are multi-word phrases ("heating plumbing and
+  electrical contractors", "cosmetic dentistry / implant clinics", etc.),
+  this actor is currently low-value for most real prospecting queries.
+  `discover run` handles the failure gracefully (0 Yell results, logged,
+  pipeline continues) rather than erroring the whole run. Worth revisiting
+  if the actor gets fixed upstream, or swapping for a different Yell
+  scraper.
+- **SerpAPI organic search** (`engine=google`, 2-3 pages deep,
+  directory-domain exclusions) genuinely surfaces real independent
+  businesses Places misses (confirmed live: 14 net-new "air conditioning"
+  firms in South London beyond what Places+Yell found). BUT organic SERP
+  snippets don't carry structured phone/address data the way Places does
+  — most organic-sourced businesses land with `phone=NULL`,
+  `postcode=NULL` until the `site fetch` stage scrapes their homepage.
+  Result quality is also mixed: some results are real business names
+  (e.g. "Cool Electrics", "South Eastern Air Conditioning (London) Ltd."),
+  others are generic listicle/blog page titles picked up as the SERP
+  result title rather than an actual business name (e.g. "Local Air
+  Conditioning Companies in London for AC..."). Treat organic-sourced
+  rows as lower-confidence than Places/Yell until `site fetch` has run
+  and manually spot-check before an outreach batch.

@@ -20,3 +20,4 @@ prospector.db.bak-*
 # fresh from reports/runs/ + exports/runs/ on every `prospector deploy`.
 .pages_dist/
 .wrangler/
+prospector.db-journal

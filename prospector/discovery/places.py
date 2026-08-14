@@ -58,6 +58,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from pathlib import Path
+from typing import Callable
 
 from prospector import chain_signals, companies_house_client, places_client
 from prospector.db import (
@@ -67,9 +68,44 @@ from prospector.db import (
     insert_discovered_business,
     mark_chain_by_company_number,
     mark_chain_by_domain,
+    merge_discovery_source,
 )
+from prospector.discovery import organic, yell
 from prospector.http import ApiError
 from prospector.verticals import resolve_search_term
+
+# Registry of discovery sources — Google Places (original, primary) plus
+# the two additional passes Andy asked for: Yell.com (Apify actor,
+# prospector/discovery/yell.py) and SerpAPI organic Google search
+# (prospector/discovery/organic.py). All three share the exact
+# discover_businesses(sector_term, area, radius_label, max_results) ->
+# list[dict] signature/return-shape, so discover_run below can treat them
+# identically — dedupe, Companies House enrichment, chain-detection, and
+# the DB write are all source-agnostic.
+DISCOVERY_SOURCES: dict[str, Callable] = {
+    "places": places_client.discover_businesses,
+    "yell": yell.discover_businesses,
+    "organic": organic.discover_businesses,
+}
+DEFAULT_SOURCES: tuple[str, ...] = ("places", "yell", "organic")
+
+
+def resolve_sources(source: str | None) -> tuple[str, ...]:
+    """Parse the CLI --source value ("places", "yell", "organic", "all", or
+    a comma-list e.g. "places,yell") into an ordered tuple of source names.
+    None/"all" means all three — the new default, per Andy's request that
+    Yell + organic run alongside Places (additional passes), not instead
+    of it."""
+    if not source or source.strip().lower() == "all":
+        return DEFAULT_SOURCES
+    names = tuple(s.strip().lower() for s in source.split(",") if s.strip())
+    unknown = [n for n in names if n not in DISCOVERY_SOURCES]
+    if unknown:
+        raise ValueError(
+            f"Unknown discovery source(s): {', '.join(unknown)}. "
+            f"Valid: {', '.join(DISCOVERY_SOURCES)}, all"
+        )
+    return names or DEFAULT_SOURCES
 
 # Statuses that mean "not a live, callable business" — a match against one
 # of these is treated as no-match (see module docstring).
@@ -188,70 +224,113 @@ class DiscoverResult:
     inserted: int = 0
     chain_flagged: int = 0
     inserted_ids: list[int] = field(default_factory=list)
+    sources_run: tuple[str, ...] = ()
+    found_by_source: dict = field(default_factory=dict)
+    inserted_by_source: dict = field(default_factory=dict)
+    source_errors: dict = field(default_factory=dict)
 
 
-def discover_run(conn, vertical: str, location: str, max_results: int = 20, do_ch: bool = True) -> DiscoverResult:
-    """Discover businesses for one vertical/location pair, dedupe against
-    what's already in the DB (place_id first, then normalised phone/domain
-    fallback — see db.find_business_by_place_id /
-    find_business_by_phone_or_domain), optionally enrich via Companies
-    House, and write survivors to `businesses`.
+def discover_run(
+    conn,
+    vertical: str,
+    location: str,
+    max_results: int = 20,
+    do_ch: bool = True,
+    sources: tuple[str, ...] = DEFAULT_SOURCES,
+) -> DiscoverResult:
+    """Discover businesses for one vertical/location pair across one or
+    more discovery sources (Places, Yell, SerpAPI-organic — see
+    DISCOVERY_SOURCES above), dedupe against what's already in the DB
+    (place_id first, then normalised phone/domain fallback — see
+    db.find_business_by_place_id / find_business_by_phone_or_domain),
+    optionally enrich via Companies House, and write survivors to
+    `businesses`.
+
+    Sources run in the order given (DEFAULT_SOURCES: places, yell,
+    organic) against the *same* connection, so the phone/domain dedupe
+    check for a later source sees rows already inserted by an earlier
+    source in this same call — cross-source dedupe within one discover_run
+    invocation falls out of that for free, no extra logic needed. When a
+    later source re-finds a business an earlier source (or an earlier run
+    entirely) already inserted, that's not silently dropped either —
+    db.merge_discovery_source appends the new source to the existing row's
+    discovery_source (e.g. 'places' -> 'places+yell') so Andy can see which
+    businesses were corroborated by more than one source.
+
+    A single source failing (ApiError, or Yell's own soft-fail-to-[] path
+    for a bad location/keyword — see discovery/yell.py) does not abort the
+    other sources in the same call; `source_errors` on the returned
+    DiscoverResult records what happened per source.
     """
     vertical_label, search_term = resolve_search_term(vertical)
-    run_id = create_run(conn, location, [vertical_label], notes="discovery/places.py (Phase 2)")
-    result = DiscoverResult(run_id=run_id, vertical=vertical_label, location=location)
+    run_id = create_run(
+        conn, location, [vertical_label],
+        notes=f"discovery/places.py — sources={','.join(sources)}",
+    )
+    result = DiscoverResult(run_id=run_id, vertical=vertical_label, location=location, sources_run=sources)
 
-    discovered = places_client.discover_businesses(search_term, location, "county-wide", max_results)
-    result.found = len(discovered)
-
-    for biz in discovered:
-        place_id = biz.get("google_place_id")
-        if place_id and find_business_by_place_id(conn, place_id):
-            result.deduped_skipped += 1
-            continue
-        # Fallback dedupe on phone/domain regardless of place_id presence,
-        # in case the same firm was previously discovered under a
-        # different place_id (e.g. Google merged/split listings between
-        # runs) — required dedupe fallback per the standing project rules.
-        if find_business_by_phone_or_domain(conn, biz.get("phone"), biz.get("domain")):
-            result.deduped_skipped += 1
+    for source_name in sources:
+        discover_fn = DISCOVERY_SOURCES[source_name]
+        try:
+            discovered = discover_fn(search_term, location, "county-wide", max_results)
+        except ApiError as exc:
+            result.source_errors[source_name] = str(exc)
+            print(f"  [discover] {source_name} failed for {vertical_label!r} in {location!r}: {exc}")
             continue
 
-        biz["vertical"] = vertical_label
-        biz["town"] = location
-        biz["postcode"] = _extract_postcode(biz.get("address"))
+        result.found += len(discovered)
+        result.found_by_source[source_name] = len(discovered)
 
-        if do_ch:
-            biz.update(enrich_companies_house(biz["name"]))
-        else:
-            biz.update({
-                "companies_house_number": None,
-                "incorporation_date": None,
-                "company_status": None,
-                "established_flag": 0,
-                "is_group_owned": False,
-                "director_name": None,
-            })
+        for biz in discovered:
+            place_id = biz.get("google_place_id")
+            existing = find_business_by_place_id(conn, place_id) if place_id else None
+            if existing is None:
+                existing = find_business_by_phone_or_domain(conn, biz.get("phone"), biz.get("domain"))
+            if existing is not None:
+                result.deduped_skipped += 1
+                merge_discovery_source(conn, existing["id"], source_name)
+                continue
 
-        is_chain, chain_reason = chain_signals.detect_chain(conn, biz)
-        biz["is_chain"] = int(is_chain)
-        biz["chain_reason"] = chain_reason
+            biz["vertical"] = vertical_label
+            biz["town"] = location
+            biz["postcode"] = _extract_postcode(biz.get("address"))
+            biz["discovery_source"] = source_name
+            biz.setdefault("yell_listing_id", None)
 
-        business_id = insert_discovered_business(conn, run_id, biz)
-        result.inserted += 1
-        result.inserted_ids.append(business_id)
-        if is_chain:
-            result.chain_flagged += 1
-            # Retroactively flag any earlier-discovered sibling business
-            # that shares this domain/company number too — see module
-            # docstring ("multi-location" signal).
-            mark_chain_by_domain(conn, biz.get("domain"), chain_reason, exclude_id=business_id)
-            mark_chain_by_company_number(conn, biz.get("companies_house_number"), chain_reason, exclude_id=business_id)
+            if do_ch:
+                biz.update(enrich_companies_house(biz["name"]))
+            else:
+                biz.update({
+                    "companies_house_number": None,
+                    "incorporation_date": None,
+                    "company_status": None,
+                    "established_flag": 0,
+                    "is_group_owned": False,
+                    "director_name": None,
+                })
+
+            is_chain, chain_reason = chain_signals.detect_chain(conn, biz)
+            biz["is_chain"] = int(is_chain)
+            biz["chain_reason"] = chain_reason
+
+            business_id = insert_discovered_business(conn, run_id, biz)
+            result.inserted += 1
+            result.inserted_by_source[source_name] = result.inserted_by_source.get(source_name, 0) + 1
+            result.inserted_ids.append(business_id)
+            if is_chain:
+                result.chain_flagged += 1
+                # Retroactively flag any earlier-discovered sibling business
+                # that shares this domain/company number too — see module
+                # docstring ("multi-location" signal).
+                mark_chain_by_domain(conn, biz.get("domain"), chain_reason, exclude_id=business_id)
+                mark_chain_by_company_number(conn, biz.get("companies_house_number"), chain_reason, exclude_id=business_id)
 
     return result
 
 
-def import_csv(conn, csv_path: Path, max_results: int = 20, do_ch: bool = True) -> list[DiscoverResult]:
+def import_csv(
+    conn, csv_path: Path, max_results: int = 20, do_ch: bool = True, sources: tuple[str, ...] = DEFAULT_SOURCES
+) -> list[DiscoverResult]:
     """Bulk discovery from a CSV of (vertical, location) pairs — columns
     `vertical` and `location` (case-insensitive header match). An optional
     `max_results` column overrides the default per-row.
@@ -272,5 +351,5 @@ def import_csv(conn, csv_path: Path, max_results: int = 20, do_ch: bool = True) 
                 raw = (row.get(fieldmap["max_results"]) or "").strip()
                 if raw.isdigit():
                     row_max = int(raw)
-            results.append(discover_run(conn, vertical, location, max_results=row_max, do_ch=do_ch))
+            results.append(discover_run(conn, vertical, location, max_results=row_max, do_ch=do_ch, sources=sources))
     return results

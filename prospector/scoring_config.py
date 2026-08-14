@@ -190,3 +190,29 @@ APIFY_INPUT_DEFAULTS = {
     "scrapingTool": "browser-playwright",
     "requestTimeoutSecs": 40,
 }
+
+# --- Yell.com discovery source (prospector/discovery/yell.py) ---------------
+#
+# Confirmed real and functional via Apify's actor search (Andy said one
+# existed; verified rather than assumed — see README "Yell.com discovery
+# source"): jungle_synthesizer/yell-uk-business-directory-scraper. Free
+# pricing tier, last modified 2026-07-31 (actively maintained), input is
+# {keywords, location, maxItems}. Reuses the exact same run-sync-get-
+# dataset-items REST pattern as the Apify site-fetch fallback above
+# (APIFY_ACTOR_RUN_ENDPOINT), just a different actor ID/input/timeout.
+#
+# Live-tested behaviour worth knowing: the actor solves Yell's Cloudflare
+# challenge itself (18-45s typical, up to ~85s across 3 internal retry
+# attempts), so a generous client-side timeout is needed. It also 404s
+# cleanly (raises inside the actor, run status FAILED) for location
+# strings Yell's own site doesn't recognise as a location page — "South
+# London" failed consistently in live testing, "London" and "Croydon"
+# succeeded — the same class of "colloquial sub-region vs. formal
+# place-name" issue as the Places regionCode fix, just surfacing as a
+# hard failure instead of silent wrong-country leakage. yell.py fails
+# soft (returns [], logs a warning) rather than raising into discover_run,
+# so one bad location string never blocks the Places-sourced pass in the
+# same combined run.
+APIFY_YELL_ACTOR_ID = "jungle_synthesizer~yell-uk-business-directory-scraper"
+APIFY_YELL_TIMEOUT_SECONDS = 240.0
+APIFY_YELL_MAX_ITEMS_CAP = 200  # sanity ceiling passed as the actor's own maxItems input

@@ -166,6 +166,30 @@ _V8_ADD_BUSINESS_COLUMNS = [
     ("site_fetch_method", "TEXT"),
 ]
 
+# v9 — Multi-source discovery (Yell.com + SerpAPI organic search added
+# alongside Google Places, all additive discovery passes — see
+# prospector/discovery/{yell,organic}.py): tracks which source(s) found
+# each business, plus Yell's own listing URL for provenance since Yell has
+# no Google Places ID to key off. Both additive/nullable — the 300+
+# pre-existing businesses (all Places-sourced) get backfilled to
+# discovery_source='places' by the migration itself (a one-time UPDATE,
+# not just a bare ADD COLUMN) so every row has a source, not just new
+# ones; DB backed up to prospector.db.bak-<timestamp>-yell-organic-sources
+# before this migration ran.
+_V9_ADD_BUSINESS_COLUMNS = [
+    ("yell_listing_id", "TEXT"),
+    ("discovery_source", "TEXT"),
+]
+
+
+def _migration_v9_discovery_source(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V9_ADD_BUSINESS_COLUMNS)
+    # Backfill: every business that existed before this migration was
+    # found by the (until now, only) Google Places discovery pass.
+    conn.execute(
+        "UPDATE businesses SET discovery_source = 'places' WHERE discovery_source IS NULL"
+    )
+
 
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
@@ -208,6 +232,7 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (6, _migration_v6_tps_placeholder),
     (7, _migration_v7_chain_flag),
     (8, _migration_v8_site_fetch_method),
+    (9, _migration_v9_discovery_source),
 ]
 
 
@@ -332,6 +357,7 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
         "director_name", "companies_house_number", "is_group_owned",
         "incorporation_date", "company_status", "established_flag",
         "is_chain", "chain_reason",
+        "yell_listing_id", "discovery_source",
         "created_at",
     ]
     values = [run_id] + [biz.get(c) for c in cols[1:-1]] + [_utcnow()]
@@ -341,6 +367,28 @@ def insert_discovered_business(conn: sqlite3.Connection, run_id: int, biz: dict)
         values,
     )
     return int(cur.lastrowid)
+
+
+def merge_discovery_source(conn: sqlite3.Connection, business_id: int, source: str) -> None:
+    """When a business already in the DB (from an earlier source in this
+    same multi-source discover_run pass, or an earlier run entirely) is
+    re-found by a *different* source, record that instead of silently
+    dropping the fact — e.g. discovery_source becomes 'places+yell' rather
+    than staying 'places' when Yell also finds the same business. Additive
+    to the existing place_id/phone/domain dedupe (still skips the re-
+    insert; this only enriches the provenance of the already-stored row).
+    No-ops if `source` is already present (dedupe within dedupe — a
+    business can be re-found by the same source across multiple runs)."""
+    row = conn.execute("SELECT discovery_source FROM businesses WHERE id = ?", (business_id,)).fetchone()
+    existing = (row[0] if row else None) or ""
+    parts = [p for p in existing.split("+") if p]
+    if source in parts:
+        return
+    parts.append(source)
+    conn.execute(
+        "UPDATE businesses SET discovery_source = ? WHERE id = ?",
+        ("+".join(parts), business_id),
+    )
 
 
 def count_businesses_sharing_domain(conn: sqlite3.Connection, domain: str | None, exclude_id: int | None = None) -> int:
@@ -452,10 +500,22 @@ def update_business_fields(conn: sqlite3.Connection, business_id: int, fields: d
 def businesses_needing_review_fetch(
     conn: sqlite3.Connection, run_id: int | None = None, business_id: int | None = None, refresh: bool = False
 ) -> list[sqlite3.Row]:
-    """Businesses with a google_place_id, optionally filtered to one run or
-    one business, that haven't had reviews_fetched_at set yet (unless
-    refresh=True, which re-fetches everything matching the filter)."""
-    query = "SELECT * FROM businesses WHERE google_place_id IS NOT NULL"
+    """Businesses that haven't had reviews_fetched_at set yet (unless
+    refresh=True, which re-fetches everything matching the filter),
+    optionally filtered to one run or one business.
+
+    Not restricted to google_place_id IS NOT NULL any more — that
+    restriction predates multi-source discovery (Yell/organic-sourced
+    businesses have no Google Places ID at all, see
+    prospector/discovery/{yell,organic}.py) and would otherwise silently
+    exclude them from ever getting a review_target_score, which would in
+    turn silently exclude them from `targets list`/`export` forever (both
+    filter on review_target_score IS NOT NULL — see targets.py). See
+    enrichers/reviews.py's fetch_and_score(), which now treats a missing
+    google_place_id the same as a Places lookup that found no listing
+    (found_listing=False, weak_gbp=True) rather than skipping the
+    business outright."""
+    query = "SELECT * FROM businesses WHERE 1=1"
     params: list = []
     if run_id is not None:
         query += " AND run_id = ?"

@@ -80,6 +80,19 @@ def discover_businesses(sector_term: str, area: str, radius_label: str, max_resu
     body: dict[str, Any] = {
         "textQuery": f"{sector_term} in {area}",
         "pageSize": _PAGE_SIZE,
+        # Restrict results to the UK. Without this, ambiguous/colloquial
+        # area names (e.g. "South London", "Hampshire") let same-named
+        # results from other countries leak into live runs — a Canadian
+        # "Roy Inch & Sons" (enercare.ca) and a Kentucky, USA "Smith
+        # Heating & Cooling" both matched a "South London" query before
+        # this fix (see README "Google Places country restriction").
+        # `regionCode` is the New Places API (v1) Text Search request-body
+        # field for this — a CLDR two-letter region code that restricts/
+        # biases results to that region (distinct from the legacy Places
+        # API's `region` query param). Confirmed live: re-running the
+        # exact queries above with regionCode=GB returns zero non-UK
+        # results.
+        "regionCode": "GB",
     }
 
     results: list[dict[str, Any]] = []

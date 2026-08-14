@@ -157,9 +157,17 @@ def fetch_and_score(conn, run_id: int | None = None, business_id: int | None = N
 
     for row in rows:
         biz = dict(row)
-        try:
-            details = places_client.get_place_details(biz["google_place_id"])
-        except ApiError:
+        if biz.get("google_place_id"):
+            try:
+                details = places_client.get_place_details(biz["google_place_id"])
+            except ApiError:
+                details = None
+        else:
+            # Yell/organic-sourced business — no Google Places ID to look
+            # up. Treated the same as "no listing found" rather than
+            # skipped, so it still gets a review_target_score (weak_gbp)
+            # and can surface in `targets list`/`export` — see
+            # db.businesses_needing_review_fetch's docstring.
             details = None
 
         result = score_business_reviews(biz, details)

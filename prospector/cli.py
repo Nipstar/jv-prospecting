@@ -10,7 +10,7 @@ import click
 from prospector import chain_signals
 from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
-from prospector.discovery.places import discover_run, import_csv
+from prospector.discovery.places import discover_run, import_csv, resolve_sources
 from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
 from prospector.enrichers.site import fetch_all as fetch_all_site_signals
 from prospector.export import export_run_csv
@@ -135,36 +135,49 @@ def list_runs() -> None:
 
 @cli.group()
 def discover() -> None:
-    """Prospector v2 discovery module (Phase 2) — vertical x location Google
-    Places search, Companies House enrichment, dedupe against the DB."""
+    """Prospector v2 discovery module (Phase 2, extended) — vertical x
+    location search across Google Places, Yell.com, and SerpAPI organic
+    search (see --source), Companies House enrichment, dedupe against the
+    DB (including across sources — see README 'Multi-source discovery')."""
 
 
 @discover.command(name="run")
 @click.option("--vertical", "vertical", required=True, help="A prospector.verticals slug/name, or freeform text.")
 @click.option("--location", "location", required=True, help="UK town/city (freeform, or one of prospector.locations.LOCATIONS).")
-@click.option("--max-results", "max_results", type=int, default=20, help="Max businesses to discover (default 20).")
+@click.option("--max-results", "max_results", type=int, default=20, help="Max businesses to discover PER SOURCE (default 20).")
 @click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment (faster, no CH API calls).")
-def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool) -> None:
+@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, or a comma-list (e.g. places,yell). Default 'all' runs all three additively and dedupes across them.")
+def discover_run_cmd(vertical: str, location: str, max_results: int, no_ch: bool, source: str) -> None:
     """Discover businesses for one vertical/location pair."""
     missing = missing_keys()
     if missing:
         click.echo(f"Warning: missing .env keys: {', '.join(missing)}.", err=True)
 
-    with get_conn() as conn:
-        result = discover_run(conn, vertical, location, max_results=max_results, do_ch=not no_ch)
+    sources = resolve_sources(source)
 
-    click.echo(f"Run #{result.run_id}: {result.vertical} in {result.location}")
+    with get_conn() as conn:
+        result = discover_run(conn, vertical, location, max_results=max_results, do_ch=not no_ch, sources=sources)
+
+    click.echo(f"Run #{result.run_id}: {result.vertical} in {result.location}  (sources={','.join(result.sources_run)})")
     click.echo(f"  found={result.found}  deduped_skipped={result.deduped_skipped}  inserted={result.inserted}  chain_flagged={result.chain_flagged}")
+    if result.found_by_source:
+        breakdown = "  ".join(f"{s}: found={result.found_by_source.get(s, 0)} inserted={result.inserted_by_source.get(s, 0)}" for s in result.sources_run)
+        click.echo(f"  by source — {breakdown}")
+    if result.source_errors:
+        for s, err in result.source_errors.items():
+            click.echo(f"  [{s}] error: {err}", err=True)
 
 
 @discover.command(name="import")
 @click.argument("csv_path", type=click.Path(exists=True, path_type=Path))
-@click.option("--max-results", "max_results", type=int, default=20, help="Default max businesses per row (default 20; overridable per-row via a max_results CSV column).")
+@click.option("--max-results", "max_results", type=int, default=20, help="Default max businesses per row per source (default 20; overridable per-row via a max_results CSV column).")
 @click.option("--no-companies-house", "no_ch", is_flag=True, default=False, help="Skip Companies House enrichment for all rows.")
-def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool) -> None:
+@click.option("--source", "source", default="all", help="Discovery source(s): places, yell, organic, or a comma-list. Default 'all'.")
+def discover_import_cmd(csv_path: Path, max_results: int, no_ch: bool, source: str) -> None:
     """Bulk-discover from a CSV of vertical,location pairs (optional max_results column)."""
+    sources = resolve_sources(source)
     with get_conn() as conn:
-        results = import_csv(conn, csv_path, max_results=max_results, do_ch=not no_ch)
+        results = import_csv(conn, csv_path, max_results=max_results, do_ch=not no_ch, sources=sources)
 
     total_found = sum(r.found for r in results)
     total_inserted = sum(r.inserted for r in results)
