@@ -27,6 +27,12 @@ a page for any of them on request.
 | #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 32 | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
 | #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 9 | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
 | #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 5 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
+| #21 | Surrey | hvac | 2026-08-19 | 29 (of 31, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-21-Surrey.pdf) | [CSV](../exports/runs/targets_run21.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/21/) |
+| #22 | Guildford, Surrey | hvac | 2026-08-19 | 10 (of 19, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-22-Guildford--Surrey.pdf) | [CSV](../exports/runs/targets_run22.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/22/) |
+| #23 | Woking, Surrey | hvac | 2026-08-19 | 23 (of 26, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-23-Woking--Surrey.pdf) | [CSV](../exports/runs/targets_run23.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/23/) |
+| #24 | Reigate, Surrey | hvac | 2026-08-19 | 11 (of 14, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
+| #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
+| #26 | Camberley, Surrey | hvac | 2026-08-19 | 15 (of 24, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -82,6 +88,26 @@ like Gas Safe/NICEIC/TrustMark and CDN/font/social links were being
 counted as "directory signal" on completely normal small-business sites)
 — fixed with a non-signal-domain exclusion list before it touched the DB;
 see commit history for the specific false positives caught in testing.
+
+**Surrey HVAC sweep** (Andy: "run hvac companies in Surrey", then "look for
+more" after the initial county-wide query capped at 20/source). Chunked
+by sub-area — Surrey (#21), Guildford (#22), Woking (#23), Reigate (#24),
+Epsom (#25), Camberley (#26) — same reasoning as the London sweep: a
+single big-area query plateaus under the per-source result cap. 144 raw
+businesses found, 108 non-chain after chain rescan. Content validator
+(see above) caught junk live during discovery on every chunk (job/course
+listings, blog-signal pages). One gap found and fixed manually: the
+validator's title/content checks don't catch a *real* business page that
+is simply off-vertical — "air conditioning" as a search term also
+surfaces vehicle AC shops (same issue as the "Alpinair" catch in the
+London sweep). In run #26 (Camberley) this let through 2 automotive AC
+shops (confirmed via their email domains — jdkautomotive.co.uk,
+autotest.co.uk), 1 job listing (salutemyjob.com — slipped past the
+title filter because "Air Conditioning Technician, Camberley, Surrey"
+doesn't match the job-title regex), and 1 trade-news article
+(designandbuilduk.net) — all 5 caught by a manual email/name scan after
+site-fetch, removed, reports regenerated and redeployed. All other runs
+scanned clean.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a

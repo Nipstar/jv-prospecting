@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #21</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #21 &mdash; 19 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; Surrey</h1>
+        <p class="sub">29 targets across hvac (2 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">29</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">14</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">10</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">0</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Surrey Air Conditioning &amp; Refrigeration Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (6 reviews)</span><span>07555 175583</span><span>http://www.surreyaircon.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (6 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: JONES, Michael Gavin</span><span>Co. no. 13682052</span><span>Incorporated 2021-10-15</span></div>
+            <div class="biz-meta" style="margin-top:2px">33 Deerings Rd, Reigate RH2 0PW, Surrey, RH2 0PW</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">CoolFlo Air-Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (17 reviews)</span><span>020 8944 7755</span><span>https://www.coolflo-ac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (17 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CARTER, Darren Ronald</span><span>Co. no. 04492014</span><span>Incorporated 2002-07-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit 10, Highway Farm, Cobham KT11 3JZ, Surrey, KT11 3JZ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Taymo Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (36 reviews)</span><span>07590 686282</span><span>https://www.taymoairconditioning.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (36 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: TAYLOR-MOSS, James Harry</span><span>Co. no. 17145214</span><span>Incorporated 2026-04-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">Hatch Farm, Addlestone KT15 2EH, Surrey, KT15 2EH</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">HT cooling LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (50 reviews)</span><span>07557 477700</span><span>http://htcooling.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (50 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LEE, Harry Thomas</span><span>Co. no. 13378090</span><span>Incorporated 2021-05-05</span></div>
+            <div class="biz-meta" style="margin-top:2px">24, Florence Court, Knaphill, Woking GU21 2TN, Surrey, GU21 2TN</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">RC Cooling Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (44 reviews)</span><span>01737 632805</span><span>http://www.rcooling.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (44 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">5 Grosvenor Rd, Epsom KT18 6JG, Surrey, KT18 6JG</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">AC Logic &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (38 reviews)</span><span>01483 676983</span><span>http://www.aclogic.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (38 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CHILDS, Kenneth</span><span>Co. no. 07474927</span><span>Incorporated 2010-12-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">36 Ivydene, Knaphill, Woking GU21 2TA, Surrey, GU21 2TA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">High Path Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (27 reviews)</span><span>07979 757186</span><span>https://highpathairconditioning.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (27 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">17 Green Ln, Godalming GU7 3SN, Surrey, GU7 3SN</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Atrium Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (22 reviews)</span><span>01483 889090</span><span>http://www.atriumaircon.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (22 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HALL, Gary Kenneth John</span><span>Co. no. 02939822</span><span>Incorporated 1994-06-16</span></div>
+            <div class="biz-meta" style="margin-top:2px">The Lodge, Windrush, Prey Heath Rd, Woking GU22 0SW, Surrey, GU22 0SW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">RJG Heating and Plumbing Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (26 reviews)</span><span>01932 885735</span><span>https://www.rjgheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (26 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PARSONS, Hannah Louise</span><span>Co. no. 16844882</span><span>Incorporated 2025-11-10</span></div>
+            <div class="biz-meta" style="margin-top:2px">60 Ledger Dr, Addlestone KT15 1AT, Surrey, KT15 1AT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">AIR HVAC &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.airhvac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: RADO, Stephen John</span><span>Co. no. 15516945</span><span>Incorporated 2024-02-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Commercial HVAC and Air Conditioning Services in Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.med-lec.co.uk/hvac</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PAYE, Ian Michael</span><span>Co. no. 17330831</span><span>Incorporated 2026-07-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Expert Air Conditioning Services in Surrey, Kent &amp; London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.smartairhvac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MACLEOD, Dean</span><span>Co. no. 04306387</span><span>Incorporated 2001-10-17</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Commercial HVAC Contractors Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://ihc-uk.com/contact/surrey-heating-specialists/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Find a HVAC contractor in Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.homestars.com/heating/hvac-contractor-pros/surrey</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BALL, Joseph</span><span>Co. no. 08219203</span><span>Incorporated 2012-09-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">DC Air Conditioning &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.dcairconditioningltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: COCKSHOTT, Daniel Hedley</span><span>Co. no. 11023577</span><span>Incorporated 2017-10-20</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Ventus Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (73 reviews)</span><span>07496 990442</span><span>http://www.ventusltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (73 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HALL, Gary Kenneth John</span><span>Co. no. 13647811</span><span>Incorporated 2021-09-28</span></div>
+            <div class="biz-meta" style="margin-top:2px">22-28 Cobbett Pk, Moorfield Rd, Guildford GU1 1RU, Surrey, GU1 1RU</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">THAW - Air Conditioning, Plumbing &amp; Electrical Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (72 reviews)</span><span>0800 689 1726</span><span>http://www.thawgroup.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (72 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Unit 5, Ashley Business Centre, Hanworth Ln, Chertsey KT16 9GF, Surrey, KT16 9GF</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Molesey Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (100 reviews)</span><span>07516 590017</span><span>https://www.moleseyair.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (100 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LANGRIDGE, Justin</span><span>Co. no. 11501066</span><span>Incorporated 2018-08-06</span></div>
+            <div class="biz-meta" style="margin-top:2px">61 Central Ave, West Molesey KT8 2RF, Surrey, KT8 2RF</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Crown Air conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (57 reviews)</span><span>01737 668310</span><span>http://crownac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (57 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BROWN, Mathew Graham</span><span>Co. no. 06434997</span><span>Incorporated 2007-11-22</span></div>
+            <div class="biz-meta" style="margin-top:2px">Castle House Rear OF, 39 Nork Way, Banstead SM7 1PB, Surrey, SM7 1PB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Crisp Air Conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (75 reviews)</span><span>01737 483552</span><span>https://www.crispac.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (75 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GUNN, Daniel David</span><span>Co. no. 09754899</span><span>Incorporated 2015-09-01</span></div>
+            <div class="biz-meta" style="margin-top:2px">Caledonian House, Reigate Rd, Hookwood, Horley RH6 0AP, Surrey, RH6 0AP</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Evans And Son Heating &amp; Cooling Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (59 reviews)</span><span>020 3685 5102</span><span>http://www.evansandson.net/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (59 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: EVANS, Louise</span><span>Co. no. 10000058</span><span>Incorporated 2016-02-11</span></div>
+            <div class="biz-meta" style="margin-top:2px">Castle Court, 41 London Rd, Reigate RH2 9RJ, Surrey, RH2 9RJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Gas &amp; Heating Direct &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (89 reviews)</span><span>01932 460144</span><span>http://www.gasandheatingdirect.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (89 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KHAN, Ibraheim</span><span>Co. no. 13198708</span><span>Incorporated 2021-02-12</span></div>
+            <div class="biz-meta" style="margin-top:2px">120 Tartar Rd, Cobham KT11 2AT, Surrey, KT11 2AT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Zebra Cooling Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (53 reviews)</span><span>020 8528 3555</span><span>https://www.zebracooling.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (53 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MEYER, Ryan</span><span>Co. no. 08639229</span><span>Incorporated 2013-08-06</span></div>
+            <div class="biz-meta" style="margin-top:2px">64 Catlin Cres, Shepperton TW17 8EU, Surrey, TW17 8EU</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Dorking &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://agwmechanical.co.uk/service-areas/dorking/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GROSSMAN, Shimon</span><span>Co. no. 10632959</span><span>Incorporated 2017-02-22</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">HVAC Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://newsome.ltd.uk/hvac-surrey/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BUCHANAN, Andre</span><span>Co. no. 15801953</span><span>Incorporated 2024-06-25</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Professional HVAC Services in Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://mountair.co.uk/surrey/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ANDREI, Sofrone</span><span>Co. no. 16003211</span><span>Incorporated 2024-10-07</span></div>
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Hitachi heat pump installers in Surrey &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://www.hitachiaircon.com/uk/where-to-buy/heat-pump-installers/surrey</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Sunrise Heating &amp; Cooling Ltd. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (494 reviews)</span><span>(604) 612-4591</span><span>https://www.sunriseheating.ca/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (494 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: UNDERWOOD, Andrew Philip</span><span>Co. no. SC743952</span><span>Incorporated 2022-09-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">6234 152A St, Surrey, BC V3S 5X5, Canada, Surrey</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Fraser Valley Heating Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (192 reviews)</span><span>(604) 541-5740</span><span>http://www.fraservalleyheatingltd.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (192 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FRASER, Andrew John</span><span>Co. no. SC704036</span><span>Incorporated 2021-07-13</span></div>
+            <div class="biz-meta" style="margin-top:2px">2675 184 St, Surrey, BC V3Z 9V2, Canada, Surrey</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #21 &mdash; 19 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>

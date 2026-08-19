@@ -1,0 +1,12 @@
+firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
+Rail Cool Services Limited,hvac,"Reigate, Surrey",RH2 9PS,07814 528799,,,,,50,0,weak_gbp;established,06533198,"SAINI, Manvir",18,false,false,
+Kinnear Air Conditioning,hvac,"Reigate, Surrey",RH2 8QH,07786 444199,jameskinnearac@gmail.com,https://kinnearac.co.uk/,5,5.0,40,15,no_booking;no_chat;phone_dependent;established,13737186,"KINNEAR, James Michael",4,false,false,
+Nexus Air & Climate,hvac,"Reigate, Surrey",RH2 0AN,020 4553 5333,,https://nexusair.co.uk/,,,40,15,no_booking;no_chat;phone_dependent,16678775,"GRANT, Benjamin William",0,false,false,
+Solo Heating Installations,hvac,"Reigate, Surrey",RH2 7DR,01737 211213,,https://www.soloheatinginstallations.co.uk,,,40,15,no_booking;no_chat;phone_dependent;established,06499785,"BERNARDINI, Luke James George",18,false,false,
+Technicool Air Conditioning Ltd,hvac,"Reigate, Surrey",RH2 9EL,020 8668 6108,,https://www.tec.uk.net/,16,4.5,40,10,no_booking;no_chat;established,03664607,"CONSTABLE, Colin Paul",27,false,false,
+Racsel Building Services Limited,hvac,"Reigate, Surrey",RH2 9HX,020 8391 5545,mail@racsel.co.uk,http://www.racsel.co.uk/,3,5.0,40,10,no_booking;no_chat;established,02873003,"ARIS, Matthew Edward",32,false,false,
+Ace Electrical Installations,hvac,"Reigate, Surrey",RH2 0QA,07834 156407,info@aceelectricalinstallations.com,https://aceelectricalinstallations.com/contact-2/,12,5.0,40,10,no_booking;no_chat;established,08429910,"CURTIS, Asa",13,false,false,
+Split Level Air Conditioning Ltd,hvac,"Reigate, Surrey",KT18 6AW,01372 277248,sales@splitlevelairconditioning.co.uk,https://splitlevelairconditioning.co.uk/,4,4.5,40,5,no_chat;established,07008673,"CUNNEW, Gary",16,false,false,
+PD Heating & Plumbing,hvac,"Reigate, Surrey",RH2 9DY,07739 120349,PDPlumbingReigate@Gmail.com,http://www.pdheating.com/,27,5.0,20,15,no_booking;no_chat;phone_dependent;established,12267197,"DODITA, Petrica",6,false,false,
+Virtue Heating and Plumbing Ltd,hvac,"Reigate, Surrey",RH2 0AU,01293 403244,info@virtueheatingandplumbing.co.uk,http://virtueheatingandplumbing.co.uk/,69,4.9,10,10,no_booking;phone_dependent;established,09202863,"BRANTON, Sean Kevin",11,false,false,
+"Gas, Electrical, Mechanical & HVAC Services In Reigate",hvac,"Reigate, Surrey",,,info@comgas.uk,https://www.comgas.uk/about-us/reigate/,,,10,10,weak_gbp;no_booking;no_chat,16294691,"NEWTON, Micheal Gordon",1,false,false,

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #25</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #25 &mdash; 19 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; Epsom, Surrey</h1>
+        <p class="sub">20 targets across hvac (5 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">20</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">37</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">0</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">1</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Maloney&#x27;s Heating &amp; Plumbing Supply &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 90 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.2★ (11 reviews)</span><span>01372 727511</span><span>http://www.maloneys.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (11 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: AYUB, Ajaz</span><span>Co. no. 12199949</span><span>Incorporated 2019-09-10</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit 5, Business Park, Kiln Ln, Epsom KT17 1JF, Epsom, Surrey, KT17 1JF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">All Four Seasons Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 70 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.0★ (1 reviews)</span><span>020 8224 6597</span><span>http://www.allfourseasons.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">6 Stoneleigh Park Rd, Epsom KT19 0QT, Epsom, Surrey, KT19 0QT</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Fuller Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 55 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.3★ (26 reviews)</span><span>020 8394 2776</span><span>http://www.fullerheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (26 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FULLER, Alan</span><span>Co. no. 11055004</span><span>Incorporated 2017-11-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">451 Kingston Rd, Epsom KT19 0DB, Epsom, Surrey, KT19 0DB</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">I.C.E. Services UK Ltd. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.6★ (9 reviews)</span><span>020 8394 1771</span><span>http://www.iceservicesuk.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (9 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CONIBEAR, Ian James</span><span>Co. no. 04365268</span><span>Incorporated 2002-02-01</span></div>
+            <div class="biz-meta" style="margin-top:2px">53 High St, Ewell, Epsom KT17 1RX, Epsom, Surrey, KT17 1RX</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">JM Environmental Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>07920 770039</span><span>http://www.jm-environmental.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: COPPING, Jayne Elizabeth</span><span>Co. no. 08815514</span><span>Incorporated 2013-12-16</span></div>
+            <div class="biz-meta" style="margin-top:2px">277 Fir Tree Rd, Epsom KT17 3LF, Epsom, Surrey, KT17 3LF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">PWA Plumbing &amp; Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (18 reviews)</span><span>07342 241808</span><span>https://pwaplumbingandheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (18 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: WASILEWSKI, Piotr Edward</span><span>Co. no. 12091197</span><span>Incorporated 2019-07-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">30 Andover Cl, Epsom KT19 9DB, Epsom, Surrey, KT19 9DB</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Bluechip Heating Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>01737 362882</span><span>http://www.bluechipheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LOGAN, Adrian Roger</span><span>Co. no. 06307862</span><span>Incorporated 2007-07-10</span></div>
+            <div class="biz-meta" style="margin-top:2px">120, Reaver House, 12 East St, Epsom KT17 1HX, Epsom, Surrey, KT17 1HX</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">AC Gas Solutions &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (6 reviews)</span><span>07846 320553</span><span>http://www.acgassolutions.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (6 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">4 Scott Cl, Epsom KT19 9NY, Epsom, Surrey, KT19 9NY</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">RTR Air conditioning Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>07963 395583</span><span>https://rtrairconditioning.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BLACKMAN, Stuart</span><span>Co. no. 11138746</span><span>Incorporated 2018-01-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">Unit 4, Epsom Downs Metro Centre, Epsom, Tadworth KT20 5LR, Epsom, Surrey, KT20 5LR</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Epsom Heating and Gas Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>020 8394 2964</span><span>https://www.centralheatingepsom.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SIGGERY, Robert Peter</span><span>Co. no. 05326471</span><span>Incorporated 2005-01-07</span></div>
+            <div class="biz-meta" style="margin-top:2px">The Warren, Ashtead KT21 2SG, Epsom, Surrey, KT21 2SG</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Optimal Heating Services Limited &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>07535 584991</span><span>http://www.optimalheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KOWAL, Wieslaw Tadeusz</span><span>Co. no. 09482406</span><span>Incorporated 2015-03-10</span></div>
+            <div class="biz-meta" style="margin-top:2px">52 Fendall Rd, Epsom KT19 9NZ, Epsom, Surrey, KT19 9NZ</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">RHMEP LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>07500 045585</span><span>https://rhmep.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FAZEL, Kanishco</span><span>Co. no. 11189927</span><span>Incorporated 2018-02-06</span></div>
+            <div class="biz-meta" style="margin-top:2px">10 Romney Cl, Chessington KT9 1BP, Epsom, Surrey, KT9 1BP</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">AirAix Climate Control &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (13 reviews)</span><span>07308 081414</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (13 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HAJIVANDI, Setareh</span><span>Co. no. 14191820</span><span>Incorporated 2022-06-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">Flat1, 1 Tattenham Grove, Epsom KT18 5QW, Epsom, Surrey, KT18 5QW</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Surbiton Heating and Cooling Solutions &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>4.6★ (10 reviews)</span><span>020 3823 6143</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (10 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GOODE, Daniel</span><span>Co. no. 14359402</span><span>Incorporated 2022-09-15</span></div>
+            <div class="biz-meta" style="margin-top:2px">68-70 Tolworth Broadway, Tolworth, Surbiton KT6 7HR, Epsom, Surrey, KT6 7HR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Keystone Comfort Solutions Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (37 reviews)</span><span>07399 539686</span><span>https://keystonecomfortsolutions.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (37 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: WILLETT, Anthony John</span><span>Co. no. 14581894</span><span>Incorporated 2023-01-10</span></div>
+            <div class="biz-meta" style="margin-top:2px">11 Elm Gardens, Epsom KT18 5RQ, Epsom, Surrey, KT18 5RQ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">R J B &amp; Sons Electrical &amp; Ventilation Contractors LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (48 reviews)</span><span>07903 681369</span><span>http://www.rjbelectricalventilation.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (48 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">71 Gibraltar Cres, Epsom KT19 9BS, Epsom, Surrey, KT19 9BS</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Max Heating &amp; Plumbing &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (23 reviews)</span><span>07956 121113</span><span>https://www.maxheating.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (23 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: TOWEY-SMITH, Max</span><span>Co. no. 10923110</span><span>Incorporated 2017-08-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">29 West St, Epsom KT18 7RR, Epsom, Surrey, KT18 7RR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">A3 Cooling Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (27 reviews)</span><span>020 4638 1145</span><span>http://www.a3cooling.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (27 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FITZ-GERALD, Daniel Patrick</span><span>Co. no. 06654162</span><span>Incorporated 2008-07-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">chessington Business Centre, Cox Ln., Chessington KT9 1SD, Epsom, Surrey, KT9 1SD</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">T GAS HEATING &amp; PLUMBING SOLUTIONS LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (72 reviews)</span><span>07471 849039</span><span>http://www.tgas-solutions.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (72 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BARRETT, Thomas Kevin</span><span>Co. no. 11386060</span><span>Incorporated 2018-05-29</span></div>
+            <div class="biz-meta" style="margin-top:2px">18 Riverview Rd, Epsom KT19 0LF, Epsom, Surrey, KT19 0LF</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Blueman Plumbing &amp; Heating &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">hvac</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (231 reviews)</span><span>020 8644 4414</span><span>http://www.bluemanplumbing.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (231 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ALI, Hafez</span><span>Co. no. 14055809</span><span>Incorporated 2022-04-20</span></div>
+            <div class="biz-meta" style="margin-top:2px">51 Hamilton Ave, Cheam, Sutton SM3 9RJ, Epsom, Surrey, SM3 9RJ</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #25 &mdash; 19 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>
