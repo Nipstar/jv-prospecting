@@ -32,7 +32,7 @@ a page for any of them on request.
 | #23 | Woking, Surrey | hvac | 2026-08-19 | 23 (of 26, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-23-Woking--Surrey.pdf) | [CSV](../exports/runs/targets_run23.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/23/) |
 | #24 | Reigate, Surrey | hvac | 2026-08-19 | 11 (of 14, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
 | #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
-| #26 | Camberley, Surrey | hvac | 2026-08-19 | 15 (of 24, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
+| #26 | Camberley, Surrey | hvac | 2026-08-19 | 14 (of 22, 8 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -108,6 +108,25 @@ doesn't match the job-title regex), and 1 trade-news article
 (designandbuilduk.net) — all 5 caught by a manual email/name scan after
 site-fetch, removed, reports regenerated and redeployed. All other runs
 scanned clean.
+
+**Second gap, same run — 2 directory pages Andy spotted manually**
+(dentons.net, industryoversight.co.uk). Root cause: the validator's
+schema.org check treated "has LocalBusiness schema at all" as proof of a
+single real business — wrong, because both directory pages mark up
+*every listed business* with its own schema block (industryoversight.co.uk
+carried 24 separate JSON-LD LocalBusiness blocks, one per listing).
+Fixed two ways in `discovery/validate.py`: (1) new URL-path pattern check
+(`/results/`, `order-by-relevance`, `?page=`, `/directory/`, etc) run
+before any fetch; (2) rewrote the schema check to parse JSON-LD properly
+and count *distinct business names* rather than raw block count — a real
+business's repeated/nested schema all names itself once, a directory
+names a different business per block. Block-count alone was tried first
+and rejected: it false-positived on aacairconditioning.co.uk, a genuine
+business whose page legitimately carries 23 LocalBusiness JSON-LD blocks
+(same name repeated). Retroactively re-checked all 123 organic-sourced
+DB rows against the fixed validator: 0 false positives on the previously-
+verified good set, both directory pages still caught, removed from run
+#26, report regenerated and redeployed.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a

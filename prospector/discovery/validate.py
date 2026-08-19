@@ -42,6 +42,7 @@ positive would silently lose real prospecting data with no visibility.
 """
 from __future__ import annotations
 
+import json
 import re
 from collections import Counter
 from urllib.parse import urlparse
@@ -83,6 +84,30 @@ _LOCAL_BUSINESS_SCHEMA_RE = re.compile(
     re.IGNORECASE,
 )
 
+_DIRECTORY_URL_PATTERNS = [
+    r"/results/",
+    r"order-by-relevance",
+    r"[?&]page=\d",
+    r"/search[/?]",
+    r"/search-results",
+    r"within-\d+-miles",
+    r"/listings?/",
+    r"/directory/",
+]
+_DIRECTORY_URL_RE = re.compile("|".join(_DIRECTORY_URL_PATTERNS), re.IGNORECASE)
+
+# Raw schema-block COUNT is not a reliable directory signal on its own —
+# live-tested false positive: aacairconditioning.co.uk (a real business)
+# carries 23 separate LocalBusiness JSON-LD blocks (repeated/nested
+# structured data for the same company), which a naive "count > 2 ==
+# directory" rule wrongly flagged. What actually distinguishes a directory
+# page is DISTINCT BUSINESS NAMES across those blocks — a real business's
+# repeated schema all names itself once; a directory schema-marks up every
+# *different* listed business. industryoversight.co.uk: 24 blocks, 24
+# distinct names ("Tri-Counties Heating LTD", "Vitoenergy Ltd", ...) — a
+# genuine directory. See _extract_schema_business_names() below.
+_MAX_DISTINCT_SCHEMA_NAMES_FOR_SINGLE_BUSINESS = 2
+
 _FETCH_TIMEOUT_SECONDS = 6.0
 _MAX_DISTINCT_EXTERNAL_DOMAINS_BEFORE_SUSPECT = 8  # of the NON-infra, NON-cert-body domains counted below
 
@@ -119,9 +144,57 @@ def is_junk_title(title: str | None) -> bool:
     return bool(_TITLE_REJECT_RE.search(title))
 
 
+def looks_like_directory_url(url: str) -> bool:
+    """Fast, free, no-network check. True if the URL path itself reads
+    like a directory search-results page (dentons.net's
+    /results/.../order-by-relevance?page=2 pattern)."""
+    return bool(_DIRECTORY_URL_RE.search(url))
+
+
+_LD_JSON_BLOCK_RE = re.compile(
+    r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _extract_schema_business_names(html: str) -> list[str]:
+    """Parse every JSON-LD block on the page (proper json.loads, not
+    regex-counting) and collect the `name` of every LocalBusiness/
+    Organization entity found. A page can legitimately have several
+    blocks — what matters is how many *distinct* business names they
+    carry (see _MAX_DISTINCT_SCHEMA_NAMES_FOR_SINGLE_BUSINESS docstring)."""
+    names: list[str] = []
+    for raw in _LD_JSON_BLOCK_RE.findall(html):
+        try:
+            data = json.loads(raw)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        items = data if isinstance(data, list) else [data]
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            # @graph is a common wrapper for multiple entities in one block.
+            candidates = item.get("@graph", [item]) if isinstance(item.get("@graph"), list) else [item]
+            for cand in candidates:
+                if not isinstance(cand, dict):
+                    continue
+                cand_type = cand.get("@type")
+                type_list = cand_type if isinstance(cand_type, list) else [cand_type]
+                if any(
+                    t in ("LocalBusiness", "Organization", "HVACBusiness",
+                          "HomeAndConstructionBusiness", "ProfessionalService")
+                    for t in type_list
+                ) and cand.get("name"):
+                    names.append(str(cand["name"]).strip().lower())
+    return names
+
+
 def looks_like_directory_or_blog(url: str, html: str | None = None) -> tuple[bool, str]:
     """One httpx GET (if html not already supplied), fails open on any
     fetch problem. Returns (is_suspect, reason)."""
+    if looks_like_directory_url(url):
+        return True, "URL path matches directory/search-results pattern"
+
     if html is None:
         try:
             with httpx.Client(
@@ -136,8 +209,20 @@ def looks_like_directory_or_blog(url: str, html: str | None = None) -> tuple[boo
         except Exception:
             return False, "fetch error — fail open, not flagged"
 
-    if _LOCAL_BUSINESS_SCHEMA_RE.search(html):
+    schema_names = _extract_schema_business_names(html)
+    distinct_schema_names = len(set(schema_names))
+    if 1 <= distinct_schema_names <= _MAX_DISTINCT_SCHEMA_NAMES_FOR_SINGLE_BUSINESS:
         return False, "has LocalBusiness/Organization schema — confirmed real business"
+    if distinct_schema_names > _MAX_DISTINCT_SCHEMA_NAMES_FOR_SINGLE_BUSINESS:
+        return True, (
+            f"{distinct_schema_names} distinct business names in page schema "
+            "— directory/listing-aggregator signal, not a single business"
+        )
+    # No JSON-LD names parsed (either no JSON-LD at all, or it's non-name
+    # microdata) — fall back to itemtype microdata presence as a weaker
+    # positive signal, same as the original check.
+    if _LOCAL_BUSINESS_SCHEMA_RE.search(html):
+        return False, "has LocalBusiness/Organization microdata — confirmed real business"
 
     if _BLOG_SIGNAL_RE.search(html):
         return True, "blog/article signals found (posted/published/byline/read-more)"
