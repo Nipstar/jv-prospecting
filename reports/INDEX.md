@@ -22,17 +22,17 @@ a page for any of them on request.
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
 | #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 25 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_run12_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
-| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 27 | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
-| #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 19 | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
+| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 26 (of 27, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
+| #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 15 (of 21, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
 | #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 32 | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
 | #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 9 | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
 | #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 5 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
-| #21 | Surrey | hvac | 2026-08-19 | 29 (of 31, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-21-Surrey.pdf) | [CSV](../exports/runs/targets_run21.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/21/) |
-| #22 | Guildford, Surrey | hvac | 2026-08-19 | 10 (of 19, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-22-Guildford--Surrey.pdf) | [CSV](../exports/runs/targets_run22.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/22/) |
-| #23 | Woking, Surrey | hvac | 2026-08-19 | 23 (of 26, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-23-Woking--Surrey.pdf) | [CSV](../exports/runs/targets_run23.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/23/) |
-| #24 | Reigate, Surrey | hvac | 2026-08-19 | 11 (of 14, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
+| #21 | Surrey | hvac | 2026-08-19 | 26 (of 31, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-21-Surrey.pdf) | [CSV](../exports/runs/targets_run21.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/21/) |
+| #22 | Guildford, Surrey | hvac | 2026-08-19 | 9 (of 18, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-22-Guildford--Surrey.pdf) | [CSV](../exports/runs/targets_run22.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/22/) |
+| #23 | Woking, Surrey | hvac | 2026-08-19 | 21 (of 26, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-23-Woking--Surrey.pdf) | [CSV](../exports/runs/targets_run23.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/23/) |
+| #24 | Reigate, Surrey | hvac | 2026-08-19 | 10 (of 14, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
 | #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
-| #26 | Camberley, Surrey | hvac | 2026-08-19 | 14 (of 22, 8 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
+| #26 | Camberley, Surrey | hvac | 2026-08-19 | 13 (of 22, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -127,6 +127,42 @@ business whose page legitimately carries 23 LocalBusiness JSON-LD blocks
 DB rows against the fixed validator: 0 false positives on the previously-
 verified good set, both directory pages still caught, removed from run
 #26, report regenerated and redeployed.
+
+**Chain signal extended: templated per-town "service area" pages** (Andy:
+"some of the listings are location pages as well"). Root cause: 2 of 5
+Camberley "location pages" were already caught by the existing
+multi-location chain signal (same domain/CH number at 2+ discovered
+locations) — but that signal only fires once a second location has
+actually been discovered. The remaining 2
+(ecorenewables.co.uk/air-source-heat-pump-installation-camberley/,
+southernmaintenancesolutions.com/surrey-service-area/) hadn't yet been
+cross-referenced. Added `match_service_area_url_pattern()` to
+`chain_signals.py` — flags a URL as a service-area/location-landing-page
+if it ends in "-{the searched town}", lives under a literal
+"/service-area/"-style path, or matches "/locations/{town}/" — treated
+as a chain signal (flag `is_chain`, don't delete) since the page belongs
+to a genuine business, it's the business's *scale/independence* that's
+in question, same as the multi-location signal. Re-running `chain
+rescan` DB-wide with this signal newly flagged 10 more businesses across
+runs #16/#17/#21/#22/#23/#26 (not just Camberley) — reports regenerated
+and redeployed for all affected runs, target counts above reflect the
+new totals.
+
+**Third automotive-AC miss, this time undetectable by name alone**
+(Andy: "car air conditioning in the guildford list"). Found: "Precision
+Air Conditioning Service" on `car-air-conditioning-service-guildford.co.uk`
+(email `PCScars@outlook.com`) — a plausible-sounding building-HVAC
+business name with nothing automotive in it at all; only the domain gives
+it away. Same root ambiguity as the earlier Alpinair/jdkautomotive/
+autotest catches ("air conditioning" matches both building and vehicle
+trades) but this one couldn't have been caught by a name-keyword check.
+Added `looks_like_automotive_domain()` to `discovery/validate.py` — a
+free, no-fetch domain-substring check (automotive/autotest/car-air-con/
+vehicle-air-con/autocare/garage/tyres/bodyshop/car-servicing) run
+alongside the title check, before any page fetch. Re-checked the whole
+DB: only this one row matched (the earlier jdkautomotive.co.uk/
+autotest.co.uk misses were already removed manually), removed, run #22
+report regenerated and redeployed.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a

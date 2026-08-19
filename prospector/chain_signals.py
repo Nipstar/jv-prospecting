@@ -50,7 +50,54 @@ domain, for `CHAIN_DOMAIN_PATTERNS`). Keep entries lower-case.
 """
 from __future__ import annotations
 
+import re
+
 from prospector.verticals import slug_for_label
+
+# Templated per-town "service area" landing page signal. Andy spotted two
+# Camberley HVAC results structured this way —
+# ecorenewables.co.uk/air-source-heat-pump-installation-camberley/ and
+# southernmaintenancesolutions.com/surrey-service-area/ — that hadn't yet
+# tripped the multi-location signal above because only one of their pages
+# had been discovered so far (multi-location needs a *second* discovered
+# row sharing the domain/CH number). The URL structure itself is evidence:
+# a real single-location independent's homepage doesn't usually end in
+# "-{the-town-you-searched}" or live under a literal "/service-area/"
+# path — that's the pattern of a bigger operator templating the same page
+# across every town it wants to rank for locally. Treated as a chain
+# signal (flag, don't delete) rather than a validate.py content-junk
+# signal, since the page IS a real business's own site — it's the
+# scale/independence of the business that's in question, same category
+# as the multi-location domain-sharing signal just above.
+_SERVICE_AREA_LITERAL_RE = re.compile(
+    r"/[a-z0-9-]*service-areas?/|/areas-we-cover/|/locations?/[a-z0-9-]+/", re.IGNORECASE
+)
+
+
+def _slugify_town(town: str | None) -> str | None:
+    """"Camberley, Surrey" -> "camberley". None/empty -> None."""
+    if not town:
+        return None
+    first_part = town.split(",")[0].strip().lower()
+    slug = re.sub(r"[^a-z0-9]+", "-", first_part).strip("-")
+    return slug or None
+
+
+def match_service_area_url_pattern(website: str | None, town: str | None) -> str | None:
+    """Return a human-readable description of the matched pattern if
+    `website` looks like a templated per-town "service area" landing page,
+    else None. See module-level comment above for the two live-tested
+    examples that motivated this."""
+    if not website:
+        return None
+    if _SERVICE_AREA_LITERAL_RE.search(website):
+        return "URL path matches a 'service area' landing-page pattern"
+    town_slug = _slugify_town(town)
+    if town_slug and len(town_slug) >= 4:  # avoid matching short/generic slugs by accident
+        path = website.lower()
+        if re.search(rf"[a-z0-9]-{re.escape(town_slug)}(/|$)", path) or f"/{town_slug}/" in path:
+            return f"URL path ends in/contains the searched town ('{town_slug}') — per-town landing page pattern"
+    return None
 
 # Brand/name substrings that are always treated as a corporate chain
 # regardless of vertical (holding groups whose practices/branches often
@@ -348,6 +395,10 @@ def detect_chain(conn, biz: dict, exclude_id: int | None = None) -> tuple[bool, 
     ch_count = db.count_businesses_sharing_company_number(conn, biz.get("companies_house_number"), exclude_id=exclude_id)
     if ch_count:
         reasons.append(f"same Companies House company number seen at {ch_count + 1} discovered locations")
+
+    service_area_match = match_service_area_url_pattern(biz.get("website"), biz.get("town"))
+    if service_area_match:
+        reasons.append(service_area_match)
 
     return (bool(reasons), "; ".join(reasons) if reasons else None)
 

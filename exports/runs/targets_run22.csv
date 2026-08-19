@@ -1,5 +1,4 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
-Precision Air Conditioning Service,hvac,"Guildford, Surrey",GU1 2QD,07713 275460,PCScars@outlook.com,https://car-air-conditioning-service-guildford.co.uk/,,,40,15,no_booking;no_chat;phone_dependent,,,,false,false,
 "TF Solutions Ltd, Guildford",hvac,"Guildford, Surrey",GU1 1SZ,01483 939110,,http://www.tfsolutions.co.uk/,3,5.0,40,10,no_booking;no_chat;established,BR024650,,4,false,false,
 Mick Smith Heating & Plumbing Ltd,hvac,"Guildford, Surrey",GU2 9YL,07932 018965,,http://www.micksmithheatingandplumbingltd.com/,15,5.0,40,10,no_booking;no_chat;established,04723597,"SMITH, Alexander Michael",23,false,false,
 ALD Plumbing and Heating,hvac,"Guildford, Surrey",GU3 3DH,07553 220181,,,12,5.0,40,0,,16972607,"SELIMAJ, Eraldo",0,false,false,

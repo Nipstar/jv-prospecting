@@ -63,6 +63,23 @@ _TITLE_REJECT_PATTERNS = [
 ]
 _TITLE_REJECT_RE = re.compile("|".join(_TITLE_REJECT_PATTERNS), re.IGNORECASE)
 
+# "Air conditioning" as a search term is ambiguous between building/HVAC
+# aircon (what Andy wants) and vehicle aircon (a different trade entirely)
+# — same ambiguity that caused the manually-caught "Alpinair"/"Southwest
+# Mobile Autocare" misses in the London sweep. Unlike those two (caught by
+# business name alone), the Surrey sweep surfaced misses where the NAME
+# reads as a plausible building-aircon business but the DOMAIN gives away
+# the real trade: jdkautomotive.co.uk, autotest.co.uk, and
+# car-air-conditioning-service-guildford.co.uk (business name "Precision
+# Air Conditioning Service", nothing automotive-sounding at all). Domain-
+# level check, free/instant, no fetch needed.
+_AUTOMOTIVE_DOMAIN_SUBSTRINGS = [
+    "automotive", "autotest", "car-air-con", "vehicle-air-con", "autocare",
+    "-garage", "garage-", "mot-centre", "motcentre", "tyres", "bodyshop",
+    "car-servicing", "carservicing",
+]
+_AUTOMOTIVE_DOMAIN_RE = re.compile("|".join(_AUTOMOTIVE_DOMAIN_SUBSTRINGS), re.IGNORECASE)
+
 _BLOG_SIGNAL_PATTERNS = [
     r"\bposted\s+(on|by)\b",
     r"\bpublished\s+(on|by)\b",
@@ -142,6 +159,16 @@ def is_junk_title(title: str | None) -> bool:
     if not title:
         return False
     return bool(_TITLE_REJECT_RE.search(title))
+
+
+def looks_like_automotive_domain(url: str | None) -> bool:
+    """Fast, free, no-network check. True if the domain/URL gives away a
+    vehicle-aircon/garage/tyre business rather than building HVAC — see
+    _AUTOMOTIVE_DOMAIN_SUBSTRINGS docstring for the live-tested misses
+    this catches (the business NAME alone doesn't always give it away)."""
+    if not url:
+        return False
+    return bool(_AUTOMOTIVE_DOMAIN_RE.search(url))
 
 
 def looks_like_directory_url(url: str) -> bool:
@@ -246,6 +273,8 @@ def validate_organic_result(name: str | None, url: str | None) -> tuple[bool, st
     reason). is_valid=False means "skip this, don't insert into the DB"."""
     if is_junk_title(name):
         return False, f"title matches junk pattern: {name!r}"
+    if looks_like_automotive_domain(url):
+        return False, f"domain gives away vehicle-aircon/garage business, not building HVAC: {url!r}"
     if not url:
         return True, "no URL to content-check, letting it through"
     is_suspect, reason = looks_like_directory_or_blog(url)
