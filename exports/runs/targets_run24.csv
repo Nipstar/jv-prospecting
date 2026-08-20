@@ -1,5 +1,5 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
-Rail Cool Services Limited,hvac,"Reigate, Surrey",RH2 9PS,07814 528799,,,,,50,0,weak_gbp;established,06533198,"SAINI, Manvir",18,false,false,
+Rail Cool Services Limited,hvac,"Reigate, Surrey",RH2 9PS,07814 528799,,,,,50,15,weak_gbp;no_booking;no_chat;phone_dependent;no_website;established,06533198,"SAINI, Manvir",18,false,false,
 Kinnear Air Conditioning,hvac,"Reigate, Surrey",RH2 8QH,07786 444199,jameskinnearac@gmail.com,https://kinnearac.co.uk/,5,5.0,40,15,no_booking;no_chat;phone_dependent;established,13737186,"KINNEAR, James Michael",4,false,false,
 Nexus Air & Climate,hvac,"Reigate, Surrey",RH2 0AN,020 4553 5333,,https://nexusair.co.uk/,,,40,15,no_booking;no_chat;phone_dependent,16678775,"GRANT, Benjamin William",0,false,false,
 Solo Heating Installations,hvac,"Reigate, Surrey",RH2 7DR,01737 211213,,https://www.soloheatinginstallations.co.uk,,,40,15,no_booking;no_chat;phone_dependent;established,06499785,"BERNARDINI, Luke James George",18,false,false,

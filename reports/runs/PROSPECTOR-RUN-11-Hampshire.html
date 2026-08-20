@@ -267,6 +267,40 @@
             break-inside: avoid;
             page-break-inside: avoid;
         }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
         .footer-brand {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
@@ -285,19 +319,21 @@
 <body>
     <header class="site-header">
         <div class="header-brand">Antek Automation — Prospector</div>
-        <div class="header-meta">Run #11 &mdash; 13 August 2026</div>
+        <div class="header-meta">Run #11 &mdash; 20 August 2026</div>
     </header>
+    
+    
 
     <section class="hero">
         <span class="eyebrow">Sales-readiness snapshot</span>
         <h1>Top targets &mdash; Hampshire</h1>
-        <p class="sub">8 targets across Heating / plumbing / electrical (larger firms, not sole traders) (3 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+        <p class="sub">9 targets across Heating / plumbing / electrical (larger firms, not sole traders) (2 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
     </section>
 
     <div class="stat-grid">
         <div class="stat-cell priority-a">
             <span class="stat-label">Total targets</span>
-            <div class="stat-num">8</div>
+            <div class="stat-num">9</div>
         </div>
         <div class="stat-cell">
             <span class="stat-label">Avg review score</span>
@@ -334,6 +370,7 @@
                 <span class="tag on">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: WATSON, James Peter</span><span>Co. no. 10672416</span><span>Incorporated 2017-03-15</span></div>
@@ -357,6 +394,7 @@
                 <span class="tag on">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: HARRISON, Jacqueline</span><span>Co. no. 03148877</span><span>Incorporated 1996-01-22</span></div>
@@ -380,6 +418,7 @@
                 <span class="tag on">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: FARAH, Nathan</span><span>Co. no. 08181881</span><span>Incorporated 2012-08-16</span></div>
@@ -403,10 +442,35 @@
                 <span class="tag">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: MILLER, Gregory Lee</span><span>Co. no. 09545571</span><span>Incorporated 2015-04-16</span></div>
             <div class="biz-meta" style="margin-top:2px">2 Woodpecker Cl, Bordon GU35 0UR, UK, Hampshire, GU35 0UR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heat Tech Hampshire &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">Heating / plumbing / electrical (larger firms, not sole traders)</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (34 reviews)</span><span>07891 128019</span><span>http://www.heattechhampshire.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (34 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HADZIDIMITRIOU, Angelo</span><span>Co. no. 14008460</span><span>Incorporated 2022-03-29</span></div>
+            <div class="biz-meta" style="margin-top:2px">Kelvin Rd, Eastleigh SO50 9GA, UK, Hampshire, SO50 9GA</div>
             
         </div>
         <div class="biz-card">
@@ -426,6 +490,7 @@
                 <span class="tag on">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: MIRABITA, Robert</span><span>Co. no. 15310580</span><span>Incorporated 2023-11-27</span></div>
@@ -449,10 +514,35 @@
                 <span class="tag on">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             <div class="biz-meta" style="margin-top:2px"><span>Director: ABRAHAM, Michael</span><span>Co. no. 07984619</span><span>Incorporated 2012-03-09</span></div>
             <div class="biz-meta" style="margin-top:2px">8a St Cross Rd, Winchester SO23 9HX, UK, Hampshire, SO23 9HX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">KCM Services - Electrical, Plumbing &amp; Heating. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">Heating / plumbing / electrical (larger firms, not sole traders)</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (172 reviews)</span><span>07875 715396</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (172 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No website at all — dual opportunity (website/SEO + AI answering)</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: STEPIEN, Cheslow Steven</span><span>Co. no. 02818423</span><span>Incorporated 1993-05-17</span></div>
+            <div class="biz-meta" style="margin-top:2px">178 Stirling Cres, Southampton SO30 2AL, UK, Hampshire, SO30 2AL</div>
             
         </div>
         <div class="biz-card">
@@ -472,33 +562,11 @@
                 <span class="tag">No booking widget</span>
 <span class="tag on">No live chat</span>
 <span class="tag">Phone-dependent contact page</span>
+<span class="tag">No website at all — dual opportunity (website/SEO + AI answering)</span>
                 
             </div>
             
             <div class="biz-meta" style="margin-top:2px">84 Queen Mary Ave, Basingstoke RG21 5PQ, UK, Hampshire, RG21 5PQ</div>
-            
-        </div>
-        <div class="biz-card">
-            <div class="biz-card-top">
-                <div class="biz-name">KCM Services - Electrical, Plumbing &amp; Heating. &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">Heating / plumbing / electrical (larger firms, not sole traders)</span></div>
-                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 0</div>
-            </div>
-            <div class="biz-meta"><span>5.0★ (172 reviews)</span><span>07875 715396</span></div>
-            <div class="tag-row">
-                <span class="tag priority">REVIEW SIGNALS (172 reviews (100+, +0))</span>
-                <span class="tag">Weak/unclaimed listing</span>
-<span class="tag">Recent low-star review</span>
-<span class="tag">Missed-call evidence in reviews</span>
-            </div>
-            <div class="tag-row">
-                <span class="tag priority">OPPORTUNITY SIGNALS</span>
-                <span class="tag">No booking widget</span>
-<span class="tag">No live chat</span>
-<span class="tag">Phone-dependent contact page</span>
-                
-            </div>
-            <div class="biz-meta" style="margin-top:2px"><span>Director: STEPIEN, Cheslow Steven</span><span>Co. no. 02818423</span><span>Incorporated 1993-05-17</span></div>
-            <div class="biz-meta" style="margin-top:2px">178 Stirling Cres, Southampton SO30 2AL, UK, Hampshire, SO30 2AL</div>
             
         </div>
         </div>
@@ -507,7 +575,7 @@
     <footer class="site-footer">
         <div class="footer-brand">PROSPECTOR</div>
         <div class="footer-meta">
-            Run #11 &mdash; 13 August 2026<br>
+            Run #11 &mdash; 20 August 2026<br>
             Antek Automation &mdash; internal outreach snapshot
         </div>
     </footer>

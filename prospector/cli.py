@@ -313,10 +313,15 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
 
     results = all_results
     if not results:
-        click.echo("No businesses to fetch (already checked, or none with a website — run `discover run` first).")
+        click.echo("No businesses to fetch (already checked — run `discover run` first).")
         return
     for r in results:
-        status = f"fetched via {r.fetch_method}" if r.fetched else "UNREACHABLE/NO WEBSITE"
+        if r.fetched:
+            status = f"fetched via {r.fetch_method}"
+        elif r.no_website:
+            status = "NO WEBSITE"
+        else:
+            status = "UNREACHABLE"
         click.echo(
             f"#{r.business_id} {r.name}: {status}  no_booking={r.no_booking}  no_chat={r.no_chat}  "
             f"phone_dependent={r.phone_dependent}  opportunity_score={r.opportunity_score}"

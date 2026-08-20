@@ -62,6 +62,12 @@ def _flags_for(row: sqlite3.Row) -> str:
         flag_names.append("no_chat")
     if row["phone_dependent"]:
         flag_names.append("phone_dependent")
+    if row["no_website"]:
+        # Distinct, stronger signal than a generic weak/phone-dependent
+        # site — this business needs a website/SEO build (Ayse) as well
+        # as AI call answering (Andy), not just the latter. See db.py
+        # migration v12 / enrichers/site.py docstring.
+        flag_names.append("no_website")
     if row["established_flag"]:
         flag_names.append("established")
     if row["is_group_owned"]:

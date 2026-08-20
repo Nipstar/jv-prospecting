@@ -41,13 +41,19 @@ testable and returning the same `FetchResult | None` shape):
      can't. Skipped cleanly (falls through to "no signal detected") if
      APIFY_TOKEN is unset.
 
-If all three fail, behaviour is unchanged from the original Phase 4 spec:
-"no signal detected" (no_booking=True, no_chat=True, phone_dependent=True,
-opportunity_score=0) — a failure to fetch is never scored as if it were a
-verified absence of booking/chat, it's recorded as "we don't know."
-`SiteSignalResult.fetch_method` records which layer (if any) actually
-succeeded, so Andy can see from a run's console output (and the
-`site_fetch_method` DB column) how often each fallback is needed.
+If all three fail (or there's no website to try), the flags are set to
+"no signal detected" (no_booking=True, no_chat=True, phone_dependent=True)
+— a failure to fetch is never scored as if it were a verified absence of
+booking/chat, it's recorded as "we don't know." opportunity_score is
+still computed from those flags like any other result (fixed — a prior
+version hardcoded opportunity_score=0 here despite all three flags being
+True, which silently under-scored exactly the businesses that need the
+most attention; see db.py migration v12 / Andy: "the last 2 no website,
+that should be a signal"). `SiteSignalResult.fetch_method` records which
+layer (if any) actually succeeded, and `.no_website` distinguishes "no
+website at all" from "had a website, couldn't fetch it" — so Andy can see
+from a run's console output (and the `site_fetch_method`/`no_website` DB
+columns) how often each case happens.
 """
 from __future__ import annotations
 
@@ -275,6 +281,7 @@ class SiteSignalResult:
     opportunity_score: int
     email: str | None = None
     fetch_method: str | None = None  # "httpx" | "playwright" | "apify" | None (unreachable/no website)
+    no_website: bool = False  # True only when businesses.website was NULL — see db.py migration v12
 
 
 def _detect_booking(html: str) -> bool:
@@ -316,17 +323,31 @@ def _extract_email(html: str) -> str | None:
 def fetch_and_score_site(client: httpx.Client, business: dict) -> SiteSignalResult:
     website = business.get("website")
     if not website:
+        # No website at all — Andy: "that should be a signal as both of us
+        # do websites, Ayse is the SEO expert". Previously this scored
+        # opportunity_score=0 despite all three flags being True (a bug:
+        # the early-return skipped the SITE_FLAG_POINTS calc entirely).
+        # This is the STRONGEST opportunity signal, not the weakest — max
+        # the score to match the flags, and set no_website so reports can
+        # call it out as a dual-service (website/SEO + AI answering) lead.
         return SiteSignalResult(
             business_id=business["id"], name=business["name"], fetched=False,
-            no_booking=True, no_chat=True, phone_dependent=True, opportunity_score=0,
+            no_booking=True, no_chat=True, phone_dependent=True,
+            opportunity_score=min(SITE_FLAG_POINTS * 3, OPPORTUNITY_SCORE_CAP),
+            no_website=True,
         )
 
     url = website if website.startswith("http") else f"https://{website}"
     home_result = _fetch_with_escalation(client, url)
     if home_result is None:
+        # Has a website, just couldn't be fetched (blocked/down/timeout) —
+        # same flag values as no-website since we genuinely don't know,
+        # but no_website stays False: this business isn't necessarily
+        # missing a site, so don't conflate the two signals in reports.
         return SiteSignalResult(
             business_id=business["id"], name=business["name"], fetched=False,
-            no_booking=True, no_chat=True, phone_dependent=True, opportunity_score=0,
+            no_booking=True, no_chat=True, phone_dependent=True,
+            opportunity_score=min(SITE_FLAG_POINTS * 3, OPPORTUNITY_SCORE_CAP),
         )
 
     home_html = home_result.html
@@ -370,9 +391,17 @@ def fetch_and_score_site(client: httpx.Client, business: dict) -> SiteSignalResu
 
 
 def fetch_all(conn, run_id: int | None = None, business_id: int | None = None, refresh: bool = False, limit: int | None = None) -> list[SiteSignalResult]:
-    """Fetch + score site signals for businesses with a website that
-    haven't been checked yet (or all matching, if refresh=True)."""
-    query = "SELECT * FROM businesses WHERE website IS NOT NULL"
+    """Fetch + score site signals for businesses that haven't been checked
+    yet (or all matching, if refresh=True).
+
+    Deliberately NOT filtered to `website IS NOT NULL` — a business with no
+    website at all still needs its opportunity_score/no_website/flags set
+    (fetch_and_score_site() already handles website=None correctly, scoring
+    it as the strongest opportunity signal; this query used to filter those
+    rows out before they ever reached that logic, leaving them permanently
+    unscored — see db.py migration v12 / Andy: "the last 2 no website,
+    that should be a signal")."""
+    query = "SELECT * FROM businesses WHERE 1=1"
     params: list = []
     if run_id is not None:
         query += " AND run_id = ?"
@@ -394,10 +423,13 @@ def fetch_all(conn, run_id: int | None = None, business_id: int | None = None, r
             biz = dict(row)
             result = fetch_and_score_site(client, biz)
             results.append(result)
-            print(
-                f"  [site] #{result.business_id} {result.name}: "
-                f"{'fetched via ' + result.fetch_method if result.fetched else 'UNREACHABLE'}"
-            )
+            if result.fetched:
+                status = "fetched via " + result.fetch_method
+            elif result.no_website:
+                status = "NO WEBSITE"
+            else:
+                status = "UNREACHABLE"
+            print(f"  [site] #{result.business_id} {result.name}: {status}")
 
             fields = {
                 "no_booking": int(result.no_booking),
@@ -406,6 +438,7 @@ def fetch_all(conn, run_id: int | None = None, business_id: int | None = None, r
                 "opportunity_score": result.opportunity_score,
                 "site_checked_at": _utcnow(),
                 "site_fetch_method": result.fetch_method,
+                "no_website": int(result.no_website),
             }
             if result.email:
                 fields["email"] = result.email

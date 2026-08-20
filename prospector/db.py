@@ -233,6 +233,23 @@ def _migration_v11_organic_crosscheck(conn: sqlite3.Connection) -> None:
     _add_columns_if_missing(conn, "businesses", _V11_ADD_BUSINESS_COLUMNS)
 
 
+# Andy: "the last 2 no website, that should be a signal as both of us do
+# websites, Ayse is the SEO expert" — a business with NO website at all is
+# a distinct, stronger dual-service signal than one with a weak website
+# (needs a website/SEO build from Ayse *and* AI call answering from Andy),
+# but it was previously indistinguishable in exports from a business whose
+# site just happened to be unreachable at fetch time. Explicit column so
+# reports/exports can call it out rather than relying on eyeballing an
+# empty website cell.
+_V12_ADD_BUSINESS_COLUMNS = [
+    ("no_website", "INTEGER DEFAULT 0"),  # 1 if businesses.website was NULL at the time site fetch ran
+]
+
+
+def _migration_v12_no_website_flag(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V12_ADD_BUSINESS_COLUMNS)
+
+
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
     for name, coltype in columns:
@@ -277,6 +294,7 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (9, _migration_v9_discovery_source),
     (10, _migration_v10_checkatrade),
     (11, _migration_v11_organic_crosscheck),
+    (12, _migration_v12_no_website_flag),
 ]
 
 

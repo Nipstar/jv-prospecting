@@ -1,7 +1,7 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
+ALD Plumbing and Heating,hvac,"Guildford, Surrey",GU3 3DH,07553 220181,,,12,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,16972607,"SELIMAJ, Eraldo",0,false,false,
 "TF Solutions Ltd, Guildford",hvac,"Guildford, Surrey",GU1 1SZ,01483 939110,,http://www.tfsolutions.co.uk/,3,5.0,40,10,no_booking;no_chat;established,BR024650,,4,false,false,
 Mick Smith Heating & Plumbing Ltd,hvac,"Guildford, Surrey",GU2 9YL,07932 018965,,http://www.micksmithheatingandplumbingltd.com/,15,5.0,40,10,no_booking;no_chat;established,04723597,"SMITH, Alexander Michael",23,false,false,
-ALD Plumbing and Heating,hvac,"Guildford, Surrey",GU3 3DH,07553 220181,,,12,5.0,40,0,,16972607,"SELIMAJ, Eraldo",0,false,false,
 Pearson Air Ltd,hvac,"Guildford, Surrey",GU2 9SB,01483 399463,info@pearsonair.co.uk,http://www.pearsonair.co.uk/,23,5.0,20,15,no_booking;no_chat;phone_dependent;established,12167329,"PEARSON, Michael Richard William",6,false,false,
 Tempest Air Conditioning,hvac,"Guildford, Surrey",,,,https://tempestac.co.uk/,,,10,15,weak_gbp;no_booking;no_chat;phone_dependent,16512664,"SPINKS, Hayden Martin Robert Darren",1,false,false,
 Air Conditioning & Heat Pump Services Guildford,hvac,"Guildford, Surrey",,,hello@anemoiair.uk,https://www.anemoiair.uk/areas-served/guildford,,,10,15,weak_gbp;no_booking;no_chat;phone_dependent,15118535,"RIECHERT, Maik",2,false,false,

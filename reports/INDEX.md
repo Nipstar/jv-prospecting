@@ -20,7 +20,7 @@ a page for any of them on request.
 
 | Run | Location | Vertical | Date | Targets | PDF | CSV | Live report |
 |---|---|---|---|---|---|---|---|
-| #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 11 | [PDF](runs/PROSPECTOR-RUN-11-Hampshire-targets.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
+| #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 9 (of 11, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-11-Hampshire.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
 | #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 25 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_run12_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
 | #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 26 (of 27, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
 | #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 15 (of 21, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
@@ -164,6 +164,28 @@ alongside the title check, before any page fetch. Re-checked the whole
 DB: only this one row matched (the earlier jdkautomotive.co.uk/
 autotest.co.uk misses were already removed manually), removed, run #22
 report regenerated and redeployed.
+
+**Fixed: no-website businesses were being scored as the WEAKEST leads
+instead of the strongest** (Andy: "The last 2 no website, that should be
+a signal as both of us do websites, Ayse is the SEO expert"). Two
+compounding bugs in `enrichers/site.py`: (1) `fetch_and_score_site()`
+hardcoded `opportunity_score=0` for a business with no website at all,
+despite every opportunity flag being True — backwards, since "no website"
+is the strongest possible opportunity signal, not the weakest. (2) worse,
+`fetch_all()`'s query filtered to `WHERE website IS NOT NULL`, so
+no-website businesses were never even passed to the scoring function in
+the first place — permanently stuck unscored regardless of how many
+times `site fetch` ran. Fixed both: `fetch_and_score_site()` now scores a
+missing website at the max opportunity_score (matching its flags), and
+`fetch_all()` no longer filters them out. Added a new `no_website` column
+(migration v12) so these are a distinct, explicitly-labelled signal in
+reports/exports — not lumped in with "we couldn't fetch this site" —
+since a no-website business needs a full website/SEO build (Ayse) *and*
+AI call answering (Andy), a stronger dual-service lead than a business
+that merely has a weak site. Backfilled all 25 existing no-website
+businesses across the whole DB (no new fetches needed, pure scoring
+fix), regenerated and redeployed the 9 affected tracked runs:
+#11/#12/#17/#18/#22/#24/#25/#26/#27.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
