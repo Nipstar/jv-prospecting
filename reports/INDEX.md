@@ -33,6 +33,7 @@ a page for any of them on request.
 | #24 | Reigate, Surrey | hvac | 2026-08-19 | 10 (of 14, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
 | #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
 | #26 | Camberley, Surrey | hvac | 2026-08-19 | 13 (of 22, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
+| #27 | South London | electricians (multi-source: places+checkatrade+organic) | 2026-08-20 | 41 (of 48, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-27-South-London.pdf) | [CSV](../exports/runs/targets_run27.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/27/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
