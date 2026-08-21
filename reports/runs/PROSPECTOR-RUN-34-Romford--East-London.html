@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #34</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #34 &mdash; 21 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; Romford, East London</h1>
+        <p class="sub">27 targets across electricians (7 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">27</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">31</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">3</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">1</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Rt electrical contractors ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 90 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>3.0★ (2 reviews)</span><span>07946 892356</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BEGLEY, Reece Brian</span><span>Co. no. 12117205</span><span>Incorporated 2019-07-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">10 Western Rd, Romford RM1 3JT, Romford, East London, RM1 3JT</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Cape Electrical &amp; Mechanical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 90 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.2★ (5 reviews)</span><span>01708 733900</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (5 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DUKE, Kevin Michael</span><span>Co. no. 04584621</span><span>Incorporated 2002-11-07</span></div>
+            <div class="biz-meta" style="margin-top:2px">89 Albert Rd, Romford RM1 2PS, Romford, East London, RM1 2PS</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">D &amp; S Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 75 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>2.0★ (1 reviews)</span><span>01708 443999</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DURRELL, John Anthony</span><span>Co. no. 03898101</span><span>Incorporated 1999-12-22</span></div>
+            <div class="biz-meta" style="margin-top:2px">110 Heath Park Rd, Gidea Park, Romford RM2 5XL, Romford, East London, RM2 5XL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Radiant Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (17 reviews)</span><span>07710 830882</span><span>http://radiantelectricalltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (17 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GRAVES, Daniel Edward</span><span>Co. no. 15858014</span><span>Incorporated 2024-07-25</span></div>
+            <div class="biz-meta" style="margin-top:2px">20 Beauly Way, Romford RM1 4XD, Romford, East London, RM1 4XD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Electrician Romford - J Burton Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (15 reviews)</span><span>07769 223108</span><span>https://jburtonelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (15 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BURTON, James Patrick</span><span>Co. no. 12437884</span><span>Incorporated 2020-02-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">36 Fry Cl, Romford RM5 2QE, Romford, East London, RM5 2QE</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">ADG Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>07774 611466</span><span>http://www.adgelectric.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">11 Lonsdale Ave, Romford RM7 9JT, Romford, East London, RM7 9JT</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Pro Electrical And Heating Romford &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (6 reviews)</span><span>020 3815 7539</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (6 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KNIPE, Andrew</span><span>Co. no. 06906605</span><span>Incorporated 2009-05-15</span></div>
+            <div class="biz-meta" style="margin-top:2px">41a Victoria Rd, Romford RM1 2LH, Romford, East London, RM1 2LH</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">GJMD Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>07966 355227</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KATHPALIA, Shfali</span><span>Co. no. 09011625</span><span>Incorporated 2014-04-25</span></div>
+            <div class="biz-meta" style="margin-top:2px">4 Dunstable Rd, Romford RM3 8JB, Romford, East London, RM3 8JB</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Affordable Electrical And Heating Romford &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (4 reviews)</span><span>07428 370674</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (4 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DHILLON, Rashpal Singh</span><span>Co. no. 10123162</span><span>Incorporated 2016-04-14</span></div>
+            <div class="biz-meta" style="margin-top:2px">9 High Rd, Romford RM6 6PU, Romford, East London, RM6 6PU</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Atlas Electrical Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>01708 443470</span><span>http://www.240volts.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: TURNBULL, Liberty Ann</span><span>Co. no. 11927673</span><span>Incorporated 2019-04-05</span></div>
+            <div class="biz-meta" style="margin-top:2px">10 Romney Chase, Hornchurch RM11 3BJ, Romford, East London, RM11 3BJ</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Wiltons Electrical Contractors Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>07939 543263</span><span>https://www.wiltonselectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ACRES, Anthony John George</span><span>Co. no. 09733362</span><span>Incorporated 2015-08-14</span></div>
+            <div class="biz-meta" style="margin-top:2px">55 Mildmay Rd, Romford RM7 7DA, Romford, East London, RM7 7DA</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Dlh Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (3 reviews)</span><span>020 3026 6448</span><span>http://www.dlhelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (3 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BALTAZAR BATALHA, Helder Miguel</span><span>Co. no. 10042101</span><span>Incorporated 2016-03-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">4 Horace Ave, Dagenham, Romford RM7 0XA, Romford, East London, RM7 0XA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">EICR Certificate - Electricians | Gas Safety | Fire Safety &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 35 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (112 reviews)</span><span>01480 776288</span><span>https://www.eicrcert.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (112 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SUMON, Abdullah Al Amin</span><span>Co. no. 16869363</span><span>Incorporated 2025-11-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">26 Marshalls Rd, Romford RM7 7ED, Romford, East London, RM7 7ED</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">TBE Electrical LTD | Electrician Essex &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (35 reviews)</span><span>020 3468 7667</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (35 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BOOTHE, Adam</span><span>Co. no. 11438014</span><span>Incorporated 2018-06-28</span></div>
+            <div class="biz-meta" style="margin-top:2px">43 Bushy Cl, Collier Row, Romford RM1 4WL, Romford, East London, RM1 4WL</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Radke Electrical services Limited &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (34 reviews)</span><span>07745 342351</span><span>http://www.r-e-services.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (34 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: RADKE, Jamie Lee</span><span>Co. no. 12622477</span><span>Incorporated 2020-05-26</span></div>
+            <div class="biz-meta" style="margin-top:2px">Ravensbourne Cres, Romford RM3 0UD, Romford, East London, RM3 0UD</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">I C Electrical Services Limited &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (46 reviews)</span><span>07736 681498</span><span>http://www.icelectricaluk.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (46 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: COLE, Iain</span><span>Co. no. 04792462</span><span>Incorporated 2003-06-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">20 Crossways, Romford RM2 6AL, Romford, East London, RM2 6AL</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Natpowa Electrics Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (26 reviews)</span><span>07961 763958</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (26 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HEATH, Nathaneil</span><span>Co. no. 12819604</span><span>Incorporated 2020-08-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">72 Garry Way, Romford RM1 4YT, Romford, East London, RM1 4YT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Powerbrite Electrical East London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (26 reviews)</span><span>07973 407768</span><span>https://www.powerbrite.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (26 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ZACHARIA, Chris Angelos</span><span>Co. no. 03855603</span><span>Incorporated 1999-10-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">25 Heath Park Rd, Romford RM2 5UB, Romford, East London, RM2 5UB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Mbm Electrical Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (40 reviews)</span><span>01708 898919</span><span>http://www.mbm-electrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (40 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DAY, Martin</span><span>Co. no. 10121766</span><span>Incorporated 2016-04-13</span></div>
+            <div class="biz-meta" style="margin-top:2px">41 Dee Way, Romford RM1 4XA, Romford, East London, RM1 4XA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Illuminate Electrical Solutions &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (46 reviews)</span><span>07872 551616</span><span>http://www.illuminate-solutions.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (46 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: JONES, Mathew</span><span>Co. no. 12014625</span><span>Incorporated 2019-05-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">95 Amersham Rd, Romford RM3 9JA, Romford, East London, RM3 9JA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">K&amp;D Electrical Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (74 reviews)</span><span>07983 383745</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (74 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HYLANDS, Darren Damian</span><span>Co. no. 13273300</span><span>Incorporated 2021-03-17</span></div>
+            <div class="biz-meta" style="margin-top:2px">383 Mawney Rd, Romford RM7 8QR, Romford, East London, RM7 8QR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Contact Us : Southeast Electrical Contractors ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>01708 750 940</span><span>https://www.sec-ltd.co.uk/contact-us</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FIELD, Rowan</span><span>Co. no. 12221025</span><span>Incorporated 2019-09-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">Romford, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electricians Romford, Rise Park, RM1 &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://romford-handyman.co.uk/electricians.html</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Co. no. CS000966</span></div>
+            <div class="biz-meta" style="margin-top:2px">Romford, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">JNV Electrical and Maintenance - Electrician &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (54 reviews)</span><span>07581 369720</span><span>https://www.facebook.com/Jnvelectrical</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (54 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MCWILLIAMS, James</span><span>Co. no. NI669467</span><span>Incorporated 2020-05-15</span></div>
+            <div class="biz-meta" style="margin-top:2px">Dagenham Rd, Dagenham RM10 7UH, Romford, East London, RM10 7UH</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electrical Installation in Romford &amp; Essex &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://volteast.co.uk/services/electrical-installation</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Romford, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Verve Electrical Services Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (70 reviews)</span><span>https://www.verveelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (70 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CHOAT, Bob Avtar Singh</span><span>Co. no. 09507401</span><span>Incorporated 2015-03-24</span></div>
+            <div class="biz-meta" style="margin-top:2px">9 Vernon Rd, Romford RM5 3DE, Romford, East London, RM5 3DE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">D &amp; T Electrical Services LTD (Havering) &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (109 reviews)</span><span>07359 390929</span><span>https://dandtelectrical.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (109 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BRADLEY, Derek Archibald</span><span>Co. no. SC330636</span><span>Incorporated 2007-09-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">17 Marshalls Rd, Romford RM7 7EL, Romford, East London, RM7 7EL</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #34 &mdash; 21 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>

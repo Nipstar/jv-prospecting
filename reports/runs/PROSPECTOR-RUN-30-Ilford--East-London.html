@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #30</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #30 &mdash; 21 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; Ilford, East London</h1>
+        <p class="sub">19 targets across electricians (14 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">19</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">36</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">1</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">1</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Five Star Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 90 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>2.3★ (3 reviews)</span><span>07939 941801</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (3 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">90 Park Rd, Ilford IG1 1SF, Ilford, East London, IG1 1SF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">London Electrical and Lighting Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 60 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.5★ (15 reviews)</span><span>020 8478 0778</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (15 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: IQBAL, Umair</span><span>Co. no. 08682852</span><span>Incorporated 2013-09-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">118d Windsor Rd, Ilford IG1 1HF, Ilford, East London, IG1 1HF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Ohm Electrical Engineering &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 60 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (17 reviews)</span><span>020 3302 2024</span><span>http://www.ohmelectricals.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (17 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DAUD, Muhammad</span><span>Co. no. 11343805</span><span>Incorporated 2018-05-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">130 Woodlands Rd, Ilford IG1 1JP, Ilford, East London, IG1 1JP</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Greenwood Electricals Ilford &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>020 3670 7992</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">23 Woodford Ave, Gants Hill, Ilford IG2 6UF, Ilford, East London, IG2 6UF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">The Electric Company Redbridge &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (14 reviews)</span><span>020 3670 8140</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (14 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">25G Woodlands Rd, Ilford IG1 1JL, Ilford, East London, IG1 1JL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Mason Electricians Redbridge &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>020 3670 7993</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: AKRAM, Ghazala Shaheen</span><span>Co. no. 04246504</span><span>Incorporated 2001-07-05</span></div>
+            <div class="biz-meta" style="margin-top:2px">133 St Marys Rd, Ilford IG1 1QY, Ilford, East London, IG1 1QY</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Ilford Local Plumbing &amp; Electrician &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (2 reviews)</span><span>020 8106 8245</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (2 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CARCU, Emanuel Gabriel</span><span>Co. no. 13588293</span><span>Incorporated 2021-08-26</span></div>
+            <div class="biz-meta" style="margin-top:2px">181 Ley St, Ilford IG1 4BL, Ilford, East London, IG1 4BL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Firminio Electrical Services Barking &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (7 reviews)</span><span>020 3670 7990</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (7 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">36 Hunter Rd, Ilford IG1 2NW, Ilford, East London, IG1 2NW</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Ilford E-Bike Clinic &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (12 reviews)</span><span>07510 935262</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (12 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ASIF, Hamza</span><span>Co. no. 15832813</span><span>Incorporated 2024-07-11</span></div>
+            <div class="biz-meta" style="margin-top:2px">66 Aldborough Rd. S, Seven Kings, Ilford IG3 8EX, Ilford, East London, IG3 8EX</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Handy Hub &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (14 reviews)</span><span>020 3355 6091</span><span>https://handyhub.co.uk/contact-us/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (14 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">180C Cranbrook Road Cranbrook Ilford, Greater, London IG1 4LX, Ilford, East London, IG1 4LX</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Ryker Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (17 reviews)</span><span>020 8553 0263</span><span>http://www.rykerelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (17 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: VANCE, Timothy James</span><span>Co. no. 11876955</span><span>Incorporated 2019-03-12</span></div>
+            <div class="biz-meta" style="margin-top:2px">101 Sunnyside Rd, Ilford IG1 1HY, Ilford, East London, IG1 1HY</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">UK Electrician Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>07949 720712</span><span>http://www.ukelectricianltd.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LUSHA, Besmir</span><span>Co. no. 10072328</span><span>Incorporated 2016-03-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">18 Radley Ave, Ilford IG3 9DA, Ilford, East London, IG3 9DA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">House Rewire Electrician &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (22 reviews)</span><span>07520 641676</span><span>https://localelectricianilford.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (22 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">96A High Rd, Ilford IG1 1DS, Ilford, East London, IG1 1DS</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Capital Electric &amp; Gas &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (29 reviews)</span><span>07940 794227</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (29 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PALACHANDRAN, Sivaram</span><span>Co. no. 10317060</span><span>Incorporated 2016-08-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">24 Eastwood Rd, Ilford IG3 8XA, Ilford, East London, IG3 8XA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Heyworth Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (46 reviews)</span><span>020 8220 0555</span><span>http://www.heyworthelectrical.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (46 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">44 Ashburton Ave, Ilford IG3 9ES, Ilford, East London, IG3 9ES</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">B S Electrical Services Uk Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (27 reviews)</span><span>07932 621585</span><span>https://bs-electrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (27 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PATEL, Bhimji Shivji</span><span>Co. no. 05912917</span><span>Incorporated 2006-08-22</span></div>
+            <div class="biz-meta" style="margin-top:2px">118 Castleview Gardens, Ilford IG1 3QE, Ilford, East London, IG1 3QE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Safe Spark Solutions - Electricians &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (65 reviews)</span><span>07966 037885</span><span>http://www.safesparksolutions.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (65 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Essex, 22 Aragon Dr, Ilford IG6 2TS, Ilford, East London, IG6 2TS</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electrical Services in Ilford, Greater London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://noticed.uk/electrical-services/greater-london/ilford?page\u003d3</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: WILLIAMS, Dwayne</span><span>Co. no. 16144883</span><span>Incorporated 2024-12-19</span></div>
+            <div class="biz-meta" style="margin-top:2px">Ilford, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">KCS Electrics &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (92 reviews)</span><span>https://kcs-electrics.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (92 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MEHBOOB, Muhammad Soban</span><span>Co. no. 07662504</span><span>Incorporated 2011-06-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">Broadway Chambers, 1 Cranbrook Rd, Ilford IG1 4DU, Ilford, East London, IG1 4DU</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #30 &mdash; 21 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>

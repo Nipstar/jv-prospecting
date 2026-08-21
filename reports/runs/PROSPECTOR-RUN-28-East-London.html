@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #28</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #28 &mdash; 21 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; East London</h1>
+        <p class="sub">26 targets across electricians (13 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">26</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">14</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">7</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">3</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">AC1 Electrical Services LTD - Electricians in London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 55 &middot; OPPORTUNITY 0</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (49 reviews)</span><span>020 3150 1342</span><span>https://www.ac1electricalservices.com/electricians-in-london</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (49 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: RUMSEY, Tony</span><span>Co. no. 11581027</span><span>Incorporated 2018-09-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">6, Beaufort Court, Admirals Way, Canary Wharf Estate, London E14 9XL, East London, E14 9XL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">See Volt Electricians &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>020 3670 4252</span><span>https://stratfordelectrician.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KOTSANI, Andrianos</span><span>Co. no. 17357906</span><span>Incorporated 2026-07-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">21 Rosher Cl, London E15 1AU, East London, E15 1AU</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Wired up electrical services london &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (8 reviews)</span><span>07809 431873</span><span>https://www.rnelectrician.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (8 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Lathom Rd, London E6 2DU, East London, E6 2DU</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">BESA Electrical Services LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 35 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (343 reviews)</span><span>020 3633 8937</span><span>https://besaelectricalservices.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (343 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: PEJA, Gjergji</span><span>Co. no. 13716531</span><span>Incorporated 2021-11-01</span></div>
+            <div class="biz-meta" style="margin-top:2px">160 City Rd, London EC1V 2NX, East London, EC1V 2NX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Lloyd Hallowell Electrics &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 35 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (215 reviews)</span><span>https://www.lloydhallowellelectrics.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (215 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag on">Recent low-star review</span>
+<span class="tag on">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LLOYD, Samuel Richard</span><span>Co. no. 16896332</span><span>Incorporated 2025-12-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">Flat 61, Sandall House, Daling Way, Bow, London E3 5NB, East London, E3 5NB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">King Electricians &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.7★ (38 reviews)</span><span>07903 289687</span><span>https://kingelectricians.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (38 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: DUNCAN, Charles James Thomas</span><span>Co. no. SC594131</span><span>Incorporated 2018-04-12</span></div>
+            <div class="biz-meta" style="margin-top:2px">31 Benson Quay, London E1W 3TR, East London, E1W 3TR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">ZJ Electrical Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (85 reviews)</span><span>07407 028737</span><span>https://zjelectricalservices.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (85 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: JASIULIS, Zilvinas</span><span>Co. no. 16199084</span><span>Incorporated 2025-01-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">38 Leyton Green Rd, London E10 6BF, East London, E10 6BF</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Zaman Electrical Engineering Works &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (71 reviews)</span><span>07473 608236</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (71 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SHAMSUZZAMAN, Shameem</span><span>Co. no. 12955451</span><span>Incorporated 2020-10-15</span></div>
+            <div class="biz-meta" style="margin-top:2px">11 Maddams St, London E3 3RA, East London, E3 3RA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electricians London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://www.electricalserviceslondon.co.uk/electricians/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Knox Power Electrical Services LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>07307 216867</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KNOX, Cameron Sturrock</span><span>Co. no. SC785918</span><span>Incorporated 2023-10-13</span></div>
+            <div class="biz-meta" style="margin-top:2px">Dalkeith, Midlothian, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Spartan Electrical Scotland Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>07401 230484</span><span>https://spartanelectricalscotland.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: REILLY, Christopher</span><span>Co. no. SC711154</span><span>Incorporated 2021-10-04</span></div>
+            <div class="biz-meta" style="margin-top:2px">EDINBURGH, City of Edinburgh, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">SCV Electrical Limited &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (69 reviews)</span><span>020 7123 8400</span><span>https://scv-electrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (69 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GILBERT, David Alexander</span><span>Co. no. 08532353</span><span>Incorporated 2013-05-16</span></div>
+            <div class="biz-meta" style="margin-top:2px">46 Stepney Grn, Stepney Green, London E1 3JJ, East London, E1 3JJ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">AJ Electrical &amp; Plumbing &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.8★ (74 reviews)</span><span>020 8261 7330</span><span>http://www.ajeps.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (74 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MCPARTLAND, Alexander</span><span>Co. no. 09530078</span><span>Incorporated 2015-04-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">Lonsdale Ave, London E6 3PW, East London, E6 3PW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electricians4u ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (91 reviews)</span><span>020 8945 3483</span><span>https://electricians4ultd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (91 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: KHAN, Abubaker</span><span>Co. no. 10944266</span><span>Incorporated 2017-09-04</span></div>
+            <div class="biz-meta" style="margin-top:2px">Office 5, 736, 740 Romford Rd, London E12 6BT, East London, E12 6BT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Mr Magic Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://mrmagicelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: RUTKOWSKI, Maciej Wlodzimierz</span><span>Co. no. 14196168</span><span>Incorporated 2022-06-26</span></div>
+            <div class="biz-meta" style="margin-top:2px">East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">GFL Electrical: Electrical Contractors in East London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>https://gflelectrical.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">GTH Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>07735 940482</span><span>http://www.gth-electrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FENNING, George Thomas</span><span>Co. no. SC523108</span><span>Incorporated 2015-12-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">Scotland, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Eol Maintenance Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (70 reviews)</span><span>020 8252 9789</span><span>https://www.eolmaintenanceservices.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (70 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MAXWELL-HARRISON, Leo Charles</span><span>Co. no. 17306259</span><span>Incorporated 2026-06-29</span></div>
+            <div class="biz-meta" style="margin-top:2px">1-3 Whittington Ave, London EC3V 1LP, East London, EC3V 1LP</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Experienced Electricians &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>https://www.denverelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GAMBLE, Benjamin Jon</span><span>Co. no. 11798129</span><span>Incorporated 2019-01-30</span></div>
+            <div class="biz-meta" style="margin-top:2px">East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Hackney Plumber Electrician &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (125 reviews)</span><span>07508 341843</span><span>https://hackneyplumberelectrician.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (125 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">92 Southwold Rd, London E5 9PS, East London, E5 9PS</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">A Star Electrical Services London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (132 reviews)</span><span>07909 074664</span><span>http://astarelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (132 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SINGH-BHAKER, Ajay</span><span>Co. no. 15176926</span><span>Incorporated 2023-09-30</span></div>
+            <div class="biz-meta" style="margin-top:2px">14 Salisbury Rd, Seven Kings, Ilford IG3 8BE, East London, IG3 8BE</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">OW London Electricians &amp; Home Automation &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (111 reviews)</span><span>07307 565444</span><span>https://www.owelectric.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (111 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">123 Rainham Rd N, Dagenham RM10 7FD, East London, RM10 7FD</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Al-Amin Electrical Contractor &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (525 reviews)</span><span>020 7476 2153</span><span>https://www.al-aminelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (525 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ARNOLD, Michael</span><span>Co. no. 02120699</span><span>Incorporated 1987-04-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">20, Peninsula Court, 2 Montford Pl, London E15 2QW, East London, E15 2QW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electrical Solutions 247 Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (319 reviews)</span><span>07777 968288</span><span>https://www.electricalsolutions247ltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (319 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HASAN, Najmul</span><span>Co. no. 15329705</span><span>Incorporated 2023-12-05</span></div>
+            <div class="biz-meta" style="margin-top:2px">Flat 3, 117 Cannon St Rd, London E1 2LX, East London, E1 2LX</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Jema Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (175 reviews)</span><span>07479 937390</span><span>http://www.jemaelectrical.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (175 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MATUBA, Jeremy</span><span>Co. no. 12787817</span><span>Incorporated 2020-08-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">8 Station Parade, Upper Clapton Rd, London E5 8BD, East London, E5 8BD</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">London Electrics Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (293 reviews)</span><span>07795 695656</span><span>https://londonelectrics.ltd/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (293 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: AMIN, Mohammad Al</span><span>Co. no. 12353382</span><span>Incorporated 2019-12-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">22 Margaret Way, London IG4 5DD, East London, IG4 5DD</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #28 &mdash; 21 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>

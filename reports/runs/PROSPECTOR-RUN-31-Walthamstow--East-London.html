@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prospector Report — Run #31</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800;900&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        @page { size: A4; margin: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --coral: #CD5C3C;
+            --cream: #E8DCC8;
+            --sage: #C8D8D0;
+            --charcoal: #2C2C2C;
+            --black: #000000;
+            --off-white: #FAF8F5;
+            --shadow: 8px 8px 0 var(--black);
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--cream);
+            color: var(--charcoal);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid-page; }
+        .site-header {
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+            padding: 0 48px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: var(--cream);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        .header-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--coral);
+        }
+        .hero {
+            padding: 40px 48px 32px;
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .eyebrow {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .hero h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 40px;
+            line-height: 1.02;
+            margin-bottom: 10px;
+        }
+        .hero .sub {
+            font-size: 14px;
+            opacity: 0.75;
+            max-width: 620px;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .stat-cell {
+            border-right: 3px solid var(--black);
+            padding: 20px 20px 18px;
+            background: var(--off-white);
+        }
+        .stat-cell:last-child { border-right: none; }
+        .stat-cell.priority-a { background: var(--coral); }
+        .stat-cell.priority-a .stat-label,
+        .stat-cell.priority-a .stat-num { color: var(--cream); }
+        .stat-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 10px;
+        }
+        .stat-num {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 40px;
+            line-height: 1;
+        }
+        .section {
+            border-bottom: 3px solid var(--black);
+            padding: 28px 48px;
+        }
+        .section-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--coral);
+            margin-bottom: 14px;
+        }
+        .section h2 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 30px;
+            line-height: 1;
+            margin-bottom: 20px;
+        }
+        .biz-card {
+            border: 3px solid var(--black);
+            border-bottom: none;
+            padding: 22px 26px;
+            background: var(--off-white);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .biz-card:last-child { border-bottom: 3px solid var(--black); }
+        .biz-card.priority-a { background: #f4e2da; }
+        .biz-card-top {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .biz-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 19px;
+            line-height: 1.15;
+        }
+        .biz-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 8px 0 10px;
+        }
+        .tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1.5px solid var(--charcoal);
+            color: var(--charcoal);
+        }
+        .tag.on { background: var(--charcoal); color: var(--cream); border-color: var(--charcoal); }
+        .tag.priority { background: var(--coral); color: var(--cream); border-color: var(--coral); font-weight: 700; }
+        .biz-meta {
+            font-size: 12.5px;
+            opacity: 0.75;
+            margin-bottom: 8px;
+        }
+        .biz-meta span + span::before { content: " · "; opacity: 0.5; }
+        .biz-quote {
+            border-left: 3px solid var(--coral);
+            background: rgba(205,92,60,0.08);
+            padding: 8px 14px;
+            font-size: 12.5px;
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 6px;
+        }
+        .biz-quote .quote-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-style: normal;
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--coral);
+            margin-bottom: 4px;
+        }
+        /* Score hero (single-business report) */
+        .score-hero {
+            padding: 40px 48px;
+            border-bottom: 3px solid var(--black);
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 48px;
+            align-items: start;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .score-big {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 110px;
+            line-height: 0.85;
+            color: var(--coral);
+        }
+        .score-denom {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 26px;
+            opacity: 0.35;
+        }
+        .signal-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 3px solid var(--black);
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .signal-cell {
+            border-right: 3px solid var(--black);
+            padding: 18px 20px;
+            background: var(--off-white);
+        }
+        .signal-cell:last-child { border-right: none; }
+        .signal-cell.active { background: var(--sage); }
+        .signal-label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.6;
+            margin-bottom: 8px;
+        }
+        .signal-value {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 20px;
+        }
+        .contact-section {
+            background: var(--charcoal);
+            color: var(--cream);
+            padding: 32px 48px;
+        }
+        .contact-row { font-size: 14px; margin: 4px 0; opacity: 0.9; }
+        .contact-row strong { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--coral); text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; margin-right: 10px; }
+        .site-footer {
+            padding: 20px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 24px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+        .download-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 18px 48px;
+            background: var(--charcoal);
+            border-bottom: 3px solid var(--black);
+        }
+        .download-btn {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--charcoal);
+            background: var(--coral);
+            border: 2px solid var(--black);
+            padding: 10px 18px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .download-btn:hover { background: var(--cream); }
+        .download-btn.secondary { background: var(--cream); color: var(--charcoal); }
+        .index-link-bar {
+            padding: 10px 48px;
+            background: var(--off-white);
+            border-bottom: 3px solid var(--black);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+        }
+        .index-link-bar a { color: var(--coral); text-decoration: none; font-weight: 700; }
+        .index-link-bar a:hover { text-decoration: underline; }
+        .footer-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .footer-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            opacity: 0.45;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <div class="header-brand">Antek Automation — Prospector</div>
+        <div class="header-meta">Run #31 &mdash; 21 August 2026</div>
+    </header>
+    
+    
+
+    <section class="hero">
+        <span class="eyebrow">Sales-readiness snapshot</span>
+        <h1>Top targets &mdash; Walthamstow, East London</h1>
+        <p class="sub">26 targets across electricians (1 chain/franchise businesses excluded — pass --include-chains to see them), sorted by review_target_score desc, opportunity_score desc tiebreak.</p>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat-cell priority-a">
+            <span class="stat-label">Total targets</span>
+            <div class="stat-num">26</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Avg review score</span>
+            <div class="stat-num">27</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Weak/unclaimed GBP</span>
+            <div class="stat-num">2</div>
+        </div>
+        <div class="stat-cell">
+            <span class="stat-label">Missed-call evidence</span>
+            <div class="stat-num">0</div>
+        </div>
+    </div>
+
+    <section class="section">
+        <span class="section-label">Ranked target list</span>
+        <h2>who to call first</h2>
+        <div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">AMAC Electrical Contracting &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 50 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (5 reviews)</span><span>020 8279 0088</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (5 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">48 Lyndhurst Dr, London E10 6JD, Walthamstow, East London, E10 6JD</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">l1 Electrical 24/7 &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (10 reviews)</span><span>07432 235232</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (10 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: CARTER, Thomas Jordan</span><span>Co. no. 13756329</span><span>Incorporated 2021-11-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">8 Westmorland Rd, London E17 8JA, Walthamstow, East London, E17 8JA</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Walthamstow electrician &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (4 reviews)</span><span>07739 417252</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (4 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ALI, Haider</span><span>Co. no. 13510735</span><span>Incorporated 2021-07-14</span></div>
+            <div class="biz-meta" style="margin-top:2px">29 Station Rd, London E17 8AA, Walthamstow, East London, E17 8AA</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Reliable Electrical And Heating Walthamstow &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (5 reviews)</span><span>07700 169445</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (5 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SINGH, Sukhwinder</span><span>Co. no. 13482785</span><span>Incorporated 2021-06-29</span></div>
+            <div class="biz-meta" style="margin-top:2px">200A High St, London E17 7JH, Walthamstow, East London, E17 7JH</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Walthamstow Electrical London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: NAWAB, Gauhar</span><span>Co. no. 12746800</span><span>Incorporated 2020-07-16</span></div>
+            <div class="biz-meta" style="margin-top:2px">40 Hoe St, London E17 4PH, Walthamstow, East London, E17 4PH</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">BBA Electrical And Heating Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (9 reviews)</span><span>07445 359864</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (9 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: YOLCU, Ali</span><span>Co. no. 14243737</span><span>Incorporated 2022-07-19</span></div>
+            <div class="biz-meta" style="margin-top:2px">2 Livingstone Rd, London E17 9AX, Walthamstow, East London, E17 9AX</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">DA Electrical London Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (9 reviews)</span><span>07727 619854</span><span>https://www.daelectricallondon.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (9 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ALBRAHIMI, Dritan</span><span>Co. no. 10922264</span><span>Incorporated 2017-08-18</span></div>
+            <div class="biz-meta" style="margin-top:2px">45 Rensburg Rd, London E17 7HL, Walthamstow, East London, E17 7HL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Waltham Forest Electrical Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>020 3670 7884</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Manor Rd, London E17 5RZ, Walthamstow, East London, E17 5RZ</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Rubben Electrical Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>07931 094585</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: WINFUL, Ruby Akler</span><span>Co. no. 13601551</span><span>Incorporated 2021-09-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">67 Marten Rd, London E17 4NL, Walthamstow, East London, E17 4NL</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Highs Care &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>020 4538 8713</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BURTON, Andrew</span><span>Co. no. SC432029</span><span>Incorporated 2012-09-06</span></div>
+            <div class="biz-meta" style="margin-top:2px">275 High St, London E17 7BF, Walthamstow, East London, E17 7BF</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">AKA Sparks Electrical Contractors Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (1 reviews)</span><span>07591 105974</span><span>http://akasparks.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (1 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: ABEYIE, Aaron Keith</span><span>Co. no. 10318018</span><span>Incorporated 2016-08-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">20 Stephenson Rd, London E17 7LE, Walthamstow, East London, E17 7LE</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">KG Electrical Contractors Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (14 reviews)</span><span>07588 394300</span><span>https://www.kgelectricalcontractorsltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (14 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GARCIA OVIEDO, Kevin Hugo</span><span>Co. no. 11855056</span><span>Incorporated 2019-03-01</span></div>
+            <div class="biz-meta" style="margin-top:2px">30 Sybourn St, London E17 8HA, Walthamstow, East London, E17 8HA</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">Gamma Electrical LTD &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (13 reviews)</span><span>07956 428204</span><span>https://gamma768.wixsite.com/gamma</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (13 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SINGH, Gurnam</span><span>Co. no. 05431975</span><span>Incorporated 2005-04-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">173 Grove Rd, London E17 9BZ, Walthamstow, East London, E17 9BZ</div>
+            
+        </div>
+        <div class="biz-card priority-a">
+            <div class="biz-card-top">
+                <div class="biz-name">All Services 4U - Electrician East London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 40 &middot; OPPORTUNITY 5</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (10 reviews)</span><span>020 7183 9572</span><span>https://allservices4u.co.uk/south-east-london/emergency-electrician/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (10 reviews (low volume, +40))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SCHULMAN, Izhar</span><span>Co. no. 17145333</span><span>Incorporated 2026-04-09</span></div>
+            <div class="biz-meta" style="margin-top:2px">33 Salisbury Hall Gdns, London E4 8SA, Walthamstow, East London, E4 8SA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Quickvolts Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (44 reviews)</span><span>07590 928564</span><span>https://www.mybuilder.com/profile/quickvolts/reviews</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (44 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MCKINNEL, Steven John</span><span>Co. no. SC643248</span><span>Incorporated 2019-10-02</span></div>
+            <div class="biz-meta" style="margin-top:2px">London E17 5JZ, Walthamstow, East London, E17 5JZ</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">London Electrical and Plumbing Supplies &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.9★ (22 reviews)</span><span>020 3581 6767</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (22 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: MAHMOOD, Waqas</span><span>Co. no. 11865735</span><span>Incorporated 2019-03-07</span></div>
+            <div class="biz-meta" style="margin-top:2px">473 Lea Bridge Rd, London E10 7EA, Walthamstow, East London, E10 7EA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">FlowTech Plumbing &amp; Drainage Walthamstow &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (34 reviews)</span><span>020 3670 8167</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (34 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: FLOWERS, Alan John</span><span>Co. no. 07230147</span><span>Incorporated 2010-04-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">34A Browns Rd, London E17 4RW, Walthamstow, East London, E17 4RW</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">PD Electrical London Limited - NICEIC Approved Contractor &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 20 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (36 reviews)</span><span>07932 720982</span><span>https://www.pd-electrical.co.uk/?utm_source=google&amp;utm_medium=wix_google_business_profile&amp;utm_campaign=13595391233692485761</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (36 reviews (20-50 band, +20))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GILLON, Steven David</span><span>Co. no. 13353711</span><span>Incorporated 2021-04-23</span></div>
+            <div class="biz-meta" style="margin-top:2px">2 Bernwell Rd, London E4 6HY, Walthamstow, East London, E4 6HY</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">M.E.L Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (61 reviews)</span><span>07883 078488</span><span>https://www.melelectricalltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (61 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: LAYZELL, Michael Edward</span><span>Co. no. 11498200</span><span>Incorporated 2018-08-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">Spruce Hills Rd, London E17 4LB, Walthamstow, East London, E17 4LB</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Blackhorse Electrical | Blackhorse Property Solutions &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (52 reviews)</span><span>07464 625998</span><span>https://blackhorseelectrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (52 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: GOKAY, Eren</span><span>Co. no. 14461143</span><span>Incorporated 2022-11-03</span></div>
+            <div class="biz-meta" style="margin-top:2px">17 Storey Rd, London E17 7DA, Walthamstow, East London, E17 7DA</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Electricians Walthamstow, E17 electrician Service ... &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>https://walthamstow-electricians.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (0 reviews (low volume, +40))</span>
+                <span class="tag on">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: SANUSI, Lateef</span><span>Co. no. 06691808</span><span>Incorporated 2008-09-08</span></div>
+            <div class="biz-meta" style="margin-top:2px">Walthamstow, East London</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Frank Edmund Electrical Services &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (72 reviews)</span><span>07968 512649</span><span>http://www.frankedmundelectrical.com/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (72 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">N Countess Rd, London E17 5HT, Walthamstow, East London, E17 5HT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">AMD Electrics &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (55 reviews)</span><span>07916 151824</span><span>http://www.amdelectrics.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (55 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            
+            <div class="biz-meta" style="margin-top:2px">Empress Parade, Chingford Rd, London E4 8SL, Walthamstow, East London, E4 8SL</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Harris Electrical Ltd &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 10 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>4.5★ (54 reviews)</span><span>020 8521 7491</span><span>http://harriselectricalltd.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (54 reviews (51-100 band, +10))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: HARRIS, Deborah Ann</span><span>Co. no. 00374056</span><span>Incorporated 1942-05-21</span></div>
+            <div class="biz-meta" style="margin-top:2px">277b Hoe St, London E17 9PT, Walthamstow, East London, E17 9PT</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Elect Tronex Walthamstow NorthEast London &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 15</div>
+            </div>
+            <div class="biz-meta"><span>4.6★ (206 reviews)</span><span>07563 251246</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (206 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag on">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag on">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: NOAH, Kai</span><span>Co. no. 11704150</span><span>Incorporated 2018-11-29</span></div>
+            <div class="biz-meta" style="margin-top:2px">Elect tronex, 17&amp;Central, 45 Selborne Rd, London E17 7JR, Walthamstow, East London, E17 7JR</div>
+            
+        </div>
+        <div class="biz-card">
+            <div class="biz-card-top">
+                <div class="biz-name">Beales Electrical &mdash; <span style="opacity:.6;font-weight:500;font-size:13px">electricians</span></div>
+                <div class="biz-score">REVIEW 0 &middot; OPPORTUNITY 10</div>
+            </div>
+            <div class="biz-meta"><span>5.0★ (116 reviews)</span><span>020 8133 1234</span><span>http://www.beales-electrical.co.uk/</span></div>
+            <div class="tag-row">
+                <span class="tag priority">REVIEW SIGNALS (116 reviews (100+, +0))</span>
+                <span class="tag">Weak/unclaimed listing</span>
+<span class="tag">Recent low-star review</span>
+<span class="tag">Missed-call evidence in reviews</span>
+            </div>
+            <div class="tag-row">
+                <span class="tag priority">OPPORTUNITY SIGNALS</span>
+                <span class="tag on">No booking widget</span>
+<span class="tag">No live chat</span>
+<span class="tag on">Phone-dependent contact page</span>
+<span class="tag">No Website</span>
+                
+            </div>
+            <div class="biz-meta" style="margin-top:2px"><span>Director: BEALES, Oliver James</span><span>Co. no. 15538863</span><span>Incorporated 2024-03-04</span></div>
+            <div class="biz-meta" style="margin-top:2px">Smarts Ln, Loughton IG10 4BU, Walthamstow, East London, IG10 4BU</div>
+            
+        </div>
+        </div>
+    </section>
+
+    <footer class="site-footer">
+        <div class="footer-brand">PROSPECTOR</div>
+        <div class="footer-meta">
+            Run #31 &mdash; 21 August 2026<br>
+            Antek Automation &mdash; internal outreach snapshot
+        </div>
+    </footer>
+</body>
+</html>

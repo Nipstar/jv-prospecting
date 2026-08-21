@@ -55,6 +55,13 @@ _TITLE_REJECT_PATTERNS = [
     r"\bcourses?\s+in\b",
     r"\btraining\s+courses?\b",
     r"\btop\s+\d+\b",
+    # NOTE: the digit can come before "top" too — "8 Top Rated Electricians
+    # in Romford for 2026" slipped past the original top-then-digit-only
+    # pattern (live-tested miss, East London electrician sweep). Also
+    # catch "for {year}" as its own signal — a "best-of" listicle dated
+    # to a specific year is never a business's own name.
+    r"\b\d+\s+top\b",
+    r"\bfor\s+20\d\d\b",
     r"\bbest\s+\d*\s*.*\bin\b",
     r"\bcompanies\s+in\b.*\bfor\b",
     r"\blocal\s+.*\s+companies\s+in\b",

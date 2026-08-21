@@ -34,6 +34,13 @@ a page for any of them on request.
 | #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
 | #26 | Camberley, Surrey | hvac | 2026-08-19 | 13 (of 22, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
 | #27 | South London | electricians (multi-source: places+checkatrade+organic) | 2026-08-20 | 41 (of 48, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-27-South-London.pdf) | [CSV](../exports/runs/targets_run27.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/27/) |
+| #28 | East London | electricians | 2026-08-21 | 26 (of 39, 13 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-28-East-London.pdf) | [CSV](../exports/runs/targets_run28.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/28/) |
+| #29 | Stratford, East London | electricians | 2026-08-21 | 16 (of 25, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-29-Stratford--East-London.pdf) | [CSV](../exports/runs/targets_run29.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/29/) |
+| #30 | Ilford, East London | electricians | 2026-08-21 | 19 (of 33, 14 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-30-Ilford--East-London.pdf) | [CSV](../exports/runs/targets_run30.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/30/) |
+| #31 | Walthamstow, East London | electricians | 2026-08-21 | 26 (of 27, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-31-Walthamstow--East-London.pdf) | [CSV](../exports/runs/targets_run31.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/31/) |
+| #32 | Barking, East London | electricians | 2026-08-21 | 25 (of 34, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-32-Barking--East-London.pdf) | [CSV](../exports/runs/targets_run32.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/32/) |
+| #33 | Hackney, East London | electricians | 2026-08-21 | 18 (of 24, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-33-Hackney--East-London.pdf) | [CSV](../exports/runs/targets_run33.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/33/) |
+| #34 | Romford, East London | electricians | 2026-08-21 | 27 (of 34, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-34-Romford--East-London.pdf) | [CSV](../exports/runs/targets_run34.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/34/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -186,6 +193,31 @@ that merely has a weak site. Backfilled all 25 existing no-website
 businesses across the whole DB (no new fetches needed, pure scoring
 fix), regenerated and redeployed the 9 affected tracked runs:
 #11/#12/#17/#18/#22/#24/#25/#26/#27.
+
+**East London electricians sweep — complete** (Andy: "electrician search
+for whole of east London try and find them all", then flagged that the
+first broad query alone likely undercounted, same lesson as the earlier
+London aircon sweep). Chunked by sub-area — East London broad (#28),
+Stratford (#29), Ilford (#30), Walthamstow (#31), Barking (#32), Hackney
+(#33), Romford (#34). 216 raw businesses found, 157 non-chain after
+rescan. Content validator caught junk live on every chunk (job/course
+listings, directory URL patterns, link-density signals). Retroactive
+DB-wide re-check with a validator fix (see below) caught one more:
+"8 Top Rated Electricians in Romford for 2026" on topratedelectricians.co.uk
+— a directory site. Also manually caught 3 off-vertical vehicle-electrics
+businesses that a name/domain scan surfaces but the automated checks
+can't (no_website=1, so there's no domain to check): "DND Car Electrics",
+"Samet auto electrics", "Mirpur Auto" — same building-vs-vehicle trade
+ambiguity as the earlier air conditioning misses, just for electricians
+instead. All removed.
+
+**Validator fix: digit-before-"top" listicle titles.** The junk-title
+regex only matched "top 10" (digit after "top"), missing "8 Top Rated
+Electricians..." (digit before). Added `\d+\s+top\b` and `for\s+20\d\d\b`
+(a "best-of {year}" listicle is never a business's own name) to
+`discovery/validate.py`'s title-reject patterns. Verified against the
+existing known-good business name set (0 false positives) before
+re-running the DB-wide sweep.
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
