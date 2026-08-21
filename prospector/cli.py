@@ -12,6 +12,7 @@ from prospector.config import missing_keys
 from prospector.db import get_conn, init_db
 from prospector.discovery.places import discover_run, import_csv, resolve_sources
 from prospector.enrichers.crosscheck import crosscheck_organic
+from prospector.enrichers.no_website_check import confirm_all
 from prospector.enrichers.reviews import fetch_and_score as fetch_and_score_reviews
 from prospector.enrichers.site import fetch_all as fetch_all_site_signals
 from prospector.export import export_run_csv
@@ -334,6 +335,35 @@ def site_fetch_cmd(run_id: int | None, business_id: int | None, refresh: bool, l
             f"Fetch layer usage: httpx={counts['httpx']}  playwright={counts['playwright']}  "
             f"apify={counts['apify']}  unreachable={len(results) - len(methods)}"
         )
+
+
+@cli.group(name="no-website")
+def no_website_group() -> None:
+    """Confirmation search for businesses flagged no_website=1 (prospector/
+    enrichers/no_website_check.py) — Andy: "do we do a brand name search
+    to confirm there is no website" — this closes that gap. no_website=1
+    only ever meant "Places had no website on file"; this runs a targeted
+    "{name} {town}" organic search with a strict name-to-domain match
+    before treating it as a confirmed fact either way."""
+
+
+@no_website_group.command(name="confirm")
+@click.option("--run-id", "run_id", type=int, default=None, help="Limit to one discover run.")
+@click.option("--refresh", "refresh", is_flag=True, default=False, help="Re-check even businesses already checked.")
+@click.option("--limit", "limit", type=int, default=None, help="Cap how many businesses to check this invocation.")
+def no_website_confirm_cmd(run_id: int | None, refresh: bool, limit: int | None) -> None:
+    """Search-confirm businesses flagged no_website=1. A confident match
+    flips no_website to 0, backfills website/domain, and re-scores
+    opportunity_score. No match leaves no_website=1 but records that it
+    was actually checked (no_website_confirmed=1), not guessed."""
+    with get_conn() as conn:
+        results = confirm_all(conn, run_id=run_id, refresh=refresh, limit=limit)
+
+    if not results:
+        click.echo("No businesses to check (none flagged no_website=1, or already checked — pass --refresh).")
+        return
+    found = sum(1 for r in results if r.get("no_website") == 0)
+    click.echo(f"Checked {len(results)} — {found} confirmed with a website found, {len(results) - found} confirmed genuinely no website.")
 
 
 @cli.group()

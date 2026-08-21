@@ -250,6 +250,26 @@ def _migration_v12_no_website_flag(conn: sqlite3.Connection) -> None:
     _add_columns_if_missing(conn, "businesses", _V12_ADD_BUSINESS_COLUMNS)
 
 
+# Andy: "Do we do a brand name search to confirm there is no website" —
+# no_website=1 was set purely from Places' website field being empty, no
+# verification search. Adds a confirmation search
+# (enrichers/no_website_check.py) with its own distinct result columns —
+# "checked, still no site" and "checked, found one" are both real outcomes
+# worth recording, not just a boolean overwrite of no_website itself.
+_V13_ADD_BUSINESS_COLUMNS = [
+    ("no_website_checked_at", "TEXT"),
+    # NULL = not yet checked. 1 = confirmed search, no confident domain match found
+    # (no_website=1 stands). 0 = confident match found, no_website flipped to 0 and
+    # website/domain backfilled with the found candidate — see no_website_check.py
+    # for the strict match rule ("no guessing" per Andy).
+    ("no_website_confirmed", "INTEGER"),
+]
+
+
+def _migration_v13_no_website_confirm(conn: sqlite3.Connection) -> None:
+    _add_columns_if_missing(conn, "businesses", _V13_ADD_BUSINESS_COLUMNS)
+
+
 def _add_columns_if_missing(conn: sqlite3.Connection, table: str, columns: list[tuple[str, str]]) -> None:
     existing = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
     for name, coltype in columns:
@@ -295,6 +315,7 @@ MIGRATIONS: list[tuple[int, "str | object"]] = [
     (10, _migration_v10_checkatrade),
     (11, _migration_v11_organic_crosscheck),
     (12, _migration_v12_no_website_flag),
+    (13, _migration_v13_no_website_confirm),
 ]
 
 

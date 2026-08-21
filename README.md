@@ -471,6 +471,21 @@ prospector reviews list --min-score 50
 #    resort, costs a little money) — see "Site-fetch escalation" below.
 prospector site fetch --run-id 9
 
+# 3.5. No-website confirmation — a business with no website flagged by
+#      `site fetch` (no_website=1, opportunity_score maxed — see
+#      "no_website scoring" below) only means Places had no website on
+#      file, not a verified fact. This runs a targeted "{name} {town}"
+#      organic search with a STRICT name-to-domain match (Andy: "no
+#      guessing" — see prospector/enrichers/no_website_check.py's
+#      docstring for the exact rule) before treating either outcome as
+#      confirmed. A confident match flips no_website back to 0,
+#      backfills website/domain, and re-scores opportunity_score against
+#      the real site; no match just records that it was actually
+#      checked (no_website_confirmed=1), leaving the strong signal in
+#      place with verification behind it now instead of an empty field.
+prospector no-website confirm --run-id 9
+prospector no-website confirm            # DB-wide, all runs
+
 # 4. Targets — combined sort (review_target_score desc, opportunity_score
 #    desc tiebreak) + CSV export. Excludes is_chain=1 businesses by default
 #    (see "Chain / franchise / corporate exclusion" below) — pass
