@@ -62,7 +62,7 @@ OPPORTUNITY_SIGNAL_TAGS: list[tuple[str, str]] = [
     ("no_booking", "No booking widget"),
     ("no_chat", "No live chat"),
     ("phone_dependent", "Phone-dependent contact page"),
-    ("no_website", "No website at all — dual opportunity (website/SEO + AI answering)"),
+    ("no_website", "No Website"),
 ]
 
 
