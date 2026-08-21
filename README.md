@@ -404,6 +404,29 @@ always-current one) — update it manually when you commit a new run's
 `reports/runs/`/`exports/runs/` artifacts, mirroring the row format already
 there.
 
+**Standing rule: shared-template/scoring code changes must regenerate
+EVERY tracked run, not just the one you're testing against.** All runs
+render from the same `prospector/report.py` template and scoring logic
+(`enrichers/site.py`, `chain_signals.py`, `discovery/validate.py`) — a
+label wording fix, tag-rendering fix, or scoring bugfix applies to every
+run's report, not just the one you happened to redeploy. `prospector
+deploy --run-id N` (no `report`, no `--force`) does NOT re-render from the
+DB by default — it patches the existing static HTML with a fresh download
+bar and otherwise reuses whatever's already in `reports/runs/`, so a
+template/scoring change silently does *not* reach already-deployed runs
+that way. Live-tested gap: after fixing the `no_website` scoring bug and
+shortening its tag label, only run #27 was regenerated first — Andy
+screenshotted a stale card from a run that hadn't been touched yet. Fix:
+after any change to `report.py`, `enrichers/site.py`, `chain_signals.py`,
+or `discovery/validate.py`, run `prospector report --run-id N --deploy`
+(full regenerate, not `deploy` alone) for **every** run_id currently
+listed in `reports/INDEX.md`'s table — not just the run being actively
+worked on. Run these sequentially, one at a time: concurrent
+`report --deploy` invocations collide on the shared npx/wrangler cache
+(`ENOTEMPTY`/`enoent` errors on the miniflare install step), silently
+failing the deploy step for whichever runs lost the race — live-tested
+during the Surrey sweep.
+
 ## Prospector v2: discovery, reviews, site signals, targets
 
 This is the new workflow built in Phases 2-5 of the "Prospector v2: UK
