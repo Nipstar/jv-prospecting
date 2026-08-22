@@ -70,7 +70,15 @@ from prospector.verticals import slug_for_label
 # scale/independence of the business that's in question, same category
 # as the multi-location domain-sharing signal just above.
 _SERVICE_AREA_LITERAL_RE = re.compile(
-    r"/[a-z0-9-]*service-areas?/|/areas-we-cover/|/locations?/[a-z0-9-]+/", re.IGNORECASE
+    r"/[a-z0-9-]*service-areas?/|/areas-we-cover/|/locations?/[a-z0-9-]+/"
+    # Also catches the bare "/areas/{town}" pattern (no "service-" prefix)
+    # missed by the above — live-tested misses: aboveboardgroup.co.uk/areas/
+    # ealing, klic-electrical.co.uk/areas/stratford,
+    # everaldalfselectrical.co.uk/areas/, mkveasey.co.uk/areas/kingston-
+    # upon-thames/ — all templated per-town landing pages under a bare
+    # "/areas/" path, not "/service-area/".
+    r"|/areas/([a-z0-9-]+/?)?$",
+    re.IGNORECASE,
 )
 
 

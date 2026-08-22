@@ -71,8 +71,10 @@ from prospector.db import (
     merge_discovery_source,
 )
 from prospector.discovery import checkatrade, organic, yell
+from prospector.discovery.validate import validate_discovered_business
 from prospector.http import ApiError
 from prospector.verticals import resolve_search_term
+from prospector.verticals import slug_for_label
 
 # Registry of discovery sources — Google Places (original, primary) plus
 # the additional passes Andy asked for: Yell.com (Apify actor,
@@ -225,6 +227,7 @@ class DiscoverResult:
     location: str
     found: int = 0
     deduped_skipped: int = 0
+    junk_filtered: int = 0
     inserted: int = 0
     chain_flagged: int = 0
     inserted_ids: list[int] = field(default_factory=list)
@@ -293,6 +296,21 @@ def discover_run(
             if existing is not None:
                 result.deduped_skipped += 1
                 merge_discovery_source(conn, existing["id"], source_name)
+                continue
+
+            # Content-junk filter — applied to EVERY source (Places, Yell,
+            # Checkatrade, organic), not just organic search results. Places
+            # text search ("electricians in Kingston") loosely text-matches
+            # colleges, job ads, tattoo/vape/phone-repair shops that share a
+            # keyword with the trade query; these were previously only
+            # caught by manual review after the fact. See discovery/
+            # validate.py's validate_discovered_business() docstring.
+            is_valid, junk_reason = validate_discovered_business(
+                biz.get("name"), biz.get("website"), slug_for_label(vertical_label), vertical_label
+            )
+            if not is_valid:
+                result.junk_filtered += 1
+                print(f"  [discover] filtered junk from {source_name}: {junk_reason}")
                 continue
 
             biz["vertical"] = vertical_label

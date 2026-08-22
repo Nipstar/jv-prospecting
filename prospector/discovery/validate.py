@@ -160,6 +160,128 @@ _NON_SIGNAL_DOMAIN_SUBSTRINGS = [
 ]
 
 
+# Job board / recruitment domains — a Places/organic/Yell result can be a
+# job AD, not a business, e.g. energyjobline.com/job/maintenance-electrician-
+# kingston-upon-thames-london-31236809 ("Maintenance Electrician in Kingston
+# upon Thames, London") slipped through because its title doesn't match
+# _TITLE_REJECT_RE's "jobs in" pattern (it's phrased as a job title, not a
+# "jobs in X" listicle) — the DOMAIN is the reliable tell here, same idea as
+# _AUTOMOTIVE_DOMAIN_SUBSTRINGS.
+_JOB_BOARD_DOMAIN_SUBSTRINGS = [
+    "energyjobline.com", "indeed.co.uk", "indeed.com", "totaljobs.com",
+    "reed.co.uk", "cv-library.co.uk", "glassdoor.co.uk", "glassdoor.com",
+    "monster.co.uk", "jobsite.co.uk", "jobserve.com", "adzuna.co.uk",
+    "s1jobs.com", "careerstructure.com", "findajob.dwp.gov.uk",
+    "milkround.com", "prospects.ac.uk", "apprenticeships.gov.uk",
+    "jooble.org", "ziprecruiter.co.uk", "careerbuilder.co.uk",
+    "linkedin.com/jobs",
+]
+_JOB_BOARD_DOMAIN_RE = re.compile("|".join(re.escape(s) for s in _JOB_BOARD_DOMAIN_SUBSTRINGS), re.IGNORECASE)
+
+# Off-vertical junk that Google Places text search ("electricians in
+# Kingston") loosely text-matches in on trade/keyword overlap alone, none of
+# which are ever a real target for any of prospector's verticals — a
+# tattooist, vape shop, and phone/gadget repair shop all surfaced in one
+# Kingston run (id 1067/1069/1072/1071) purely because their listing text
+# mentions "electric"/"repair"/wiring-adjacent words. Name-based, no
+# network call, safe to run against every discovery source (Places/Yell/
+# Checkatrade/organic), not just organic search results.
+_OFF_VERTICAL_NAME_SUBSTRINGS = [
+    "tattoo", "vape", "vaping", "e-cigarette", "e cigarette", "e-liquid",
+    "phone repair", "mobile phone repair", "iphone repair", "ipad repair",
+    "laptop repair", "computer repair", "screen repair", "repair zone",
+    "cell phone repair", "gadget repair", "phone shop",
+]
+_OFF_VERTICAL_NAME_RE = re.compile("|".join(re.escape(s) for s in _OFF_VERTICAL_NAME_SUBSTRINGS), re.IGNORECASE)
+
+# Educational institution names ("Kingston College") also slip through
+# Places text search the same way — but NOT a universal reject: "London
+# College of Oral Implantology (LCOI)" is a real dental-implant training
+# clinic that legitimately trades under "College" in the dental vertical.
+# Scoped to verticals where a further-education college is never a
+# plausible real target (every trade-services vertical); dental/vets are
+# excluded since specialist teaching-clinic naming is plausible there.
+_EDUCATION_NAME_SUBSTRINGS = ["college", "university", "sixth form", "further education"]
+_EDUCATION_NAME_RE = re.compile("|".join(re.escape(s) for s in _EDUCATION_NAME_SUBSTRINGS), re.IGNORECASE)
+_VERTICALS_WHERE_COLLEGE_IS_PLAUSIBLE = {"dental_cosmetic_aesthetic", "vets"}
+# Belt-and-braces text match on top of the slug check above — live-tested
+# false positive: run 2's vertical is stored as the legacy trade_sectors.py
+# label "Cosmetic dentistry / implant clinics" (pre-v2 pipeline), which
+# slug_for_label() can't resolve (returns None, same "legacy label" gap
+# documented in chain_signals.match_known_chain_name), so the slug-only
+# check alone wrongly rejected "London College of Oral Implantology
+# (LCOI)". Checking the raw label text too catches this regardless of
+# which pipeline/label vocabulary wrote it.
+_PLAUSIBLE_COLLEGE_LABEL_SUBSTRINGS = ["dental", "dentist", "cosmetic", "implant", "aesthetic", "vet"]
+
+
+def looks_like_job_board_domain(url: str | None) -> bool:
+    """Fast, free, no-network check. True if the URL is a job-board/
+    recruitment-site domain (a job ad, not a business) — see
+    _JOB_BOARD_DOMAIN_SUBSTRINGS docstring for the live-tested miss this
+    catches."""
+    if not url:
+        return False
+    return bool(_JOB_BOARD_DOMAIN_RE.search(url))
+
+
+def looks_like_off_vertical_shop(name: str | None) -> bool:
+    """Fast, free, no-network check. True if the business name reads as a
+    tattooist/vape shop/phone-gadget-repair shop — off-vertical junk for
+    every prospector vertical, regardless of which trade keyword the
+    Places/Yell text search matched on."""
+    if not name:
+        return False
+    return bool(_OFF_VERTICAL_NAME_RE.search(name))
+
+
+def looks_like_education_institution(
+    name: str | None, vertical_slug: str | None = None, vertical_label: str | None = None
+) -> bool:
+    """Fast, free, no-network check. True if the name reads as a
+    college/university (further-education institution, not a trading
+    business) — scoped OFF for verticals where a teaching clinic is a
+    plausible real business (see _VERTICALS_WHERE_COLLEGE_IS_PLAUSIBLE
+    docstring: "London College of Oral Implantology" is a real dental
+    business, "Kingston College" surfacing under an electricians search is
+    not). Checks both the resolved slug AND the raw label text (legacy
+    pipeline labels don't always resolve to a slug — see
+    _PLAUSIBLE_COLLEGE_LABEL_SUBSTRINGS docstring)."""
+    if not name:
+        return False
+    if vertical_slug in _VERTICALS_WHERE_COLLEGE_IS_PLAUSIBLE:
+        return False
+    label_lower = (vertical_label or "").lower()
+    if any(sub in label_lower for sub in _PLAUSIBLE_COLLEGE_LABEL_SUBSTRINGS):
+        return False
+    return bool(_EDUCATION_NAME_RE.search(name))
+
+
+def validate_discovered_business(
+    name: str | None,
+    website: str | None,
+    vertical_slug: str | None = None,
+    vertical_label: str | None = None,
+) -> tuple[bool, str]:
+    """Cheap, no-network validation applied to EVERY discovery source
+    (Places, Yell, Checkatrade, organic) at insert time — see
+    discovery/places.py's discover_run() loop. Unlike
+    validate_organic_result() below, this deliberately does NOT fetch the
+    page (Places/Yell results are frequent enough that a per-result httpx
+    GET would be slow/rate-limit-risky across a whole run) — name/domain
+    heuristics only. Returns (is_valid, reason); is_valid=False means
+    "skip this, don't insert into the DB"."""
+    if is_junk_title(name):
+        return False, f"title matches junk/listicle pattern: {name!r}"
+    if looks_like_job_board_domain(website):
+        return False, f"domain is a job board/recruitment site, not a business: {website!r}"
+    if looks_like_off_vertical_shop(name):
+        return False, f"name reads as an off-vertical shop (tattoo/vape/phone-repair), not a trade business: {name!r}"
+    if looks_like_education_institution(name, vertical_slug, vertical_label):
+        return False, f"name reads as a college/university, not a trading business: {name!r}"
+    return True, "no junk signals found"
+
+
 def is_junk_title(title: str | None) -> bool:
     """Fast, free, no-network check. True if the title itself reads like
     a listicle/aggregator/job/course page rather than a business name."""
