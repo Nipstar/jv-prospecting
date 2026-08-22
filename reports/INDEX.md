@@ -41,6 +41,18 @@ a page for any of them on request.
 | #32 | Barking, East London | electricians | 2026-08-21 | 25 (of 34, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-32-Barking--East-London.pdf) | [CSV](../exports/runs/targets_run32.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/32/) |
 | #33 | Hackney, East London | electricians | 2026-08-21 | 18 (of 24, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-33-Hackney--East-London.pdf) | [CSV](../exports/runs/targets_run33.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/33/) |
 | #34 | Romford, East London | electricians | 2026-08-21 | 27 (of 34, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-34-Romford--East-London.pdf) | [CSV](../exports/runs/targets_run34.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/34/) |
+| #35 | Croydon, South London | electricians | 2026-08-21 | 22 (of 26, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-35-Croydon--South-London.pdf) | [CSV](../exports/runs/targets_run35.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/35/) |
+| #36 | Streatham, South London | electricians | 2026-08-21 | 17 (of 24, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-36-Streatham--South-London.pdf) | [CSV](../exports/runs/targets_run36.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/36/) |
+| #37 | Peckham, South London | electricians | 2026-08-21 | 10 (of 15, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-37-Peckham--South-London.pdf) | [CSV](../exports/runs/targets_run37.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/37/) |
+| #38 | Lewisham, South London | electricians | 2026-08-21 | 8 (of 12, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-38-Lewisham--South-London.pdf) | [CSV](../exports/runs/targets_run38.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/38/) |
+| #39 | Bromley, South London | electricians | 2026-08-21 | 29 (of 33, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-39-Bromley--South-London.pdf) | [CSV](../exports/runs/targets_run39.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/39/) |
+| #40 | Wimbledon, South London | electricians | 2026-08-21 | 18 (of 28, 10 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-40-Wimbledon--South-London.pdf) | [CSV](../exports/runs/targets_run40.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/40/) |
+| #41 | Kingston, South London | electricians | 2026-08-21 | 25 (of 28, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-41-Kingston--South-London.pdf) | [CSV](../exports/runs/targets_run41.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/41/) |
+| #42 | Purley, South London | electricians | 2026-08-21 | 18 (of 22, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-42-Purley--South-London.pdf) | [CSV](../exports/runs/targets_run42.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/42/) |
+| #43 | Mitcham, South London | electricians | 2026-08-21 | 13 (of 18, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-43-Mitcham--South-London.pdf) | [CSV](../exports/runs/targets_run43.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/43/) |
+| #44 | Sutton, South London | electricians | 2026-08-21 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-44-Sutton--South-London.pdf) | [CSV](../exports/runs/targets_run44.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/44/) |
+| #45 | Tooting, South London | electricians | 2026-08-21 | 1 (of 1) — heavy overlap with Streatham/Wimbledon/Clapham, expected | [PDF](runs/PROSPECTOR-RUN-45-Tooting--South-London.pdf) | [CSV](../exports/runs/targets_run45.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/45/) |
+| #46 | Clapham, South London | electricians | 2026-08-21 | 9 (of 14, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-46-Clapham--South-London.pdf) | [CSV](../exports/runs/targets_run46.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/46/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
 (North/South/East/West/Central) rather than one citywide query, per the
@@ -218,6 +230,27 @@ Electricians..." (digit before). Added `\d+\s+top\b` and `for\s+20\d\d\b`
 `discovery/validate.py`'s title-reject patterns. Verified against the
 existing known-good business name set (0 false positives) before
 re-running the DB-wide sweep.
+
+**South London electricians sweep — complete** (Andy: "delve deeper on
+south London" after seeing East London's chunked sweep dwarf the original
+single-query South London run #27; also asked whether the original #27
+run had undercounted the same way — yes, it had never been sub-area
+chunked). 12 sub-areas — Croydon (#35), Streatham (#36), Peckham (#37),
+Lewisham (#38), Bromley (#39), Wimbledon (#40), Kingston (#41), Purley
+(#42), Mitcham (#43), Sutton (#44), Tooting (#45), Clapham (#46). 246 raw
+businesses, 190 non-chain. Tooting returned only 1 new business (heavy
+dedupe against Streatham/Wimbledon/Clapham coverage — expected, confirms
+dedupe is working against the whole DB, not just within-run).
+
+Manually removed 13 off-vertical results the automated checks can't
+catch (Places surfaces adjacent trades for a broad "electricians" search
+— pure plumbers/handymen/EV-charging-points with no electrical work
+mentioned, distinct from genuine dual-trade firms like "X Plumbing &
+Electrical" which were correctly kept). Content validator flagged 4 more
+during retroactive re-check but all verified as real businesses on
+manual review (one hosted on a website-builder platform whose own
+branding links tripped the link-density check — noted as a known
+heuristic limitation, not worth over-fitting for a single case).
 
 "Targets" = total businesses captured in the run (not filtered to
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a

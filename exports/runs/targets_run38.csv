@@ -1,0 +1,9 @@
+firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
+A Phillip Electrical,electricians,"Lewisham, South London",SE13 7UL,020 8333 1981,,https://www.aphillipelectrical.co.uk/,21,4.6,40,15,has_negative_recent;no_booking;no_chat;phone_dependent;established,03546857,"PHILLIPS, John Richard",28,false,false,
+Jilmon Electricians Lewisham,electricians,"Lewisham, South London",SE13 6HQ,020 3670 6990,,,2,5.0,40,15,no_booking;no_chat;phone_dependent;no_website;established,05819537,"BARRON, Lorna Sarah",20,false,false,
+Lewisham Electrical Solutions,electricians,"Lewisham, South London",SE6 4JF,0800 520 2057,,,3,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,16448171,"LOWE, Trudy-Ann",1,false,false,
+VCO Lewisham Electricians,electricians,"Lewisham, South London",SE13 5BU,0800 910 1397,info@vcoelectrical.co.uk,http://www.vcolewishamelectrician.co.uk/,13,5.0,40,10,no_chat;phone_dependent,16386083,"ULLAH, Asad",1,false,false,
+Lewisham Electrician Pros,electricians,"Lewisham, South London",SE13 7EL,020 8059 2675,,https://www.thelewishamelectrician.co.uk/,13,5.0,40,10,no_booking;no_chat;established,14573248,"ATHERTON, Daniel Paul",3,false,false,
+"Electricians Lewisham, SE13 electrician Service Lewisham ...",electricians,"Lewisham, South London",,,,https://lewishamelectricians.co.uk/,,,10,15,weak_gbp;no_booking;no_chat;phone_dependent,17074623,"O'SULLIVAN, Margaret Rena",0,false,false,
+Electrician South London,electricians,"Lewisham, South London",,,,https://polarityelectrics.co.uk/areas/south-london,,,10,10,weak_gbp;no_booking;no_chat,,,,false,false,
+Blackheath & Greenwich Electricians,electricians,"Lewisham, South London",,,,https://tphase.co.uk/,,,10,10,weak_gbp;no_booking;no_chat;established,00306107,"ALLEN, Edward",90,false,false,
