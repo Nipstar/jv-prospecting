@@ -1,5 +1,4 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
-A C R London,air conditioning companies,East London,DA16 1TB,020 8331 5603,,https://acrlondon.co.uk/,4,4.0,90,15,has_negative_recent;no_booking;no_chat;phone_dependent;established,04097241,"BROWN, Peter Michael",25,false,false,
 Apex Airconditioning services,air conditioning companies,East London,DA2 6NP,07383 978970,Olly@apexac.co.UK,http://apexac.co.uk/,19,4.7,75,10,has_negative_recent;missed_call_evidence;no_booking;phone_dependent;established,12444859,"HUGHES, Oliver John",6,false,false,
 Aircon Worldwide Ltd,air conditioning companies,East London,E3 2NX,020 3005 7301,,http://www.airconworldwide.com/,1,1.0,75,10,has_negative_recent;no_booking;no_chat;established,06008319,"NOEST, Tim Peter",19,false,false,
 PHS Engineers Ltd | LONDON,air conditioning companies,East London,IG8 8AP,020 8252 8927,,https://phsengineersltd.co.uk/,100,3.9,75,10,has_negative_recent;missed_call_evidence;no_booking;no_chat;established,07740170,"WILLIS, Adam",15,false,false,

@@ -1,13 +1,11 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
 Niche Electrical Contractors Ltd,electricians,"Bromley, South London",BR1 3NH,01474 368950,info@niche-electrical.co.uk,http://www.niche-electrical.co.uk/,6,4.3,60,15,has_negative_recent;no_booking;no_chat;phone_dependent;established,12154051,"GREEN, Marc Anthony",7,false,false,
 Sparkys Electricians Bromley,electricians,"Bromley, South London",BR1 3PL,0800 520 2016,,,6,5.0,50,15,weak_gbp;no_booking;no_chat;phone_dependent;no_website,,,,false,false,
-Bromley Electrical Services,electricians,"Bromley, South London",BR2 9HW,07533 542041,,,5,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,,,,false,false,
 Hussar Electrical Services LTD,electricians,"Bromley, South London",SE9 4BT,07808 215070,,https://sitelift.site/hussarelectricalservicesltd/,13,5.0,40,15,no_booking;no_chat;phone_dependent,,,,false,false,
 Thomas London Emergency Electrician,electricians,"Bromley, South London",BR2 9NZ,0800 520 2002,,,6,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,16378417,"RAHMAN, Khan Mohammed Zahidur",1,false,false,
 Adams Electrical London Ltd,electricians,"Bromley, South London",BR2 7NL,07931 598214,,http://www.adamselectrical.london/,14,5.0,40,15,no_booking;no_chat;phone_dependent,,,,false,false,
 CJ Electric,electricians,"Bromley, South London",BR2 9RY,020 8289 9260,,,17,5.0,40,15,no_booking;no_chat;phone_dependent;no_website;established,10778432,"JAMES, Colin Joseph",9,false,false,
 BR2 Electrician Bromley Common,electricians,"Bromley, South London",BR2 8QW,0800 078 6053,,http://br2electricianbromleycommon.co.uk/,4,4.8,40,15,no_booking;no_chat;phone_dependent;established,12356109,"ARCHIBALD, Brian David",6,false,false,
-Bromley Electrician Services,electricians,"Bromley, South London",BR1 3EA,07727 275295,,,2,5.0,40,15,no_booking;no_chat;phone_dependent;no_website;established,SC747826,"EDGAR, Alastair Ivor",3,false,false,
 T J Electrical Ltd,electricians,"Bromley, South London",BR2 7EH,020 8462 7982,,https://www.tjelectricalltd.co.uk/,3,5.0,40,15,no_booking;no_chat;phone_dependent;established,05696882,"HOLLOWAY, Timothy John",20,false,false,
 Scotts Plumbing & Electric Ltd,electricians,"Bromley, South London",BR1 1NF,07451 289940,,,4,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,,,,false,false,
 Cloud Electrical Limited,electricians,"Bromley, South London",BR2 9HD,020 8185 0955,,https://cloudelectrical.co.uk/,,,40,15,no_booking;no_chat;phone_dependent;established,05620600,"CLOUD, Matthew Christopher Ian",20,false,false,

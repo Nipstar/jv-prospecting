@@ -99,6 +99,98 @@ def match_service_area_url_pattern(website: str | None, town: str | None) -> str
             return f"URL path ends in/contains the searched town ('{town_slug}') — per-town landing page pattern"
     return None
 
+
+# Rank-and-rent signal. Andy: "This one I think is a rank and rent style
+# website" — flagged https://south-croydon-electricians.co.uk/
+# (businesses.id 932, "Electrician in South Croydon").
+#
+# First attempt matched business-name words against the DOMAIN slug — live
+# DB-wide test found 12 candidates but only 4 were genuine (Electricians
+# Ilford, Electrician in Barking, Electrician in South Croydon, Electrician
+# in Streatham Hill — all bare "{trade} {location}" phrases with a
+# location-matching domain). The other 8 were real businesses with real
+# brand names that simply happen to also be their own domain (Evans
+# Installations, Sharp Space, Topaz Refrigeration, KCS Electrics, AABS
+# Electrical, Solid Electrical — "Evans"/"Sharp"/"Topaz"/"KCS"/"AABS"/
+# "Solid" are brand words, not rank-and-rent tells, and domain-matching
+# your own real name is exactly what a real business should do).
+#
+# Fixed version drops the domain check entirely and instead asks the
+# question directly: strip generic TRADE words from the name, and check
+# whether every word that's LEFT is just the searched town's name. A real
+# business's name always has at least one word that isn't a trade term or
+# the town it's in — a founder's name, an invented brand, an initialism.
+# A rank-and-rent page's "name" is usually nothing but the exact search
+# phrase itself: {trade word(s)} + {the town searched}, nothing else. This
+# also correctly keeps "Hackney Plumbing Electrical Drainage" (all trade
+# words + the searched town, no brand at all) as a flag — structurally
+# identical to the confirmed case, whatever platform it happens to be
+# hosted on.
+_GENERIC_TRADE_WORDS = {
+    "electrician", "electricians", "electrical", "electric", "electrics",
+    "plumber", "plumbers", "plumbing", "heating", "hvac", "hvacr",
+    "refrigeration", "aircon", "air", "conditioning", "conditioner",
+    "handyman", "handymen", "installation", "installations", "installer",
+    "installers", "engineer", "engineers", "engineering", "contractor",
+    "contractors", "service", "services", "repair", "repairs", "gas",
+    "boiler", "boilers", "drainage", "emergency", "local", "trusted",
+    "expert", "experts", "certified", "professional", "commercial",
+    "domestic", "residential", "24", "7", "247",
+}
+_NAME_STOPWORDS = {"in", "the", "near", "a", "an", "of", "and", "for", "me", "to"}
+
+
+def _brand_words(name: str) -> set[str]:
+    """Words in `name` after removing stopwords and generic trade terms —
+    what's left over should be the brand/location, nothing else, for a
+    business name to be worth checking for the rank-and-rent pattern."""
+    words = re.sub(r"[^a-z0-9\s]", " ", name.lower()).split()
+    return {w for w in words if w not in _NAME_STOPWORDS and w not in _GENERIC_TRADE_WORDS and len(w) >= 2}
+
+
+def match_rank_and_rent_pattern(name: str | None, town: str | None) -> str | None:
+    """Return a description if `name` looks like a bare "{trade} {town}"
+    search-phrase with no real trading name behind it, else None. See
+    module comment above for the redesign rationale (domain-matching
+    alone had an 8/12 false-positive rate on real brand names)."""
+    if not name or not town:
+        return None
+    leftover = _brand_words(name)
+    if not leftover:
+        return None  # name was ENTIRELY trade words, e.g. "Electrical Services" — too generic to say anything either way
+    town_words = _brand_words(town)
+    if not town_words:
+        return None
+    # Every leftover word must match a town word — with one exception:
+    # allow a single unmatched word when there are 2+ leftover words, to
+    # tolerate a hyper-local sub-area name that doesn't literally appear
+    # in the (coarser) discovered `town` field — e.g. "Electrician in
+    # Streatham Hill" was discovered searching "Streatham", so "hill"
+    # doesn't stem-match any town word even though this is genuinely the
+    # same pattern. Requiring 100% match on a single-word leftover still
+    # applies (an unmatched lone word is exactly what distinguishes a real
+    # brand name like "Evans Installations" from the rank-and-rent case).
+    def _stems_match(a: str, b: str) -> bool:
+        n = min(len(a), len(b), 5)
+        return a[:n] == b[:n]
+
+    # Require every leftover word to match a town word — an "allow 1
+    # unmatched word" relaxation was tried (to catch "Electrician in
+    # Streatham Hill" when discovered via the coarser "Streatham" search)
+    # and rejected: live-tested false positive on "GM Electrical –
+    # Guildford Electrician", where the ONE unmatched word ("GM") is
+    # exactly the brand identifier that should have kept it out. A missed
+    # hyper-local sub-area variant is an acceptable false negative
+    # (fail-open); a real business's brand name being the thing that gets
+    # "forgiven" is not.
+    if leftover and all(any(_stems_match(lw, tw) for tw in town_words) for lw in leftover):
+        return (
+            f"business name ({name!r}) is nothing but trade terms plus the "
+            f"searched town ({town!r}) — no brand/founder name at all, "
+            "rank-and-rent search-phrase pattern rather than a real trading name"
+        )
+    return None
+
 # Brand/name substrings that are always treated as a corporate chain
 # regardless of vertical (holding groups whose practices/branches often
 # keep the trading name but occasionally surface the parent brand in the
@@ -399,6 +491,10 @@ def detect_chain(conn, biz: dict, exclude_id: int | None = None) -> tuple[bool, 
     service_area_match = match_service_area_url_pattern(biz.get("website"), biz.get("town"))
     if service_area_match:
         reasons.append(service_area_match)
+
+    rank_and_rent_match = match_rank_and_rent_pattern(biz.get("name"), biz.get("town"))
+    if rank_and_rent_match:
+        reasons.append(rank_and_rent_match)
 
     return (bool(reasons), "; ".join(reasons) if reasons else None)
 

@@ -21,37 +21,37 @@ a page for any of them on request.
 | Run | Location | Vertical | Date | Targets | PDF | CSV | Live report |
 |---|---|---|---|---|---|---|---|
 | #11 | Hampshire | Heating / plumbing / electrical (larger firms, not sole traders) | 2026-08-13 | 9 (of 11, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-11-Hampshire.pdf) | [CSV](../exports/runs/run_11_20260813T061939Z.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/11/) |
-| #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 25 | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_run12_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
-| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 26 (of 27, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
-| #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 15 (of 21, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
-| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 32 | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
-| #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 9 | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
-| #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 5 (of 7, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
-| #21 | Surrey | hvac | 2026-08-19 | 26 (of 31, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-21-Surrey.pdf) | [CSV](../exports/runs/targets_run21.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/21/) |
+| #12 | South London | air conditioning companies (freeform vertical) | 2026-08-13 | 22 (of 31, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-12-South-London.pdf) | [CSV](../exports/runs/targets_run12_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/12/) |
+| #16 | South London | air conditioning companies (multi-source: places+yell+organic) | 2026-08-14 | 22 (of 27, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-16-South-London.pdf) | [CSV](../exports/runs/targets_run16_south-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/16/) |
+| #17 | North London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 12 (of 21, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-17-North-London.pdf) | [CSV](../exports/runs/targets_run17_north-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/17/) |
+| #18 | East London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 28 (of 32, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-18-East-London.pdf) | [CSV](../exports/runs/targets_run18_east-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/18/) |
+| #19 | West London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 7 (of 16, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-19-West-London.pdf) | [CSV](../exports/runs/targets_run19_west-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/19/) |
+| #20 | Central London | air conditioning companies (multi-source: places+checkatrade+organic) | 2026-08-14 | 3 (of 5, 2 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-20-Central-London.pdf) | [CSV](../exports/runs/targets_run20_central-london.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/20/) |
+| #21 | Surrey | hvac | 2026-08-19 | 24 (of 31, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-21-Surrey.pdf) | [CSV](../exports/runs/targets_run21.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/21/) |
 | #22 | Guildford, Surrey | hvac | 2026-08-19 | 9 (of 18, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-22-Guildford--Surrey.pdf) | [CSV](../exports/runs/targets_run22.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/22/) |
 | #23 | Woking, Surrey | hvac | 2026-08-19 | 21 (of 26, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-23-Woking--Surrey.pdf) | [CSV](../exports/runs/targets_run23.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/23/) |
 | #24 | Reigate, Surrey | hvac | 2026-08-19 | 10 (of 14, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-24-Reigate--Surrey.pdf) | [CSV](../exports/runs/targets_run24.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/24/) |
 | #25 | Epsom, Surrey | hvac | 2026-08-19 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-25-Epsom--Surrey.pdf) | [CSV](../exports/runs/targets_run25.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/25/) |
-| #26 | Camberley, Surrey | hvac | 2026-08-19 | 13 (of 22, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
-| #27 | South London | electricians (multi-source: places+checkatrade+organic) | 2026-08-20 | 41 (of 48, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-27-South-London.pdf) | [CSV](../exports/runs/targets_run27.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/27/) |
-| #28 | East London | electricians | 2026-08-21 | 26 (of 39, 13 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-28-East-London.pdf) | [CSV](../exports/runs/targets_run28.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/28/) |
-| #29 | Stratford, East London | electricians | 2026-08-21 | 16 (of 25, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-29-Stratford--East-London.pdf) | [CSV](../exports/runs/targets_run29.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/29/) |
-| #30 | Ilford, East London | electricians | 2026-08-21 | 19 (of 33, 14 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-30-Ilford--East-London.pdf) | [CSV](../exports/runs/targets_run30.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/30/) |
-| #31 | Walthamstow, East London | electricians | 2026-08-21 | 26 (of 27, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-31-Walthamstow--East-London.pdf) | [CSV](../exports/runs/targets_run31.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/31/) |
-| #32 | Barking, East London | electricians | 2026-08-21 | 25 (of 34, 9 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-32-Barking--East-London.pdf) | [CSV](../exports/runs/targets_run32.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/32/) |
+| #26 | Camberley, Surrey | hvac | 2026-08-19 | 12 (of 22, 10 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-26-Camberley--Surrey.pdf) | [CSV](../exports/runs/targets_run26.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/26/) |
+| #27 | South London | electricians (multi-source: places+checkatrade+organic) | 2026-08-20 | 36 (of 48, 12 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-27-South-London.pdf) | [CSV](../exports/runs/targets_run27.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/27/) |
+| #28 | East London | electricians | 2026-08-21 | 25 (of 39, 14 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-28-East-London.pdf) | [CSV](../exports/runs/targets_run28.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/28/) |
+| #29 | Stratford, East London | electricians | 2026-08-21 | 15 (of 25, 10 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-29-Stratford--East-London.pdf) | [CSV](../exports/runs/targets_run29.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/29/) |
+| #30 | Ilford, East London | electricians | 2026-08-21 | 18 (of 33, 15 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-30-Ilford--East-London.pdf) | [CSV](../exports/runs/targets_run30.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/30/) |
+| #31 | Walthamstow, East London | electricians | 2026-08-21 | 23 (of 27, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-31-Walthamstow--East-London.pdf) | [CSV](../exports/runs/targets_run31.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/31/) |
+| #32 | Barking, East London | electricians | 2026-08-21 | 24 (of 34, 10 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-32-Barking--East-London.pdf) | [CSV](../exports/runs/targets_run32.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/32/) |
 | #33 | Hackney, East London | electricians | 2026-08-21 | 18 (of 24, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-33-Hackney--East-London.pdf) | [CSV](../exports/runs/targets_run33.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/33/) |
 | #34 | Romford, East London | electricians | 2026-08-21 | 27 (of 34, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-34-Romford--East-London.pdf) | [CSV](../exports/runs/targets_run34.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/34/) |
-| #35 | Croydon, South London | electricians | 2026-08-21 | 22 (of 26, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-35-Croydon--South-London.pdf) | [CSV](../exports/runs/targets_run35.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/35/) |
+| #35 | Croydon, South London | electricians | 2026-08-21 | 20 (of 26, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-35-Croydon--South-London.pdf) | [CSV](../exports/runs/targets_run35.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/35/) |
 | #36 | Streatham, South London | electricians | 2026-08-21 | 17 (of 24, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-36-Streatham--South-London.pdf) | [CSV](../exports/runs/targets_run36.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/36/) |
 | #37 | Peckham, South London | electricians | 2026-08-21 | 10 (of 15, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-37-Peckham--South-London.pdf) | [CSV](../exports/runs/targets_run37.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/37/) |
-| #38 | Lewisham, South London | electricians | 2026-08-21 | 8 (of 12, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-38-Lewisham--South-London.pdf) | [CSV](../exports/runs/targets_run38.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/38/) |
-| #39 | Bromley, South London | electricians | 2026-08-21 | 29 (of 33, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-39-Bromley--South-London.pdf) | [CSV](../exports/runs/targets_run39.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/39/) |
+| #38 | Lewisham, South London | electricians | 2026-08-21 | 7 (of 12, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-38-Lewisham--South-London.pdf) | [CSV](../exports/runs/targets_run38.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/38/) |
+| #39 | Bromley, South London | electricians | 2026-08-21 | 27 (of 33, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-39-Bromley--South-London.pdf) | [CSV](../exports/runs/targets_run39.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/39/) |
 | #40 | Wimbledon, South London | electricians | 2026-08-21 | 18 (of 28, 10 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-40-Wimbledon--South-London.pdf) | [CSV](../exports/runs/targets_run40.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/40/) |
 | #41 | Kingston, South London | electricians | 2026-08-21 | 25 (of 28, 3 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-41-Kingston--South-London.pdf) | [CSV](../exports/runs/targets_run41.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/41/) |
 | #42 | Purley, South London | electricians | 2026-08-21 | 18 (of 22, 4 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-42-Purley--South-London.pdf) | [CSV](../exports/runs/targets_run42.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/42/) |
-| #43 | Mitcham, South London | electricians | 2026-08-21 | 13 (of 18, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-43-Mitcham--South-London.pdf) | [CSV](../exports/runs/targets_run43.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/43/) |
-| #44 | Sutton, South London | electricians | 2026-08-21 | 20 (of 25, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-44-Sutton--South-London.pdf) | [CSV](../exports/runs/targets_run44.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/44/) |
-| #45 | Tooting, South London | electricians | 2026-08-21 | 1 (of 1) — heavy overlap with Streatham/Wimbledon/Clapham, expected | [PDF](runs/PROSPECTOR-RUN-45-Tooting--South-London.pdf) | [CSV](../exports/runs/targets_run45.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/45/) |
+| #43 | Mitcham, South London | electricians | 2026-08-21 | 12 (of 18, 6 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-43-Mitcham--South-London.pdf) | [CSV](../exports/runs/targets_run43.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/43/) |
+| #44 | Sutton, South London | electricians | 2026-08-21 | 18 (of 25, 7 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-44-Sutton--South-London.pdf) | [CSV](../exports/runs/targets_run44.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/44/) |
+| #45 | Tooting, South London | electricians | 2026-08-21 | 0 (of 1, 1 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-45-Tooting--South-London.pdf) | [CSV](../exports/runs/targets_run45.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/45/) |
 | #46 | Clapham, South London | electricians | 2026-08-21 | 9 (of 14, 5 chain-excluded) | [PDF](runs/PROSPECTOR-RUN-46-Clapham--South-London.pdf) | [CSV](../exports/runs/targets_run46.csv) | [Live](https://jv-prospecting-reports.pages.dev/runs/46/) |
 
 **London-wide air conditioning sweep — complete.** Chunked by sub-area
@@ -256,3 +256,51 @@ heuristic limitation, not worth over-fitting for a single case).
 `review_target_score` — see `prospector/deploy.py::_run_meta` for why: a
 handful of earlier runs' businesses no longer carry v2 scores in the
 current DB, but the run itself is still real and worth listing).
+
+**New chain signal: rank-and-rent detection.** Andy flagged
+https://south-croydon-electricians.co.uk/ ("Electrician in South
+Croydon") as a rank-and-rent style site — a page built purely to rank
+for a search phrase and get rented/sold as a lead source, not a real
+trading business. Added `match_rank_and_rent_pattern()` to
+`chain_signals.py`, wired into `detect_chain()`.
+
+First design (name words vs. domain slug) tested at 8/12
+false-positive rate — real businesses whose actual brand name happens
+to equal their own domain (Evans Installations, Sharp Space, Topaz
+Refrigeration, KCS Electrics, AABS Electrical, Solid Electrical) got
+wrongly flagged. Domain-matching alone can't tell "brand that matches
+its own site" from "search-phrase with no brand at all."
+
+Redesigned: drop domain entirely, strip generic trade words
+(electrician, plumbing, heating, 24/7, etc.) from the business name,
+and check whether every word left over matches the *searched town*.
+A real business always has at least one word that's neither a trade
+term nor the town — founder name, invented brand, initialism. A
+rank-and-rent page's name is usually nothing but
+`{trade}` + `{town}`, e.g. "Tooting Electrical Services",
+"Electrician in South Croydon".
+
+Tried loosening to "allow 1 unmatched word" (to catch sub-area variants
+like "Electrician in Streatham Hill" found via the coarser "Streatham"
+search) — live-tested false positive on "GM Electrical – Guildford
+Electrician", where the one unmatched word ("GM") was exactly the
+brand identifier that should've kept it safe. Reverted to strict
+full-word matching: a missed hyper-local variant (false negative) is
+an acceptable fail-open; flagging a real brand isn't.
+
+Ran DB-wide with the final strict version: total `is_chain=1` count
+239 → 268, with 109 businesses newly matching the rank-and-rent reason
+specifically (some already flagged by other reasons, so the two deltas
+differ). Spot-checked flagged rows — Tooting Electrical Services
+(#1148, run 45), Electrician in South Croydon, Electricians Ilford,
+Electrician in Barking, Electrician in Streatham Hill — all confirmed
+correct: bare trade+town phrases, no independent trading identity.
+
+Regenerated and redeployed `report --run-id N --deploy` for all 33
+tracked runs (#11, #12, #16–46) per the standing rule that any
+`chain_signals.py` change propagates everywhere. Run #45 (Tooting)
+dropped to zero non-chain targets since its only business is the
+newly-caught rank-and-rent case — used `--include-chains` so the page
+still builds and lists it (flagged, not hidden). Re-exported all 33
+CSVs to match. Target-count column above reflects the post-rescan
+numbers.

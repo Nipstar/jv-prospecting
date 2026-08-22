@@ -1,6 +1,5 @@
 firm_name,vertical,location,postcode,phone,email,website,review_count,avg_rating,review_target_score,opportunity_score,flags,company_number,director_name,years_trading,tps_checked,is_chain,chain_reason
 Dream Light KDG Electrical,electricians,"Croydon, South London",CR0 5NA,07481 144171,,,17,4.3,60,15,has_negative_recent;no_booking;no_chat;phone_dependent;no_website;established,12585352,"ZHAMO, Dorian",6,false,false,
-Croydon Electrical Services,electricians,"Croydon, South London",CR0 1LF,07400 481075,,,2,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,,,,false,false,
 LSR Electrical Solutions,electricians,"Croydon, South London",CR0 3EQ,020 7046 0107,info@lsrelectricalsolutions.co.uk,http://www.lsrelectricalsolutions.co.uk/,9,5.0,40,15,no_booking;no_chat;phone_dependent,15146438,"BOOTHE, Rohann",2,false,false,
 Amin Electricals South Croydon,electricians,"Croydon, South London",CR2 6BX,07458 157072,,,2,5.0,40,15,no_booking;no_chat;phone_dependent;no_website,16342753,"ELLIOTT, Steven John",1,false,false,
 CR2 Electrician South Croydon,electricians,"Croydon, South London",CR2 0BL,020 3670 4182,,https://www.cr2electriciansouthcroydon.co.uk/,,,40,15,no_booking;no_chat;phone_dependent,,,,false,false,
@@ -14,7 +13,6 @@ AABS Electrical,electricians,"Croydon, South London",CR2 0QZ,07786 937737,,https
 CD Electrical,electricians,"Croydon, South London",CR0 4AE,07886 786908,chris@cdelectrics.co.uk,http://www.cdelectrics.co.uk/,46,5.0,20,15,no_booking;no_chat;phone_dependent;established,12781594,"DAVIES, Christopher Leyton",6,false,false,
 P & M Electrical Services,electricians,"Croydon, South London",CR0 9UG,01689 843835,,http://pm-electrical.co.uk/,22,4.6,20,10,no_booking;no_chat;established,SC478057,"MANSON, Paul Andrew",12,false,false,
 Warner Electrical Services Ltd,electricians,"Croydon, South London",CR0 2EL,07580 023795,,http://www.warneres.com/,84,4.9,10,15,no_booking;no_chat;phone_dependent;established,09390618,"WARNER, Jonathan Roy",11,false,false,
-Electrician in South Croydon,electricians,"Croydon, South London",,,info@south-croydon-electricians.co.uk,https://south-croydon-electricians.co.uk/,,,10,15,weak_gbp;no_booking;no_chat;phone_dependent,,,,false,false,
 Ohm & Safe Electrical,electricians,"Croydon, South London",CR0 9LW,07835 627987,,https://ohmandsafeelectrical.co.uk/,63,5.0,10,10,no_booking;no_chat,15365767,"BARTLETT, Scott",2,false,false,
 "Vital Phase UK Ltd, Electrical and Fire Solutions.",electricians,"Croydon, South London",CR2 6AZ,0800 002 5025,enquiries@vitalphase.co.uk,https://www.vitalphase.com/,54,5.0,10,10,no_booking;no_chat;established,04174268,"VELLA, Philippe",25,false,false,
 Jeff Borkett Electrical Services,electricians,"Croydon, South London",,0208 651 0177,,https://electricalservicescroydon.co.uk/,,,10,10,weak_gbp;no_booking;no_chat;established,04064822,"JEFFERY, Dale Anthony",25,false,false,
